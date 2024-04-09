@@ -1316,16 +1316,50 @@ bool Foam::mechanicalLaw::updateF
 
 void Foam::mechanicalLaw::updateSigmaHyd
 (
+    volScalarField& sigmaHyd,
     const volScalarField& sigmaHydExplicit,
     const dimensionedScalar& impK
 )
 {
-    updateSigmaHyd(sigmaHydExplicit, mechanicalLaw::impK(impK));
+    updateSigmaHyd
+    (
+        sigmaHyd, gradSigmaHyd(), sigmaHydExplicit, mechanicalLaw::impK(impK)
+    );
 }
 
 
 void Foam::mechanicalLaw::updateSigmaHyd
 (
+    const volScalarField& sigmaHydExplicit,
+    const dimensionedScalar& impK
+)
+{
+    // Use sigmaHyd and gradSigmaHyd private fields
+    updateSigmaHyd
+    (
+        sigmaHyd(), gradSigmaHyd(), sigmaHydExplicit, mechanicalLaw::impK(impK)
+    );
+}
+
+
+void Foam::mechanicalLaw::updateSigmaHyd
+(
+    const volScalarField& sigmaHydExplicit,
+    const volScalarField& impK
+)
+{
+    // Use sigmaHyd and gradSigmaHyd private fields
+    updateSigmaHyd
+    (
+        sigmaHyd(), gradSigmaHyd(), sigmaHydExplicit, impK
+    );
+}
+
+
+void Foam::mechanicalLaw::updateSigmaHyd
+(
+    volScalarField& sigmaHyd,
+    volVectorField& gradSigmaHyd,
     const volScalarField& sigmaHydExplicit,
     const volScalarField& impK
 )
@@ -1337,7 +1371,7 @@ void Foam::mechanicalLaw::updateSigmaHyd
 #endif
 
         // Store previous iteration to allow relaxation, if needed
-        sigmaHyd().storePrevIter();
+        sigmaHyd.storePrevIter();
 
         // Lookup the momentum equation inverse diagonal field
         const volScalarField* ADPtr = NULL;
@@ -1393,7 +1427,7 @@ void Foam::mechanicalLaw::updateSigmaHyd
             "rDAf",
             pressureSmoothingScaleFactor_*fvc::interpolate
             (
-                impK/AD, "interpolate(" + gradSigmaHyd().name() + ")"
+                impK/AD, "interpolate(" + gradSigmaHyd.name() + ")"
             )
         );
         const dimensionedScalar one("one", dimless, 1.0);
@@ -1404,34 +1438,34 @@ void Foam::mechanicalLaw::updateSigmaHyd
         // oscillations
         fvScalarMatrix sigmaHydEqn
         (
-            fvm::Sp(one, sigmaHyd())
-          - fvm::laplacian(rDAf, sigmaHyd(), "laplacian(rDA,sigmaHyd)")
+            fvm::Sp(one, sigmaHyd)
+          - fvm::laplacian(rDAf, sigmaHyd, "laplacian(rDA,sigmaHyd)")
          ==
             sigmaHydExplicit
-          - fvc::div(rDAf*fvc::interpolate(gradSigmaHyd()) & mesh().Sf())
+          - fvc::div(rDAf*fvc::interpolate(gradSigmaHyd) & mesh().Sf())
         );
 
         // Solve the pressure equation
         sigmaHydEqn.solve();
 
         // Relax the pressure field
-        sigmaHyd().relax();
+        sigmaHyd.relax();
 
         if (allocatedMemory)
         {
             delete ADPtr;
         }
+
+        // Update the gradient
+        gradSigmaHyd = fvc::grad(sigmaHyd);
     }
     else
     {
         // Explicitly calculate hydrostatic stress
         // We use 1.0* to overwritting the field IOobject attributes e.g. its
         // name and writeOpt
-        sigmaHyd() = 1.0*sigmaHydExplicit;
+        sigmaHyd = 1.0*sigmaHydExplicit;
     }
-
-    // Update the gradient
-    gradSigmaHyd() = fvc::grad(sigmaHyd());
 }
 
 
@@ -1574,14 +1608,14 @@ Foam::tmp<Foam::surfaceScalarField> Foam::mechanicalLaw::impKf() const
 
 
 #ifdef OPENFOAM_NOT_EXTEND
-Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
+Foam::tmp<Foam::Field<Foam::scalarSquareMatrix>>
 Foam::mechanicalLaw::materialTangentField() const
 {
     // Default to uniform field
     // This function can be overwritten in specific mechanical laws
-    tmp<Field<RectangularMatrix<scalar>>> tresult
+    tmp<Field<scalarSquareMatrix>> tresult
     (
-        new Field<RectangularMatrix<scalar>>(mesh().nFaces(), materialTangent())
+        new Field<scalarSquareMatrix>(mesh().nFaces(), materialTangent())
     );
 
     return tresult;
@@ -1595,6 +1629,20 @@ void Foam::mechanicalLaw::correct(surfaceSymmTensorField&)
     (
         type() + "::correct(surfaceSymmTensorField&)\n"
         "The correct(surfaceSymmTensorField&) function is not implemented\n"
+        " for the " + type() + " mechanical law"
+    );
+}
+
+
+void Foam::mechanicalLaw::correct
+(
+    pointSymmTensorField&, const pointTensorField&
+) const
+{
+    notImplemented
+    (
+        type() + "::correct(pointSymmTensorField&)\n"
+        "The correct(pointSymmTensorField&) function is not implemented\n"
         " for the " + type() + " mechanical law"
     );
 }

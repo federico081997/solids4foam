@@ -83,13 +83,6 @@ class neoHookeanElastic
         //- Disallow default bitwise copy construct
         neoHookeanElastic(const neoHookeanElastic&);
 
-        //- Calculate stress
-        void calculateStress
-        (
- 			surfaceSymmTensorField& sigma,
- 			const surfaceTensorField& gradD
-		);
-
         //- Disallow default bitwise assignment
         void operator=(const neoHookeanElastic&);
 
@@ -124,18 +117,33 @@ public:
         //  This is the diffusivity for the Laplacian term
         virtual tmp<volScalarField> impK() const;
 
+#ifdef OPENFOAM_COM
         //- Return material tangent
-        Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
-		materialTangentField() const;
+        tmp<Field<scalarSquareMatrix>> materialTangentField() const;
+#endif
 
         //- Return the bulk modulus field
         virtual tmp<volScalarField> bulkModulus() const;
 
-        //- Calculate the stress
+        //- Calculate the volField stress
         virtual void correct(volSymmTensorField& sigma);
 
-        //- Calculate the stress
+        //- Calculate the surfaceField stress
         virtual void correct(surfaceSymmTensorField& sigma);
+
+        //- Calculate the stress using the displacement gradient
+        virtual void correct
+        (
+            surfaceSymmTensorField& sigma,
+            const surfaceTensorField& gradD
+        ) const;
+
+        //- Calculate the stress using the deformation gradient
+        virtual void correctF
+        (
+            surfaceSymmTensorField& sigma,
+            const surfaceTensorField& F
+        ) const;
 
         //- Set restart: some mechanical laws may change the writeOpt of fields
         //  accordingly

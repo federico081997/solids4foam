@@ -18,7 +18,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "vfvmCellPoint.H"
-#include "multiplyCoeffRectMat.H"
+#include "multiplyCoeff.H"
 #include "sparseMatrixTools.H"
 #include "cellPointLeastSquaresVectors.H"
 
@@ -31,7 +31,7 @@ void Foam::vfvm::divSigma
     const fvMesh& dualMesh,
     const labelList& dualFaceToCell,
     const labelList& dualCellToPoint,
-    const Field<RectangularMatrix<scalar>>& materialTangentField,
+    const Field<scalarSquareMatrix>& materialTangentField,
     const scalar zeta,
     const bool debug
 )
@@ -52,6 +52,25 @@ void Foam::vfvm::divSigma
     const List<vectorList>& leastSquaresVecs =
         cellPointLeastSquaresVecs.vectors();
 
+    // Check the material tangents are the correct shape
+    forAll(materialTangentField, faceI)
+    {
+        if (materialTangentField[faceI].m() != 6)
+        {
+            FatalErrorIn("void Foam::vfvm::divSigma(...)")
+                << "The materialTangent for face " << faceI << " has "
+                << materialTangentField[faceI].m() << " rows "
+                << "but it should have 6!" << abort(FatalError);
+        }
+        else if (materialTangentField[faceI].n() != 6)
+        {
+            FatalErrorIn("void Foam::vfvm::divSigma(...)")
+                << "The materialTangent for face " << faceI << " has "
+                << materialTangentField[faceI].m() << " rows "
+                << "but it should have 6!" << abort(FatalError);
+        }
+    }
+
     // Loop over all internal faces of the dual mesh
     forAll(dualOwn, dualFaceI)
     {
@@ -59,7 +78,7 @@ void Foam::vfvm::divSigma
         const label cellID = dualFaceToCell[dualFaceI];
 
         // Material tangent at the dual mesh face
-        const RectangularMatrix<scalar>& materialTangent =
+        const scalarSquareMatrix& materialTangent =
             materialTangentField[dualFaceI];
 
         // Points in cellID
@@ -110,7 +129,8 @@ void Foam::vfvm::divSigma
 
             // Calculate the coefficient for this point coming from dualFaceI
             tensor coeff;
-            multiplyCoeffRectMat(coeff, curDualSf, materialTangent, lsVec);
+            // multiplyCoeffRectMat(coeff, curDualSf, materialTangent, lsVec);
+            multiplyCoeff(coeff, curDualSf, materialTangent, lsVec);
 
             // Add the coefficient to the ownPointID equation coming from
             // pointID
@@ -130,7 +150,8 @@ void Foam::vfvm::divSigma
 
         // Compact edge direction coefficient
         tensor edgeDirCoeff;
-        multiplyCoeffRectMat
+        // multiplyCoeffRectMat
+        multiplyCoeff
         (
             edgeDirCoeff, curDualSf, materialTangent, eOverLength
         );
