@@ -107,8 +107,8 @@ namespace sparseMatrixExtendedTools
     //  Exit with a FatalError if it is greater than 0
     void checkErr(const int ierr);
 
-    //- Enforce fixed DOF contributions on the linear system
-    void enforceFixedDof
+    //- Enforce fixed displacement DOF contributions on the linear system
+    void enforceFixedDisplacementDof
     (
         sparseMatrixExtended& matrix,
         Field<RectangularMatrix<scalar>>& source,
@@ -120,7 +120,7 @@ namespace sparseMatrixExtendedTools
     );
     
     //- Enforce pressure equation coefficients
-    void enforceFixedDof
+    void enforceFixedPressureDof
 	(
 		sparseMatrixExtended& matrix,
 		Field<RectangularMatrix<scalar>>& source,
@@ -128,6 +128,92 @@ namespace sparseMatrixExtendedTools
 		const boolList& fixedDofs,
 		const symmTensorField& fixedDofDirections
 	);
+	
+	//- Enforce known pressure
+	void enforceKnownPressure
+	(
+		sparseMatrixExtended& matrix,
+		Field<RectangularMatrix<scalar>>& source
+	);
+	
+	//- Enforce known displacement
+	void enforceKnownDisplacement
+	(
+		sparseMatrixExtended& matrix,
+		Field<RectangularMatrix<scalar>>& source
+	);
+	
+	void enforceSymmBoundaries
+	(
+		sparseMatrixExtended& matrix,
+		Field<RectangularMatrix<scalar>>& source
+	);
+	
+	void enforceKnownInternalAndTractionDisplacement
+	(
+		sparseMatrixExtended& matrix,
+		Field<RectangularMatrix<scalar>>& source
+	);
+	
+	void enforceAllBoundaryDisplacement
+	(
+		sparseMatrixExtended& matrix,
+		Field<RectangularMatrix<scalar>>& source
+	);
+		
+	void enforceFixedDisplacement
+	(
+		sparseMatrixExtended& matrix,
+		Field<RectangularMatrix<scalar>>& source
+	);
+	
+	void enforceRelatedToFixedDOFs
+	(
+		sparseMatrixExtended& matrix,
+		Field<RectangularMatrix<scalar>>& source
+	);
+	
+	void enforceAllBoundaryPressureDisplacement
+	(
+		sparseMatrixExtended& matrix,
+		Field<RectangularMatrix<scalar>>& source
+	);
+	
+	void enforceSymmBoundaries
+	(
+		sparseMatrixExtended& matrix,
+		Field<RectangularMatrix<scalar>>& source
+	);
+	
+	void enforceFixedDisplacementPressure
+	(
+		sparseMatrixExtended& matrix,
+		Field<RectangularMatrix<scalar>>& source
+	);
+	
+	void enforceNotFixedDisplacementPressure
+	(
+		sparseMatrixExtended& matrix,
+		Field<RectangularMatrix<scalar>>& source
+	);
+	
+	void enforceAllBoundariesExceptRightTraction
+	(
+		sparseMatrixExtended& matrix,
+		Field<RectangularMatrix<scalar>>& source
+	);
+	
+	void enforceAllTractions
+	(
+		sparseMatrixExtended& matrix,
+		Field<RectangularMatrix<scalar>>& source
+	);
+	
+/*	void Foam::sparseMatrixExtendedTools::enforceAppliedTractions*/
+/*	(*/
+/*		sparseMatrixExtended& matrix,*/
+/*		Field<RectangularMatrix<scalar>>& source*/
+/*	);*/
 
     //- Add fixed DOF contributions to the source
     // void addFixedDofToSource
