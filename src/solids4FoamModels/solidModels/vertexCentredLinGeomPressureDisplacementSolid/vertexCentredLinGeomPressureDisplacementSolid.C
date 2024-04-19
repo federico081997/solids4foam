@@ -19,7 +19,6 @@ License
 
 #include "vertexCentredLinGeomPressureDisplacementSolid.H"
 #include "addToRunTimeSelectionTable.H"
-#include "sparseMatrixExtended.H"
 #include "vfvcCellPoint.H"
 #include "vfvmCellPointExtended.H"
 #include "fvcDiv.H"
@@ -94,7 +93,7 @@ void vertexCentredLinGeomPressureDisplacementSolid::updateSource
     // Enforce extract tractions on traction boundaries
     enforceTractionBoundaries
     (
-        pointD(), pointP_, dualTraction, mesh(), dualMeshMap().pointToDualFaces()
+        pointD(), dualTraction, mesh(), dualMeshMap().pointToDualFaces()
     );
 
     // Set coupled boundary (e.g. processor) traction fields to zero: this
@@ -157,9 +156,9 @@ void vertexCentredLinGeomPressureDisplacementSolid::updateSource
     );
 
     //Calculate the bulk modulus (TO FIX LATER)
-    const scalar E = 70e9;
+    const scalar E = 2.6;
     const scalar nu = 0.3;
-    const scalar K( (nu*E/((1.0 + nu)*(1.0 - 2.0*nu))) + (2.0/3.0)*(E/(2.0*(1.0 + nu))) );
+    const scalar K( E / (3.0 * (1.0 - 2.0 * nu)) );
     
     // Calculate the pBar field
     scalarField pBar(-K*tr(pointGradD_));    
@@ -356,7 +355,6 @@ void vertexCentredLinGeomPressureDisplacementSolid::setFixedDofs
 void vertexCentredLinGeomPressureDisplacementSolid::enforceTractionBoundaries
 (
     const pointVectorField& pointD,
-    const pointScalarField& pointP,
     surfaceVectorField& dualTraction,
     const fvMesh& mesh,
     const labelListList& pointToDualFaces
@@ -743,9 +741,9 @@ vertexCentredLinGeomPressureDisplacementSolid::pBarSensitivityField
 #endif
 
     //Calculate the bulk modulus
-    const scalar E = 70e9;
+    const scalar E = 2.6;
     const scalar nu = 0.3;
-    const scalar K( (nu*E/((1.0 + nu)*(1.0 - 2.0*nu))) + (2.0/3.0)*(E/(2.0*(1.0 + nu))) );
+    const scalar K( E / (3.0 * (1.0 - 2.0 * nu)) );
 
     //d(pBar)/d(gradD) = -0.5*K*d(J^2)/d(gradD)
 
@@ -825,6 +823,368 @@ vertexCentredLinGeomPressureDisplacementSolid::pBarSensitivityField
     return tresult;
 }
 
+
+tmp<vectorField>
+vertexCentredLinGeomPressureDisplacementSolid::residualD
+(
+	const pointVectorField& pointD,
+	const pointScalarField& pointP
+) const 
+{
+    // Prepare the result
+    tmp<vectorField> tresult(new vectorField(pointD.size(), vector::zero));
+    vectorField& result = tresult.ref();
+
+    // The momentum residual (residualD) vector is
+    // F = div(sigma) + rho*g - rho*d2dt2(D)
+    //   = div(s - p*I) + rho*g - rho*d2dt2(D)
+    
+    // Calculate the displacement gradient at the dual faces
+    const surfaceTensorField dualGradDf = vfvc::fGrad
+    (
+        pointD,
+        mesh(),
+        dualMesh(),
+        dualMeshMap().dualFaceToCell(),
+        dualMeshMap().dualCellToPoint(),
+        zeta_,
+        false
+    );
+
+    // Interpolate pointP to the dual faces
+    const surfaceScalarField dualPf = vfvc::interpolate
+    (
+        pointP,
+        mesh(),
+        dualMesh(),
+        dualMeshMap().dualFaceToCell(),
+        dualMeshMap().dualCellToPoint(),
+        false // debug
+    );
+
+    // Calculate the stress at the dual faces
+    // We will hard-code the material behaviour (we can do this in updateSource, too, for testing)
+    const surfaceTensorField dualSigmaf
+    (
+        "dualSigmaf",
+        mu_*dev(dualGradDf + dualGradDf.T()) - dualPf*I
+    );
+
+    // Calculate the tractions on the dual faces
+    surfaceVectorField dualTraction
+    (
+        (dualMesh().Sf()/dualMesh().magSf()) & dualSigmaf
+    );
+
+    // Enforce extract tractions on traction boundaries
+    enforceTractionBoundaries
+    (
+        pointD, dualTraction, mesh(), dualMeshMap().pointToDualFaces()
+    );
+
+    // Set coupled boundary (e.g. processor) traction fields to zero: this
+    // ensures their global contribution is zero
+    forAll(dualTraction.boundaryField(), patchI)
+    {
+        if (dualTraction.boundaryField()[patchI].coupled())
+        {
+            dualTraction.boundaryFieldRef()[patchI] = vector::zero;
+        }
+    }
+
+    // Calculate the divergence of stress for the dual cells
+    const vectorField dualDivSigma = fvc::div(dualTraction*dualMesh().magSf());
+
+    // Map dual cell field to primary mesh point field
+    vectorField pointDivSigma(mesh().nPoints(), vector::zero);
+    const labelList& dualCellToPoint = dualMeshMap().dualCellToPoint();
+    forAll(dualDivSigma, dualCellI)
+    {
+        const label pointID = dualCellToPoint[dualCellI];
+        pointDivSigma[pointID] = dualDivSigma[dualCellI];
+    }
+
+    // Point volume field
+    const scalarField& pointVolI = pointVol_.internalField();
+
+    // Point density field
+    const scalarField& pointRhoI = pointRho_.internalField();
+
+    // Add surface forces
+    result += pointDivSigma*pointVolI;
+
+    // Add gravity body forces
+    result += pointRhoI*g().value()*pointVolI;
+
+    // Add transient term
+    result -= vfvc::d2dt2
+    (
+        mesh().d2dt2Scheme("d2dt2(pointD)"),
+        pointD,
+        pointU_,
+        pointA_,
+        pointRho_,
+        pointVol_,
+        int(bool(debug))
+    );
+
+    // Return the residual field
+    return tresult;
+}
+
+
+tmp<scalarField>
+vertexCentredLinGeomPressureDisplacementSolid::residualP
+(
+	const pointVectorField& pointD,
+	const pointScalarField& pointP
+) const
+{
+    // Prepare the result
+    tmp<scalarField> tresult(new scalarField(pointD.size(), 0));
+    scalarField& result = tresult.ref();
+
+    // The residual for the pressure equation is:
+    // F = p - gamma*laplacian(p) - pBar(D)
+    
+    pointTensorField pointGradD = vfvc::pGrad
+    (
+        pointD,
+        mesh()
+    );
+
+    // Calculate laplacian(p) field
+//    const pointScalarField laplacianP
+//    (
+//        vfvc::laplacian
+//        (
+//            pointP,
+//            mesh(),
+//            dualMesh(),
+//            dualFaceToCell,
+//            dualCellToPoint,
+//            zeta,
+//            debug
+//        )
+//    );
+
+    //Calculate the bulk modulus
+    const scalar E = 2.6;
+    const scalar nu = 0.3;
+    const scalar K( E / (3.0 * (1.0 - 2.0 * nu)) );
+    
+    // Calculate the pBar field
+    pointScalarField pBar(-K*tr(pointGradD));  
+    
+    // Point volume field
+    const scalarField& pointVolI = pointVol_.internalField();  
+
+    // Add pressure term
+    result += pointP*pointVolI;
+
+    // Add gamma*laplacian(p) term
+//    result -= pressureSmoothing*laplacianP[pointI]*pointVolI[pointI];
+
+    // Add pBar term
+    result -= pBar*pointVolI;    
+    
+    // Return the residual field
+    return tresult;
+}
+
+void vertexCentredLinGeomPressureDisplacementSolid::matrixCoefficients
+(
+	sparseMatrixExtended& matrix,
+	const vectorField& residualD,
+	const scalarField& residualP,
+	const pointVectorField& pointD,
+	const pointScalarField& pointP
+)
+{
+    // Small number used for perturbations
+    const scalar eps(solidModelDict().lookupOrDefault<scalar>("tangentEps", 1e-10));
+
+ 	// Store reference fields
+	const vectorField& residualDRef = residualD;
+	const scalarField& residualPRef = residualP;
+	const pointVectorField pointDRef("pointDRef", pointD);
+	const pointScalarField pointPRef("pointPRef", pointP);
+
+	// Create fields to be used for perturbations
+	vectorField residualDPerturb = residualDRef;
+	scalarField residualPPerturb = residualPRef;
+	pointVectorField pointDPerturb("pointDPerturb", pointDRef);
+	pointScalarField pointPPerturb("pointPPerturb", pointPRef);
+	
+	///////////////////////////////////////////////////////////////////
+ 	/////// Displacement coefficients of the momentum equation ////////
+ 	///////////////////////////////////////////////////////////////////
+
+	forAll (pointD, blockColI)
+	{		
+		// For each component of pointD, sequentially apply a perturbation and
+		// then calculate the resulting residual
+		for (label cmptI = 0; cmptI < vector::nComponents; cmptI++)
+		{
+			// Reset residualDPerturb and pointDPerturb and multiply by 1.0 to avoid it being removed
+			// from the object registry
+			pointDPerturb = 1.0*pointDRef;
+			residualDPerturb = 1.0*residualDRef;
+
+			// Perturb this component of pointD for blockColI
+		    pointDPerturb[blockColI].component(cmptI) = pointDRef[blockColI].component(cmptI) + eps;
+			
+			// Calculate residualD with this component perturbed
+			residualDPerturb =			
+				vertexCentredLinGeomPressureDisplacementSolid::residualD
+				(
+					pointDPerturb,
+					pointP
+				);
+			
+			// Calculate each component
+			const vectorField tangCmpt((residualDPerturb - residualDRef)/eps); 
+			
+		    // Insert components
+		    forAll(tangCmpt, blockRowI)
+		    {
+		    	if (cmptI == vector::X)
+		    	{		    	
+		    		matrix(blockRowI, blockColI)(0,0) = tangCmpt[blockRowI].component(vector::X);
+		    		matrix(blockRowI, blockColI)(1,0) = tangCmpt[blockRowI].component(vector::Y);
+		    		matrix(blockRowI, blockColI)(2,0) = tangCmpt[blockRowI].component(vector::Z);
+		    	}
+		    	else if (cmptI == vector::Y)
+		    	{
+		    		matrix(blockRowI, blockColI)(0,1) = tangCmpt[blockRowI].component(vector::X);
+		    		matrix(blockRowI, blockColI)(1,1) = tangCmpt[blockRowI].component(vector::Y);
+		    		matrix(blockRowI, blockColI)(2,1) = tangCmpt[blockRowI].component(vector::Z);		    			    	
+		    	}
+		    	else if (cmptI == vector::Z)
+		    	{
+		    		matrix(blockRowI, blockColI)(0,2) = tangCmpt[blockRowI].component(vector::X);
+		    		matrix(blockRowI, blockColI)(1,2) = tangCmpt[blockRowI].component(vector::Y);
+		    		matrix(blockRowI, blockColI)(2,2) = tangCmpt[blockRowI].component(vector::Z);		    	
+		    	}		    
+		    }			
+		}
+	}
+
+	///////////////////////////////////////////////////////////////////
+ 	///////// Pressure coefficients of the momentum equation //////////
+ 	///////////////////////////////////////////////////////////////////
+
+	forAll (pointP, blockColI)
+	{		
+		// Reset residualDPerturb and pointPPerturb and multiply by 1.0 to avoid it being removed
+		// from the object registry
+		pointPPerturb = 1.0*pointPRef;
+		residualDPerturb = 1.0*residualDRef;
+		
+		// Perturb pointP for blockColI
+		pointPPerturb[blockColI] = pointPRef[blockColI] + eps;
+		
+		// Calculate residualD with this component perturbed
+		residualDPerturb =			
+			vertexCentredLinGeomPressureDisplacementSolid::residualD
+			(
+				pointD,
+				pointPPerturb
+			);
+			
+		// Calculate the components
+		const vectorField tangCmpt((residualDPerturb - residualDRef)/eps); 
+		
+		// Insert components
+		forAll(tangCmpt, blockRowI)
+		{
+			matrix(blockRowI, blockColI)(0,3) = tangCmpt[blockRowI].component(vector::X);
+			matrix(blockRowI, blockColI)(1,3) = tangCmpt[blockRowI].component(vector::Y);
+			matrix(blockRowI, blockColI)(2,3) = tangCmpt[blockRowI].component(vector::Z);		    
+		}					
+	}
+	
+	///////////////////////////////////////////////////////////////////
+ 	/////// Displacement coefficients of the pressure equation ////////
+ 	///////////////////////////////////////////////////////////////////
+
+	forAll (pointD, blockColI)
+	{
+		// For each component of pointD, sequentially apply a perturbation and
+		// then calculate the resulting residual
+		for (label cmptI = 0; cmptI < vector::nComponents; cmptI++)
+		{				
+			// Reset residualPPerturb and pointDPerturb and multiply by 1.0 to avoid it being removed
+			// from the object registry
+			pointDPerturb = 1.0*pointDRef;
+			residualPPerturb = 1.0*residualPRef;
+			
+			// Perturb this component of pointD for blockColI
+		    pointDPerturb[blockColI].component(cmptI) = pointDRef[blockColI].component(cmptI) + eps;
+			
+			// Calculate residualP with this component perturbed
+			residualPPerturb =			
+				vertexCentredLinGeomPressureDisplacementSolid::residualP
+				(
+					pointDPerturb,
+					pointP
+				);
+				
+			// Calculate the components
+			const scalarField tangCmpt((residualPPerturb - residualPRef)/eps); 
+			
+		    // Insert components
+		    forAll(tangCmpt, blockRowI)
+		    {
+		    	if (cmptI == vector::X)
+		    	{		    	
+		    		matrix(blockRowI, blockColI)(3,0) = tangCmpt[blockRowI];
+		    	}
+		    	else if (cmptI == vector::Y)
+		    	{
+		    		matrix(blockRowI, blockColI)(3,1) = tangCmpt[blockRowI];		    			    	
+		    	}
+		    	else if (cmptI == vector::Z)
+		    	{
+		    		matrix(blockRowI, blockColI)(3,2) = tangCmpt[blockRowI];			    	
+		    	}		    
+		    }
+	    }						
+	}
+	
+	///////////////////////////////////////////////////////////////////
+ 	///////// Pressure coefficients of the pressure equation //////////
+ 	///////////////////////////////////////////////////////////////////
+
+	forAll (pointP, blockColI)
+	{		
+		// Reset residualPPerturb and pointPPerturb and multiply by 1.0 to avoid it being removed
+		// from the object registry
+		pointPPerturb = 1.0*pointPRef;
+		residualPPerturb = 1.0*residualPRef;
+		
+		// Perturb pointP for blockColI
+		pointPPerturb[blockColI] = pointPRef[blockColI] + eps;
+		
+		// Calculate residualD with this component perturbed
+		residualPPerturb =			
+			vertexCentredLinGeomPressureDisplacementSolid::residualP
+			(
+				pointD,
+				pointPPerturb
+			);
+			
+		// Calculate the components
+		const scalarField tangCmpt((residualPPerturb - residualPRef)/eps); 
+		
+		// Insert components
+		forAll(tangCmpt, blockRowI)
+		{
+			matrix(blockRowI, blockColI)(3,3) = tangCmpt[blockRowI];		    
+		}					
+	}
+}
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 vertexCentredLinGeomPressureDisplacementSolid::vertexCentredLinGeomPressureDisplacementSolid
@@ -855,6 +1215,20 @@ vertexCentredLinGeomPressureDisplacementSolid::vertexCentredLinGeomPressureDispl
             "pressureSmoothing", 0.5
         )
     ),
+    zeta_(solidModelDict().lookupOrDefault<scalar>("zeta", 0.2)),
+    mu_
+    (
+		IOobject
+		    (
+		        "mu",
+		        runTime.timeName(),
+		        mesh(),
+		        IOobject::READ_IF_PRESENT,
+		        IOobject::AUTO_WRITE
+		    ),
+	    dualMesh(),
+	    dimensionedScalar("0", dimPressure, 2.6/(2.0*(1.0 + 0.3)))
+	),
 //    K_(mechanical().bulkModulus()),
 //    Kf_(dualMechanicalPtr_().bulkModulus()),
     twoD_(sparseMatrixExtendedTools::checkTwoD(mesh())),
@@ -1115,12 +1489,51 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
     }
     
     //Calculate the bulk modulus
-    const scalar E = 70e9;
+    const scalar E = 2.6;
     const scalar nu = 0.3;
-    const scalar K( (nu*E/((1.0 + nu)*(1.0 - 2.0*nu))) + (2.0/3.0)*(E/(2.0*(1.0 + nu))) );
+    const scalar K( E / (3.0 * (1.0 - 2.0 * nu)) );
 
     // Initialise matrix where each coefficient is a 4x4 tensor
     sparseMatrixExtended matrixExtended(sum(globalPointIndices_.stencilSize()));
+    
+    //////////////////////////////////////////////////////////////////////
+    // TESTING //
+    
+    // Initialise calculated matrix where each coefficient is a 4x4 tensor
+    sparseMatrixExtended matrixCalculated(sum(globalPointIndices_.stencilSize()));
+    
+    const vectorField residualD
+    (
+		vertexCentredLinGeomPressureDisplacementSolid::residualD
+		(
+			pointD(),
+			pointP_
+		)
+	);
+	
+//	Info << residualD << endl;
+	
+    const scalarField residualP
+    (
+		vertexCentredLinGeomPressureDisplacementSolid::residualP
+		(
+			pointD(),
+			pointP_
+		)
+	);
+	
+//	Info << residualP << endl;
+	
+	vertexCentredLinGeomPressureDisplacementSolid::matrixCoefficients
+	(
+		matrixCalculated,
+		residualD,
+		residualP,
+		pointD(),
+		pointP_
+	);
+
+    //////////////////////////////////////////////////////////////////////
 
     // Interpolate the pressure to the dual faces
     dualPf_ = vfvc::interpolate
@@ -1331,18 +1744,31 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
 //		    }
 //		    Info << endl;
 
+		sparseMatrixExtendedTools::enforceFixedDisplacementDof
+		(
+		    matrixCalculated,
+		    sourceExtended,
+		    twoD_,
+		    fixedDofs_,
+		    fixedDofDirections_,
+		    fixedDofValues_,
+		    fixedDofScale_
+		);
+		
+		matrixCalculated.print();
+
         // Enforce fixed DOF on the linear system for
         // the displacement
-//        sparseMatrixExtendedTools::enforceFixedDisplacementDof
-//        (
-//            matrixExtended,
-//            sourceExtended,
-//            twoD_,
-//            fixedDofs_,
-//            fixedDofDirections_,
-//            fixedDofValues_,
-//            fixedDofScale_
-//        );
+        sparseMatrixExtendedTools::enforceFixedDisplacementDof
+        (
+            matrixExtended,
+            sourceExtended,
+            twoD_,
+            fixedDofs_,
+            fixedDofDirections_,
+            fixedDofValues_,
+            fixedDofScale_
+        );
         
         //        sparseMatrixExtendedTools::enforceFixedPressureDof
 //        (
@@ -1395,11 +1821,11 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
 //		        sourceExtended
 //			);
 
-			sparseMatrixExtendedTools::enforceAllBoundaryPressureDisplacement
-			(
-		        matrixExtended,
-		        sourceExtended
-			);
+//			sparseMatrixExtendedTools::enforceAllBoundaryPressureDisplacement
+//			(
+//		        matrixExtended,
+//		        sourceExtended
+//			);
 
 //			sparseMatrixExtendedTools::enforceFixedDisplacementPressure
 //			(
@@ -1408,6 +1834,18 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
 //			);
 			
 //			sparseMatrixExtendedTools::enforceNotFixedDisplacementPressure
+//			(
+//		        matrixExtended,
+//		        sourceExtended
+//			);
+
+//			sparseMatrixExtendedTools::enforceAllBoundariesExceptRightTraction
+//			(
+//		        matrixExtended,
+//		        sourceExtended
+//			);
+
+//			sparseMatrixExtendedTools::enforceAllTractions
 //			(
 //		        matrixExtended,
 //		        sourceExtended
@@ -1423,7 +1861,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
 //        );
 
 //		    Info << endl << "After enforcing DOFs " << endl << endl;
-//		    matrixExtended.print();
+		    matrixExtended.print();
 //		    Info << endl << "Print out the source: " << endl << endl;
 
 //		    for (int i = 0; i < sourceExtended.size(); i++)
@@ -1471,7 +1909,10 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         else
         {
             // Use Eigen SparseLU direct solver
-            notImplemented("Not implemented with Eigen SparseLU direct solver")
+            sparseMatrixExtendedTools::solveLinearSystemEigen
+            (
+                matrixExtended, sourceExtended, pointDPcorr, twoD_, true, debug
+            );
         }
 
         if (debug)

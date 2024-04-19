@@ -16,7 +16,7 @@ License
     along with solids4foam.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    vertexCentredLinGeomSolid
+    vertexCentredLinGeomPressureDisplacementSolid
 
 Description
     Mathematical model where linear geometry is assumed i.e. small strains and
@@ -26,8 +26,6 @@ Description
     Discretisation is performed using a vertex-centred finite volume approach
     where the governing equations are integrated over a dual mesh. The dual mesh
     is automatically constructed from the primary mesh using the meshDualiser.
-
-    An implicit Newton-Raphson algorithm is employed.
 
 Author
     Philip Cardiff, UCD.  All rights reserved.
@@ -49,9 +47,8 @@ SourceFiles
 #include "GeometricField.H"
 #include "dualMechanicalModel.H"
 #include "globalPointIndices.H"
-#ifdef OPENFOAM_COM
-    #include "pointVolInterpolation.H"
-#endif
+#include "pointFieldFunctions.H"
+#include "sparseMatrixExtended.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,8 +81,17 @@ class vertexCentredLinGeomPressureDisplacementSolid
         //- Flag to enable steadyState
         Switch steadyState_;
 
+        //- Compact stencil flag
+        Switch compactStencil_;
+
         //- Pressure smoothing factor
         const scalar pressureSmoothing_;
+        
+        //- zeta coefficient
+        const scalar zeta_;
+        
+        //- mu
+        const surfaceScalarField mu_;
 
         //- Flag indicating if the case is 2-D or 3-D
         const bool twoD_;
@@ -124,6 +130,10 @@ class vertexCentredLinGeomPressureDisplacementSolid
         //  Dual mesh cell volumes associated with the primary mesh points
         pointScalarField pointVol_;
 
+ 		//- Point gradD field
+        //  gradD associated with the primary mesh points
+        pointTensorField pointGradD_;
+
         //- Displacement gradient field at the dual mesh faces
         surfaceTensorField dualGradDf_;
 
@@ -135,24 +145,29 @@ class vertexCentredLinGeomPressureDisplacementSolid
 
         //- Cell pressure
         volScalarField volP_;
+        
+        //- Momentum equation residual
+        pointVectorField residualD_;
+        
+        //- Pressure equation residual
+        pointScalarField residualP_;
 
         //- Local-to-global point map and owner list
         globalPointIndices globalPointIndices_;
-
-#ifdef OPENFOAM_COM
-        //- Interpolator from points to cells
-        pointVolInterpolation pointVolInterp_;
-#endif
 
 
     // Private Member Functions
 
         //- Update the source vector for the linear system
         void updateSource
-        (
-            vectorField& source,
-            const labelList& dualCellToPoint
-        );
+		(
+			Field<RectangularMatrix<scalar>>& source,
+			const labelList& dualFaceToCell,
+			const labelList& dualCellToPoint,
+			const scalar& pressureSmoothing,
+			const scalar& zeta,
+			const bool debug
+		);
 
         //- Set fixed degree of freedom lists
         void setFixedDofs
@@ -174,34 +189,61 @@ class vertexCentredLinGeomPressureDisplacementSolid
 
         //- Check convergence of Newton-Raphson loop
         bool converged
-        (
-            const label iCorr,
-            scalar& initResidual,
-            const scalar res,
-            const label nInterations,
-            const pointVectorField& pointD,
-            const vectorField& pointDcorr
-        ) const;
+		(
+			const label iCorr,
+			scalar& initResidualD,
+			scalar& initResidualP,
+			const label nInterations,
+			const pointVectorField& pointD,
+			const pointScalarField& pointP,
+			const Field<RectangularMatrix<scalar>>& pointDPcorr
+		) const;
 
-        //- Calculate line search slope for the given eta parameter
-        scalar calculateLineSearchSlope
-        (
-            const scalar eta,
-            const vectorField& pointDcorr,
-            pointVectorField& pointD,
-            surfaceTensorField& dualGradDf,
-            surfaceSymmTensorField& dualSigmaf,
-            const scalar zeta
-        );
+/*        //- Calculate line search slope for the given eta parameter*/
+/*        scalar calculateLineSearchSlope*/
+/*        (*/
+/*            const scalar eta,*/
+/*            const vectorField& pointDcorr,*/
+/*            pointVectorField& pointD,*/
+/*            surfaceTensorField& dualGradDf,*/
+/*            surfaceSymmTensorField& dualSigmaf,*/
+/*            const scalar zeta*/
+/*        );*/
 
-        scalar calculateLineSearchFactor
-        (
-            const scalar rTol, // Slope reduction tolerance
-            const int maxIter, // Maximum number of line search iterations
-            const vectorField& pointDcorr, // Point displacement correction
-            const vectorField& source, // Linear system source
-            const scalar zeta // Discretisation parameter
-        );
+/*        scalar calculateLineSearchFactor*/
+/*        (*/
+/*            const scalar rTol, // Slope reduction tolerance*/
+/*            const int maxIter, // Maximum number of line search iterations*/
+/*            const vectorField& pointDcorr, // Point displacement correction*/
+/*            const vectorField& source, // Linear system source*/
+/*            const scalar zeta // Discretisation parameter*/
+/*        );*/
+
+		tmp<tensorField> pBarSensitivityField
+		(
+			const pointTensorField pGradDRef
+		) const;
+		
+		tmp<vectorField> residualD
+		(
+			const pointVectorField& pointD,
+			const pointScalarField& pointP
+		) const;
+		
+		tmp<scalarField> residualP
+		(
+			const pointVectorField& pointD,
+			const pointScalarField& pointP
+		) const;
+		
+		void matrixCoefficients
+		(
+			sparseMatrixExtended& matrix,
+			const vectorField& residualD,
+			const scalarField& residualP,
+			const pointVectorField& pointD,
+			const pointScalarField& pointP
+		);
 
         //- Disallow default bitwise copy construct
         vertexCentredLinGeomPressureDisplacementSolid(const vertexCentredLinGeomPressureDisplacementSolid&);
@@ -224,7 +266,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("vertexCentredLinearPressureDisplacementGeometry");
+    TypeName("vertexCentredPressureDisplacementLinGeometry");
 
     // Constructors
 
