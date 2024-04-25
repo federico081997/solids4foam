@@ -1004,17 +1004,17 @@ void vertexCentredLinGeomPressureDisplacementSolid::matrixCoefficients
 	// Small number used for perturbations
 	const scalar eps(solidModelDict().lookupOrDefault<scalar>("tangentEps", 1e-10));
 
-	// Store reference fields
-	const vectorField& residualDRef = residualD;
-	const scalarField& residualPRef = residualP;
-	const pointVectorField pointDRef("pointDRef", pointD);
-	const pointScalarField pointPRef("pointPRef", pointP);
+	// Store reference fields//
+	//const vectorField& residualDRef = residualD;
+	//const scalarField& residualPRef = residualP;
+	//const pointVectorField pointDRef("pointDRef", pointD);
+	//const pointScalarField pointPRef("pointPRef", pointP);
 
 	// Create fields to be used for perturbations
-	vectorField residualDPerturb = residualDRef;
-	scalarField residualPPerturb = residualPRef;
-	pointVectorField pointDPerturb("pointDPerturb", pointDRef);
-	pointScalarField pointPPerturb("pointPPerturb", pointPRef);
+	vectorField residualDPerturb = residualD;
+	scalarField residualPPerturb = residualP;
+	pointVectorField pointDPerturb("pointDPerturb", pointD);
+	pointScalarField pointPPerturb("pointPPerturb", pointP);
 	
 	///////////////////////////////////////////////////////////////////
 	//////////////////// Displacement coefficients ////////////////////
@@ -1022,19 +1022,18 @@ void vertexCentredLinGeomPressureDisplacementSolid::matrixCoefficients
 
 	forAll (pointD, blockRowI)
 	{		
-		// Reset residualDPerturb and reidualPPerturb and multiply by 1.0 to avoid it being removed
-		// from the object registry
-		residualDPerturb = 1.0*residualDRef;
-		residualPPerturb = 1.0*residualPRef;
-
 		forAll (pointD, blockColI)
 		{
 			// For each component of pointD, sequentially apply a perturbation and
 			// then calculate the resulting residuals
 			for (label cmptI = 0; cmptI < vector::nComponents; cmptI++)
 			{
+				// Reset pointDPerturb and multiply by 1.0 to avoid it being removed
+				// from the object registry
+				pointDPerturb = 1.0*pointD;
+
 				// Perturb this component of pointD
-				pointDPerturb[blockColI].component(cmptI) = pointDRef[blockColI].component(cmptI) + eps;
+				pointDPerturb[blockColI].component(cmptI) = pointD[blockColI].component(cmptI) + eps;
 				
 				// Calculate residualD with this component perturbed
 				residualDPerturb = vertexCentredLinGeomPressureDisplacementSolid::residualD(pointDPerturb, pointP);			
@@ -1043,14 +1042,14 @@ void vertexCentredLinGeomPressureDisplacementSolid::matrixCoefficients
 				residualPPerturb = vertexCentredLinGeomPressureDisplacementSolid::residualP(pointDPerturb, pointP);		
 			
 				// Calculate each component
-				const vectorField tangCmptD((residualDPerturb - residualDRef)/eps); 
-				const scalarField tangCmptP((residualPPerturb - residualPRef)/eps);
+				const vector tangCmptD((residualDPerturb[blockRowI] - residualD[blockRowI])/eps); 
+				const scalar tangCmptP((residualPPerturb[blockRowI] - residualP[blockRowI])/eps);
 				
 				// Insert components
-				matrix(blockRowI, blockColI)(0,cmptI) = tangCmptD[blockRowI].component(vector::X);
-				matrix(blockRowI, blockColI)(1,cmptI) = tangCmptD[blockRowI].component(vector::Y);
-				matrix(blockRowI, blockColI)(2,cmptI) = tangCmptD[blockRowI].component(vector::Z);
-				matrix(blockRowI, blockColI)(3,cmptI) = tangCmptP[blockRowI];
+				matrix(blockRowI, blockColI)(0,cmptI) = tangCmptD.component(vector::X);
+				matrix(blockRowI, blockColI)(1,cmptI) = tangCmptD.component(vector::Y);
+				matrix(blockRowI, blockColI)(2,cmptI) = tangCmptD.component(vector::Z);
+				matrix(blockRowI, blockColI)(3,cmptI) = tangCmptP;
 			}
 		}
 	}
@@ -1061,15 +1060,14 @@ void vertexCentredLinGeomPressureDisplacementSolid::matrixCoefficients
 
 	forAll (pointP, blockRowI)
 	{		
-		// Reset residualDPerturb and residualPerturb and multiply by 1.0 to avoid it being removed
-		// from the object registry
-		residualDPerturb = 1.0*residualDRef;
-		residualPPerturb = 1.0*residualPRef;
-		
 		forAll (pointP, blockColI)
 		{	
+			// Reset pointPPerturb and multiply by 1.0 to avoid it being removed
+			// from the object registry
+			pointPPerturb = 1.0*pointP;
+
 			// Perturb pointP
-			pointPPerturb[blockColI] = pointPRef[blockColI] + eps;
+			pointPPerturb[blockColI] = pointP[blockColI] + eps;
 			
 			// Calculate residualD with this component perturbed
 			residualDPerturb = vertexCentredLinGeomPressureDisplacementSolid::residualD(pointD, pointPPerturb);		
@@ -1078,14 +1076,14 @@ void vertexCentredLinGeomPressureDisplacementSolid::matrixCoefficients
 			residualPPerturb = vertexCentredLinGeomPressureDisplacementSolid::residualP(pointD, pointPPerturb);		
 				
 			// Calculate the components
-			const vectorField tangCmptD((residualDPerturb - residualDRef)/eps); 
-			const scalarField tangCmptP((residualPPerturb - residualPRef)/eps); 
+			const vector tangCmptD((residualDPerturb[blockRowI] - residualD[blockRowI])/eps); 
+			const scalar tangCmptP((residualPPerturb[blockRowI] - residualP[blockRowI])/eps); 
 			
 			// Insert components
-			matrix(blockRowI, blockColI)(0,3) = tangCmptD[blockRowI].component(vector::X);
-			matrix(blockRowI, blockColI)(1,3) = tangCmptD[blockRowI].component(vector::Y);
-			matrix(blockRowI, blockColI)(2,3) = tangCmptD[blockRowI].component(vector::Z);			
-			matrix(blockRowI, blockColI)(3,3) = tangCmptP[blockRowI];			
+			matrix(blockRowI, blockColI)(0,3) = tangCmptD.component(vector::X);
+			matrix(blockRowI, blockColI)(1,3) = tangCmptD.component(vector::Y);
+			matrix(blockRowI, blockColI)(2,3) = tangCmptD.component(vector::Z);			
+			matrix(blockRowI, blockColI)(3,3) = tangCmptP;			
 		}					
 	}
 }
