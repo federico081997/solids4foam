@@ -726,7 +726,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::vertexCentredLinGeomPressure
 Foam::tmp<tensorField>
 vertexCentredLinGeomPressureDisplacementSolid::pBarSensitivityField
 (
-        const pointTensorField pGradDRef
+        const pointTensorField& pGradDRef
 ) const
 {
         // Prepare tmp field
@@ -1605,7 +1605,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
                 materialTangent = dualMechanicalPtr_().materialTangentFaceField();
 
                 //Obtain undeformed surface vector field
-                surfaceVectorField Sf = dualMesh().Sf();
+                //const surfaceVectorField& Sf = dualMesh().Sf();
 
 //		  tensorField& pointGradD = pointGradD_.primitiveFieldRef();
 //		  tensorField pBarSensitivity(mesh().nPoints(), tensor::zero);
@@ -1619,7 +1619,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
 //				);
 //		  }
 
-                tensorField pBarSensitivity
+                const tensorField pBarSensitivity
                 (
                         pBarSensitivityField
                         (
