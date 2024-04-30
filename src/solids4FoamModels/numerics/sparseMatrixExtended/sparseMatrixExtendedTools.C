@@ -413,7 +413,7 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     // be thrown
     // For now, we will disable this check in debug mode so we can see how many
     // mallocs were made
-    if (debug)
+    //if (debug)
     {
         MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
     }
