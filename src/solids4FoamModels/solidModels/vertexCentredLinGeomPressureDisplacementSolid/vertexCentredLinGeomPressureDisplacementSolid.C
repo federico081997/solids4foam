@@ -496,23 +496,32 @@ bool vertexCentredLinGeomPressureDisplacementSolid::vertexCentredLinGeomPressure
 {
         scalar residualDAbs = 0;
         scalar residualPAbs = 0;
-        scalar nPoints = 0;
         // Calculate the residuals as the root mean square of the correction
         // Displacement residual
+        scalar maxDCorr = 0.0;
+        scalar maxPCorr = 0.0;
         forAll(pointDPcorr, pointI)
         {
                 // Displacement residual
-                residualDAbs += sqr(pointDPcorr[pointI](0,0)) + sqr(pointDPcorr[pointI](1,0)) +
-                        sqr(pointDPcorr[pointI](2,0));
+            const vector curDCorr
+            (
+                pointDPcorr[pointI](0,0),
+                pointDPcorr[pointI](1,0),
+                pointDPcorr[pointI](2,0)
+            );
 
-                // Pressure residual
-                residualPAbs += sqr(pointDPcorr[pointI](3,0));
+            residualDAbs += magSqr(curDCorr);
 
-                nPoints ++;
+            maxDCorr = max(maxDCorr, mag(curDCorr));
+
+            // Pressure residual
+            residualPAbs += sqr(pointDPcorr[pointI](3,0));
+
+            maxPCorr = max(maxPCorr, mag(pointDPcorr[pointI](3,0)));
         }
 
-        residualDAbs /= sqrt(residualDAbs/nPoints);
-        residualPAbs /= sqrt(residualPAbs/nPoints);
+        residualDAbs /= sqrt(residualDAbs/pointD.size());
+        residualPAbs /= sqrt(residualPAbs/pointD.size());
         //residualPAbs = 0;
 
         // Store initial residual
@@ -538,34 +547,28 @@ bool vertexCentredLinGeomPressureDisplacementSolid::vertexCentredLinGeomPressure
         //const scalar residualPNorm = 0;
 
         // Calculate the maximum displacement
-#ifdef OPENFOAM_NOT_EXTEND
         const scalar maxMagD = gMax(mag(pointD.primitiveField()));
-#else
-        const scalar maxMagD = gMax(mag(pointD.internalField()));
-#endif
 
         // Calculate the maximum pressure
-#ifdef OPENFOAM_NOT_EXTEND
         const scalar maxMagP = gMax(mag(pointP.primitiveField()));
-#else
-        const scalar maxMagP = gMax(mag(pointP.internalField()));
-#endif
 
         // Print information for the displacement
-        Info<< "	Displacement residuals: " << endl
+        Info//<< "	Displacement residuals: " << endl
                 << "	Iter = " << iCorr
                 << ", relRef = " << residualDNorm
                 << ", resAbs = " << residualDAbs
                 << ", nIters = " << nInterations
-                << ", maxD = " << maxMagD << endl;
+                << ", maxD = " << maxMagD
+                << ", maxDCorr = " << maxDCorr << endl;
 
         // Print information for the pressure
-        Info<< "	Pressure residuals: " << endl
+        Info//<< "	Pressure residuals: " << endl
                 << "	Iter = " << iCorr
                 << ", relRef = " << residualPNorm
                 << ", resAbs = " << residualPAbs
                 << ", nIters = " << nInterations
-                << ", maxP = " << maxMagP << endl;
+                << ", maxP = " << maxMagP
+                << ", maxPCorr = " << maxPCorr << endl;
 
         // Displacement tolerance
         const scalar DTol = solidModelDict().lookupOrDefault<scalar>("solutionDTolerance", 1e-11);
@@ -985,7 +988,10 @@ vertexCentredLinGeomPressureDisplacementSolid::residualP
         const scalar K( E / (3.0 * (1.0 - 2.0 * nu)) );
 
         // Calculate the pBar field
-        pointScalarField pBar(-K*tr(0.5*(pointGradD + pointGradD.T())));
+        // pointScalarField pBar(-K*tr(0.5*(pointGradD + pointGradD.T())));
+        const pointScalarField pBar(-K*tr(pointGradD));
+        // Note: tr(pointGradD) == div(pointD), so we could perform a divergence
+        // discretisation instead of a point gradient discretisation
 
         // Point volume field
         const scalarField& pointVolI = pointVol_.internalField();
@@ -1012,12 +1018,16 @@ void vertexCentredLinGeomPressureDisplacementSolid::matrixCoefficients
     const pointScalarField& pointP
 )
 {
+    Info<< "Calculating the Jacobian using finite differences" << endl;
         // Small number used for perturbations
         const scalar relEps = 1e-8;
-        const scalar typicalDisplacementValue = 1e-3;
-        const scalar typicalPressureValue = 100e6;
-        const scalar epsD = relEps*max(average(mag(pointD.primitiveField())), relEps*typicalDisplacementValue);
-        const scalar epsP = relEps*max(average(mag(pointP.primitiveField())), relEps*typicalPressureValue);
+        const scalar typicalDisplacementValue =  //1e-3;
+            readScalar(solidModelDict().lookup("typicalDisplacementValue"));
+        const scalar typicalPressureValue = //100e6;
+            readScalar(solidModelDict().lookup("typicalPressureValue"));
+        const scalar epsD = relEps*max(average(mag(pointD.primitiveField())), typicalDisplacementValue);
+        const scalar epsP = relEps*max(average(mag(pointP.primitiveField())), typicalPressureValue);
+        Info<< "epsD = " << epsD << ", epsP = " << epsP << endl;
 
         // Store reference fields//
         //const vectorField& residualDRef = residualD;
@@ -1043,7 +1053,6 @@ void vertexCentredLinGeomPressureDisplacementSolid::matrixCoefficients
         ///////////////////////////////////////////////////////////////////
         //////////////////// Displacement coefficients ////////////////////
         ///////////////////////////////////////////////////////////////////
-
         forAll (pointD, blockRowI)
         {
                 forAll (pointD, blockColI)
@@ -1452,14 +1461,17 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
 
 //	Info << residualP << endl;
 
-        vertexCentredLinGeomPressureDisplacementSolid::matrixCoefficients
-        (
+        if (Switch(solidModelDict().lookup("finiteDifferenceJacobian")))
+        {
+            vertexCentredLinGeomPressureDisplacementSolid::matrixCoefficients
+            (
                 matrixCalculated,
                 residualD,
                 residualP,
                 pointD(),
                 pointP_
-        );
+            );
+        }
 
         //////////////////////////////////////////////////////////////////////
 
@@ -1700,7 +1712,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
                         fixedDofScale_
                 );
 
-        matrixCalculated.print();
+                //matrixCalculated.print();
 
                 // Enforce fixed DOF on the linear system for
                 // the displacement
@@ -1822,7 +1834,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
                                 << " solving linear system: start" << endl;
                 }
 
-                Info<< "	Solving" << endl;
+                // Info<< "	Solving" << endl;
 
                 if (Switch(solidModelDict().lookup("usePETSc")))
                 {
@@ -1833,8 +1845,10 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
 
                         solverPerf = sparseMatrixExtendedTools::solveLinearSystemPETSc
                         (
-                                matrixCalculated,
-                                sourceCalculated,
+                            matrixExtended,
+                            sourceExtended,
+                            //matrixCalculated,
+                            //sourceCalculated,
                                 pointDPcorr,
                                 twoD_,
                                 optionsFile,
