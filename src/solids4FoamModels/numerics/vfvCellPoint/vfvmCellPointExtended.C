@@ -1013,6 +1013,7 @@ void Foam::vfvm::Sp
             for (int i = 0; i < 3; i++)
             {            	
             	matrix(pointI, pointPointID)(3,i) -= coeff.component(i);
+                matrix(pointI, pointI)(3,i) += coeff.component(i);
             	//matrix(pointPointID, pointI)(3,i) += coeff.component(i);
 //            	Info << "Before multiplying: " << endl;
 //				if (pointI == 21)
