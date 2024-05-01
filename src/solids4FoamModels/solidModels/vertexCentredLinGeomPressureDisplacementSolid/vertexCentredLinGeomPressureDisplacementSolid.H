@@ -251,7 +251,6 @@ class vertexCentredLinGeomPressureDisplacementSolid
         //- Disallow default bitwise assignment
         void operator=(const vertexCentredLinGeomPressureDisplacementSolid&);
 
-
 protected:
 
     // Protected member functions

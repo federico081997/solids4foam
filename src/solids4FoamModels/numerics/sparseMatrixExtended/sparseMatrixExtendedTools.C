@@ -1390,8 +1390,13 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
 
             // Eliminate the fixed directions from the coeffs
             momentumEqnDispCoeff = (freeDir & momentumEqnDispCoeff);
-            momentumEqnPressCoeff = (freeDir & momentumEqnPressCoeff);
-
+			momentumEqnPressCoeff = (freeDir & momentumEqnPressCoeff);
+			
+            if (fixedDofs[blockColI])
+            {
+                pressureEqnDispCoeff = (freeDir & pressureEqnDispCoeff);
+            }
+			
             if (blockRowI == blockColI)
             {
                 // Remove the fixed component from the free component equation
@@ -1406,6 +1411,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
 
                 // Set the fixed direction diagonal to enforce a zero correction
                 momentumEqnDispCoeff -= tensor(fixedDofScale*fixedDir);
+			   // pressureEqnDispCoeff = (freeDir & pressureEqnDispCoeff);
             }
 
             // Insert the changed displacement coefficients back into the matrix
@@ -1517,20 +1523,20 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 momentumEqnDispCoeff.zz() = coeff(2,2);
             }
             
-            // Extract the pressure coefficients of the momentum equation
-            vector momentumEqnPressCoeff(vector::zero);
+            //// Extract the pressure coefficients of the momentum equation
+            //vector momentumEqnPressCoeff(vector::zero);
 
-            if (twoD)
-            {
-                momentumEqnPressCoeff.x() = coeff(0,2);
-                momentumEqnPressCoeff.y() = coeff(1,2);
-            }
-            else
-            {
-				momentumEqnPressCoeff.x() = coeff(0,3);
-                momentumEqnPressCoeff.y() = coeff(1,3);
-                momentumEqnPressCoeff.z() = coeff(2,3);
-            }
+            //if (twoD)
+            //{
+                //momentumEqnPressCoeff.x() = coeff(0,2);
+                //momentumEqnPressCoeff.y() = coeff(1,2);
+            //}
+            //else
+            //{
+				//momentumEqnPressCoeff.x() = coeff(0,3);
+                //momentumEqnPressCoeff.y() = coeff(1,3);
+                //momentumEqnPressCoeff.z() = coeff(2,3);
+            //}
 
             // Extract the displacement coefficients of the pressure equation
             vector pressureEqnDispCoeff(vector::zero);
@@ -1559,6 +1565,8 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             momentumEqnDispCoeff = (momentumEqnDispCoeff & freeDir);
             //momentumEqnPressCoeff = (freeDir & momentumEqnPressCoeff);
             pressureEqnDispCoeff = (freeDir & pressureEqnDispCoeff);
+
+			//Info << "freeDir for blockRowI: " << blockRowI << " and blockColI: " << blockColI << endl;
             
 //            Info << "pressDispCoeff: " << pressDispCoeff << endl;
 
@@ -1583,18 +1591,18 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 coeff(2,2) = momentumEqnDispCoeff.zz();
             }
 
-            // Insert the changed pressure coefficients back into the matrix
-            if (twoD)
-            {
-                coeff(0,2) = momentumEqnPressCoeff.x();
-                coeff(1,2) = momentumEqnPressCoeff.y();
-            }
-            else
-            {
-                coeff(0,3) = momentumEqnPressCoeff.x();
-                coeff(1,3) = momentumEqnPressCoeff.y();
-                coeff(2,3) = momentumEqnPressCoeff.z();
-            } 
+            //// Insert the changed pressure coefficients back into the matrix
+            //if (twoD)
+            //{
+                //coeff(0,2) = momentumEqnPressCoeff.x();
+                //coeff(1,2) = momentumEqnPressCoeff.y();
+            //}
+            //else
+            //{
+                //coeff(0,3) = momentumEqnPressCoeff.x();
+                //coeff(1,3) = momentumEqnPressCoeff.y();
+                //coeff(2,3) = momentumEqnPressCoeff.z();
+            //} 
             
             //Insert the changed pressure coefficients back into the matrix
          	if (twoD)
