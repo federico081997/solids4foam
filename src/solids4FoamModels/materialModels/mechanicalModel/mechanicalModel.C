@@ -118,8 +118,8 @@ void Foam::mechanicalModel::calcImpKfcorr() const
     if (laws.size() > 1)
     {
 #ifndef OPENFOAM_NOT_EXTEND
-        // To disable Rhie-Chow correction on bi-material interface, we will set
-        // impKfcorr to zero on bi-material interface faces
+        // To disable Rhie-Chow correction on bi-material interface, we will 
+        // set impKfcorr to zero on bi-material interface faces
 
         surfaceScalarField& impKfcorr = impKfcorrPtr_();
         scalarField& impKfcorrI = impKfcorrPtr_().internalField();
@@ -237,8 +237,8 @@ Foam::mechanicalModel::mechanicalModel
     PtrList<mechanicalLaw>& laws = *this;
     laws.setSize(lawEntries.size());
 
-    // Create the list of cellZones names: they are used during the construction
-    // of the subMeshes
+    // Create the list of cellZones names: they are used during the 
+    // construction of the subMeshes
     cellZoneNames_.setSize(laws.size());
     forAll(laws, lawI)
     {
@@ -378,12 +378,14 @@ const Foam::fvMesh& Foam::mechanicalModel::mesh() const
 
 
 #ifdef OPENFOAM_NOT_EXTEND
-const Foam::enhancedVolPointInterpolation& Foam::mechanicalModel::volToPoint() const
+const Foam::enhancedVolPointInterpolation& 
+Foam::mechanicalModel::volToPoint() const
 {
     return enhancedVolPointInterpolation::New(mesh_);
 }
 #else
-const Foam::newLeastSquaresVolPointInterpolation& Foam::mechanicalModel::volToPoint() const
+const Foam::newLeastSquaresVolPointInterpolation& 
+Foam::mechanicalModel::volToPoint() const
 {
     return newLeastSquaresVolPointInterpolation::New(mesh_);
 }
@@ -955,7 +957,6 @@ Foam::tmp<Foam::volVectorField> Foam::mechanicalModel::RhieChowCorrection
     // however, numerically "div(grad(phi))" uses a larger stencil than the
     // "laplacian(phi)"; the difference between these two approximations is
     // a small amount of numerical diffusion that quells oscillations
-    //if (D.name() == "DD" || biMaterialInterfaceActive())
     if (true)
     {
         return
@@ -975,8 +976,8 @@ Foam::tmp<Foam::volVectorField> Foam::mechanicalModel::RhieChowCorrection
         // displacement, as it may become large of we base it on the total
         // displacement
         // Issue: The increment field "D - D.oldTime()" will be incorrect on
-        // non-orthogonal meshes as the grad(D - D.oldTime()) field would not be
-        // stored... we can/should fix this
+        // non-orthogonal meshes as the grad(D - D.oldTime()) field would not 
+        // be stored (to be fixed)
         return
         (
             fvc::laplacian
@@ -1070,10 +1071,10 @@ void Foam::mechanicalModel::setRestart()
 
 void Foam::mechanicalModel::writeDict()
 {
-    // This has to be done, because law dicts can only be read as IStream and so
-    // they are not references to the entries in the 'mechanicalProperties' but
-    // seperate entry object and dictionary objects. Because of this they have
-    // to be added back to 'mechanicalProperties' before writing to disk.
+    // This has to be done, because law dicts can only be read as IStream and 
+    // so they are not references to the entries in the 'mechanicalProperties' 
+    // but separate entry object and dictionary objects. Because of this they 
+    // have to be added back to 'mechanicalProperties' before writing to disk.
     PtrList<mechanicalLaw>& laws = *this;
 
     // Adding all law dictionaries to a single pointer list
