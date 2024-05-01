@@ -186,12 +186,10 @@ void Foam::mechanicalLaw::makeSigma0() const
         (
             "mechanicalProperties"
         ).PtrList::size() == 1
-        //|| !baseMesh().foundObject<volSymmTensorField>("sigma0")
     )
     {
         // Only one material, but the material mesh is not the same as the
         // base mesh: it must be a dualMesh or similar
-        // For now, give a warning
         Warning
             << "Creating sigma0 but baseMesh is not equal to the material mesh!"
             << "\nsigma0 may not be correct" << endl;
@@ -524,7 +522,6 @@ const Foam::volScalarField& Foam::mechanicalLaw::mu() const
     if (muPtr_.empty())
     {
         // Resolves temporarily #90
-        //makeMu();
         FatalErrorIn
         (
             "const Foam::volScalarField& Foam::mechanicalLaw::mu() const"
@@ -542,7 +539,6 @@ Foam::volScalarField& Foam::mechanicalLaw::mu()
     if (muPtr_.empty())
     {
         // Resolves temporarily #90
-        //makeMu();
         FatalErrorIn("Foam::volScalarField& Foam::mechanicalLaw::mu()")
             << "mu field has not been set. Please construct the field first"
             << " using mu(const dimensionedScalar& mu)"
@@ -558,7 +554,6 @@ const Foam::surfaceScalarField& Foam::mechanicalLaw::muf() const
     if (mufPtr_.empty())
     {
         // Resolves temporarily #90
-        //makeMuf();
         FatalErrorIn
         (
             "const Foam::surfaceScalarField& Foam::mechanicalLaw::muf() const"
@@ -576,7 +571,6 @@ Foam::surfaceScalarField& Foam::mechanicalLaw::muf()
     if (mufPtr_.empty())
     {
         // Resolves temporarily #90
-        //makeMuf();
         FatalErrorIn("Foam::surfaceScalarField& Foam::mechanicalLaw::muf()")
             << "muf field has not been set. Please construct the field first"
             << " using muf(const dimensionedScalar& mu)"
@@ -587,7 +581,8 @@ Foam::surfaceScalarField& Foam::mechanicalLaw::muf()
 }
 
 
-const Foam::volScalarField& Foam::mechanicalLaw::mu(const dimensionedScalar& mu)
+const Foam::volScalarField& 
+Foam::mechanicalLaw::mu(const dimensionedScalar& mu)
 {
     if (muPtr_.empty())
     {
@@ -658,7 +653,6 @@ const Foam::volScalarField& Foam::mechanicalLaw::K() const
     if (KPtr_.empty())
     {
         // Resolves temporarily #90
-        //makeK();
         FatalErrorIn("const Foam::volScalarField& Foam::mechanicalLaw::K()")
             << "K field has not been set. Please construct the field first"
             << " using K(const dimensionedScalar& K)"
@@ -674,7 +668,6 @@ Foam::volScalarField& Foam::mechanicalLaw::K()
     if (KPtr_.empty())
     {
         // Resolves temporarily #90
-        //makeK();
         FatalErrorIn("Foam::volScalarField& Foam::mechanicalLaw::K()")
             << "K field has not been set. Please construct the field first"
             << " using K(const dimensionedScalar& K)"
@@ -690,7 +683,6 @@ const Foam::surfaceScalarField& Foam::mechanicalLaw::Kf() const
     if (KfPtr_.empty())
     {
         // Resolves temporarily #90
-        //makeKf();
         FatalErrorIn
         (
             "const Foam::surfaceScalarField& Foam::mechanicalLaw::Kf() const"
@@ -708,7 +700,6 @@ Foam::surfaceScalarField& Foam::mechanicalLaw::Kf()
     if (KfPtr_.empty())
     {
         // Resolves temporarily #90
-        //makeKf();
         FatalErrorIn("Foam::surfaceScalarField& Foam::mechanicalLaw::Kf()")
             << "Kf field has not been set. Please construct the field first"
             << " using Kf(const dimensionedScalar& K)"
@@ -1097,7 +1088,7 @@ bool Foam::mechanicalLaw::updateF
             // Note: grad is wrt reference configuration
             F() = F().oldTime() + gradDD.T();
 
-            // Update the relative deformation gradient: not needed
+            // Update the relative deformation gradient
             relF() = F() & inv(F().oldTime());
 
             if (enforceLinear())
@@ -1108,8 +1099,10 @@ bool Foam::mechanicalLaw::updateF
 
                     WarningIn
                     (
-                        "void " + type() + "::correct(volSymmTensorField& sigma)"
-                    )   << "Material linearity enforced for stability!" << endl;
+                        "void " + type() 
+                        + "::correct(volSymmTensorField& sigma)"
+                    )   << "Material linearity enforced for stability!" 
+                        << endl;
                 }
 
                 // Calculate stress using Hooke's law
@@ -1129,7 +1122,7 @@ bool Foam::mechanicalLaw::updateF
             // Update the total deformation gradient
             F() = I + gradD.T();
 
-            // Update the relative deformation gradient: not needed
+            // Update the relative deformation gradient
             relF() = F() & inv(F().oldTime());
 
             if (enforceLinear())
@@ -1140,8 +1133,10 @@ bool Foam::mechanicalLaw::updateF
 
                     WarningIn
                     (
-                        "void " + type() + "::correct(volSymmTensorField& sigma)"
-                    )   << "Material linearity enforced for stability!" << endl;
+                        "void " + type() 
+                        + "::correct(volSymmTensorField& sigma)"
+                    )   << "Material linearity enforced for stability!" 
+                        << endl;
                 }
 
                 // Calculate stress using Hooke's law
@@ -1156,10 +1151,12 @@ bool Foam::mechanicalLaw::updateF
         FatalErrorIn
         (
             "void " + type() + "::correct(volSymmTensorField& sigma)"
-        )   << "Unknown nonLinGeom type: " << nonLinGeom() << abort(FatalError);
+        )   << "Unknown nonLinGeom type: " 
+            << nonLinGeom() 
+            << abort(FatalError);
     }
 
-    // linearised elasticity was not enforced
+    // Linearised elasticity was not enforced
     return false;
 }
 
@@ -1207,7 +1204,7 @@ bool Foam::mechanicalLaw::updateF
         const surfaceTensorField& gradDD =
             mesh().lookupObject<surfaceTensorField>("grad(DD)f");
 
-        // Update the relative deformation gradient: not needed
+        // Update the relative deformation gradient
         relFf() = I + gradDD.T();
 
         // Update the total deformation gradient
@@ -1245,7 +1242,7 @@ bool Foam::mechanicalLaw::updateF
             // Note: grad is wrt reference configuration
             Ff() = Ff().oldTime() + gradDD.T();
 
-            // Update the relative deformation gradient: not needed
+            // Update the relative deformation gradient
             relFf() = Ff() & inv(Ff().oldTime());
 
             if (enforceLinear())
@@ -1258,7 +1255,8 @@ bool Foam::mechanicalLaw::updateF
                     (
                         "void " + type()
                       + "::correct(surfaceSymmTensorField& sigma)"
-                    )   << "Material linearity enforced for stability!" << endl;
+                    )   << "Material linearity enforced for stability!" 
+                        << endl;
                 }
 
                 // Calculate stress using Hooke's law
@@ -1278,7 +1276,7 @@ bool Foam::mechanicalLaw::updateF
             // Update the total deformation gradient
             Ff() = I + gradD.T();
 
-            // Update the relative deformation gradient: not needed
+            // Update the relative deformation gradient
             relFf() = Ff() & inv(Ff().oldTime());
 
             if (enforceLinear())
@@ -1291,7 +1289,8 @@ bool Foam::mechanicalLaw::updateF
                     (
                         "void " + type()
                       + "::correct(surfaceSymmTensorField& sigma)"
-                    )   << "Material linearity enforced for stability!" << endl;
+                    )   << "Material linearity enforced for stability!" 
+                        << endl;
                 }
 
                 // Calculate stress using Hooke's law
@@ -1306,10 +1305,12 @@ bool Foam::mechanicalLaw::updateF
         FatalErrorIn
         (
             "void " + type() + "::correct(surfaceSymmTensorField& sigma)"
-        )   << "Unknown nonLinGeom type: " << nonLinGeom() << abort(FatalError);
+        )   << "Unknown nonLinGeom type: " 
+            << nonLinGeom() 
+            << abort(FatalError);
     }
 
-    // linearised elasticity was not enforced
+    // Linearised elasticity was not enforced
     return false;
 }
 
@@ -1352,8 +1353,8 @@ void Foam::mechanicalLaw::updateSigmaHyd
             {
 #ifdef OPENFOAM_NOT_EXTEND
                 FatalErrorIn("void Foam::mechanicalLaw::updateSigmaHyd(...)")
-                    << "Multi-materials are not yet ported for this version of "
-                    << "OpenFOAM" << abort(FatalError);
+                    << "Multi-materials are not yet ported for this version "
+                    << "of OpenFOAM" << abort(FatalError);
 #else
                 ADPtr =
                     new volScalarField
@@ -1425,7 +1426,7 @@ void Foam::mechanicalLaw::updateSigmaHyd
     else
     {
         // Explicitly calculate hydrostatic stress
-        // We use 1.0* to overwritting the field IOobject attributes e.g. its
+        // We use 1.0* to overwrite the field IOobject attributes e.g. its
         // name and writeOpt
         sigmaHyd() = 1.0*sigmaHydExplicit;
     }
@@ -1581,7 +1582,11 @@ Foam::mechanicalLaw::materialTangentField() const
     // This function can be overwritten in specific mechanical laws
     tmp<Field<RectangularMatrix<scalar>>> tresult
     (
-        new Field<RectangularMatrix<scalar>>(mesh().nFaces(), materialTangent())
+        new Field<RectangularMatrix<scalar>>
+        (
+            mesh().nFaces(), 
+            materialTangent()
+        )
     );
 
     return tresult;
