@@ -1362,10 +1362,6 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
             Info<< "bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve(): "
                 << " solving linear system: start" << endl;
         }
-        else
-        {
-            Info<< "    Solving" << endl;
-        }
 
         if (Switch(solidModelDict().lookup("usePETSc")))
         {

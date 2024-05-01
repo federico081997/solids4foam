@@ -221,7 +221,7 @@ class vertexCentredLinGeomPressureDisplacementSolid
 
 		tmp<tensorField> pBarSensitivityField
 		(
-			const pointTensorField pGradDRef
+			const pointTensorField& pGradDRef
 		) const;
 		
 		tmp<vectorField> residualD
