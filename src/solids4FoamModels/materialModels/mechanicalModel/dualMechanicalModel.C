@@ -192,31 +192,6 @@ void Foam::dualMechanicalModel::makeDualFaceInThisMaterialList() const
 
             dualFaceMask[dualFaceI] = cellInThisMat;
         }
-
-        /*
-        // Boundary faces are not set, as the dualFaceToCell map may not be
-        // defined. In any case, it shouldn't be needed
-        forAll(dualFaceInThisMaterialList_[lawI].boundaryField(), patchI)
-        {
-            scalarField& dualFaceMaskP =
-                dualFaceInThisMaterialList_[lawI].boundaryFieldRef()[patchI];
-
-            forAll(dualFaceMaskP, dualFaceI)
-            {
-                // Dual face ID
-                const label dFaceID =
-                    mesh_.boundaryMesh()[patchI].start() + dualFaceI;
-
-                // Primary mesh cell
-                const label cellID = dualFaceToCell_[dFaceID];
-
-                // Material in primary mesh cell
-                const scalar cellInThisMat = cellMask[cellID];
-
-                dualFaceMaskP[dualFaceI] = cellInThisMat;
-            }
-        }
-        */
     }
 }
 
@@ -337,10 +312,15 @@ Foam::dualMechanicalModel::materialTangentFaceField() const
     const PtrList<mechanicalLaw>& laws = *this;
 
     // Prepare the field
-    tmp< Field<RectangularMatrix<scalar>> > tresult
+    tmp<Field<RectangularMatrix<scalar>>> tresult
     (
-        new Field<RectangularMatrix<scalar>>(mesh().nFaces(), RectangularMatrix<scalar>(6))
+        new Field<RectangularMatrix<scalar>>
+        (
+            mesh().nFaces(), 
+            RectangularMatrix<scalar>(6)
+        )
     );
+
     Field<RectangularMatrix<scalar>>& result = tresult.ref();
 
     if (laws.size() == 1)
@@ -350,36 +330,12 @@ Foam::dualMechanicalModel::materialTangentFaceField() const
         if (result.size() != mesh().nFaces())
         {
             FatalErrorIn("dualMechanicalModel::materialTangentField()")
-                << "The materialTangentField field for law 0 is the wrong size!"
+                << "The materialTangentField for law 0 is the wrong size!"
                 << abort(FatalError);
         }
     }
     else
     {
-        // Accumulate data for all materials
-        // Note: the value on each dual face is uniquely set by one material law
-        // forAll(laws, lawI)
-        // {
-        //     const Field<scalarSquareMatrix> matTanI
-        //     (
-        //         laws[lawI].materialTangentField()
-        //     );
-
-        //     if (matTanI.size() != mesh().nFaces())
-        //     {
-        //         FatalErrorIn("dualMechanicalModel::materialTangentField()")
-        //             << "The materialTangentField field for law " << lawI
-        //             << " is the wrong size!" << abort(FatalError);
-        //     }
-
-        //     // Insert values from actual material region into main sigma field
-        //     result += dualFaceInThisMaterialList()[lawI]*matTanI;
-        // }
-
-        // This does work but the problem can be that the maps for the boundary
-        // faces sometimes struggle to be defined when creating the
-        // dualFaceInThisMaterialList function. It should be possible to make
-        // this robust
         notImplemented("Not implemented for more than one material");
     }
 
@@ -435,9 +391,6 @@ Foam::dualMechanicalModel::impKf() const
         }
     }
 
-    // Info<< "Writing " << result.name() << endl;
-    // result.write();
-
     return tresult;
 }
 
@@ -489,9 +442,6 @@ Foam::dualMechanicalModel::bulkModulus() const
                 );
         }
     }
-
-    // Info<< "Writing " << result.name() << endl;
-    // result.write();
 
     return tresult;
 }
