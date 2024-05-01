@@ -19,14 +19,15 @@ Class
     solidPointDisplacementAlongLine
 
 Description
-    FunctionObject reports displacement value along a line specified by the user.
+    FunctionObject reports displacement value along a line specified by the 
+    user.
 
     The displacement volField is interpolated to a pointField using the
     least squares vol-to-point interpolator.
 
 Author
-    Philip Cardiff UCD
-    Federico Mazzanti UCD
+    Philip Cardiff, UCD
+    Federico Mazzanti, UCD
 
 SourceFiles
     solidPointDisplacementAlongLine.C
@@ -47,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class solidPointDisplacementAlongLine Declaration
+               Class solidPointDisplacementAlongLine Declaration
 \*---------------------------------------------------------------------------*/
 
 class solidPointDisplacementAlongLine

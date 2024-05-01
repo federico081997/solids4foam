@@ -15,7 +15,7 @@ License
     You should have received a copy of the GNU General Public License
     along with solids4foam.  If not, see <http://www.gnu.org/licenses/>.
 
-\*----------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 #include "solidPointDisplacementAlongLine.H"
 #include "addToRunTimeSelectionTable.H"
@@ -58,7 +58,7 @@ bool Foam::solidPointDisplacementAlongLine::writeData()
         const pointVectorField& pointD =
             mesh.lookupObject<pointVectorField>("pointD");
 
-        //Obtain pointD for all values on the specified line
+        // Obtain pointD for all values on the specified line
         forAll(pointID_, pI)
         {
             const vector pointDValue = pointD[pointID_[pI]];
@@ -90,22 +90,21 @@ void Foam::solidPointDisplacementAlongLine::sortByComp
     const label cmptI
 )
 {
-    for (scalar i = 0; i < pointCoord.size(); i++)
+    for (int i = 0; i < pointCoord.size(); i++)
     {
-        for (scalar k = i + 1; k < pointCoord.size(); k++)
+        for (int k = i + 1; k < pointCoord.size(); k++)
         {
-            // I think there should be no mag here?
             if
             (
                 mag(pointCoord[i].component(cmptI))
               > mag(pointCoord[k].component(cmptI))
             )
             {
-                vector tempCoord(pointCoord[i]);
+                vector tempCoord = pointCoord[i];
                 pointCoord[i] = pointCoord[k];
                 pointCoord[k] = tempCoord;
 
-                label tempID(pointID[i]);
+                label tempID = pointID[i];
                 pointID[i] = pointID[k];
                 pointID[k] = tempID;
             }
@@ -135,7 +134,7 @@ Foam::solidPointDisplacementAlongLine::solidPointDisplacementAlongLine
     {
         notImplemented
         (
-            "This function object is currently only implemented for serial runs"
+            "This function object is only implemented for serial runs"
         );
     }
 
@@ -170,7 +169,8 @@ Foam::solidPointDisplacementAlongLine::solidPointDisplacementAlongLine
     }
     const fvMesh& mesh = *meshPtr;
 
-    // Set capacity of point lists to be a fraction of the total number of points
+    // Set capacity of point lists to be a fraction of the total number of
+    // points
     pointID_.setCapacity(0.001*mesh.nPoints());
     pointCoord_.setCapacity(0.001*mesh.nPoints());
 
@@ -181,13 +181,13 @@ Foam::solidPointDisplacementAlongLine::solidPointDisplacementAlongLine
         const scalar minDist(dict.lookupOrDefault<scalar>("minDist", 1e-6));
         Info<< "    minDist: " << minDist << endl;
 
-        //Define vector between points A and B
-        const vector line_vector = pointB - pointA;
+        // Define vector between points A and B
+        const vector lineVector = pointB - pointA;
 
         forAll(mesh.points(), pI)
         {
             //Define vector between point A and mesh point P
-            const vector point_vector = mesh.points()[pI] - pointA;
+            const vector pointVector = mesh.points()[pI] - pointA;
 
             // Create bounding box for the line from A to B
             boundBox bb(pointA, pointB);
@@ -195,20 +195,20 @@ Foam::solidPointDisplacementAlongLine::solidPointDisplacementAlongLine
             // Inflate the box in case it has zero volume
             bb.inflate(0.01);
 
-            //Check whether point is within the region defined by the segment
+            // Check whether point is within the region defined by the segment
             if (bb.contains(mesh.points()[pI]))
             {
                 // Calculate coordinates of projection point on line
-                const vector proj_pt
+                const vector projPoint
                 (
                     (
-                        (point_vector & line_vector)/mag(line_vector)
-                    )*(line_vector/mag(line_vector))
+                        (pointVector & lineVector)/mag(lineVector)
+                    )*(lineVector/mag(lineVector))
                   + pointA
                 );
 
                 // Calculate distance between mesh point and projection point
-                const scalar dist = mag(mesh.points()[pI] - proj_pt);
+                const scalar dist = mag(mesh.points()[pI] - projPoint);
 
                 // Check if mesh point is on the line
                 if (dist < minDist)
@@ -219,36 +219,44 @@ Foam::solidPointDisplacementAlongLine::solidPointDisplacementAlongLine
             }
         }
 
-        //Sort point coordinates by x, y or z-coordinates
-        if (mag(pointCoord_[0].component(vector::Y)) == mag(pointCoord_[1].component(vector::Y)) && mag(pointCoord_[0].component(vector::Z)) ==
-        mag(pointCoord_[1].component(vector::Z)))
+        // Sort point coordinates
+        if 
+        (
+            mag(pointCoord_[0].component(vector::Y)) == 
+            mag(pointCoord_[1].component(vector::Y)) 
+         && mag(pointCoord_[0].component(vector::Z)) ==
+            mag(pointCoord_[1].component(vector::Z))
+        )
         {
-            //Sort point coordinates by x-coordinates
+            // Sort point coordinates by x-coordinates
             sortByComp(pointCoord_, pointID_, vector::X);
-
-            Info<< "SortByCompX called" << pointID_.size() << pointCoord_.size() << endl;
         }
-        else if (mag(pointCoord_[0].component(vector::X)) == mag(pointCoord_[1].component(vector::X)) && mag(pointCoord_[0].component(vector::Z)) ==
-        mag(pointCoord_[1].component(vector::Z)))
+        else if 
+        (   
+            mag(pointCoord_[0].component(vector::X)) == 
+            mag(pointCoord_[1].component(vector::X)) 
+         && mag(pointCoord_[0].component(vector::Z)) ==
+            mag(pointCoord_[1].component(vector::Z))
+        )
         {
-            //Sort point coordinates by y-coordinates
+            // Sort point coordinates by y-coordinates
             sortByComp(pointCoord_, pointID_, vector::Y);
-
-            Info<< "SortByCompY called" << pointID_.size() << pointCoord_.size() << endl;
         }
-        else if (mag(pointCoord_[0].component(vector::X)) == mag(pointCoord_[1].component(vector::X)) && mag(pointCoord_[0].component(vector::Y)) ==
-        mag(pointCoord_[1].component(vector::Y)))
+        else if 
+        (
+            mag(pointCoord_[0].component(vector::X)) == 
+            mag(pointCoord_[1].component(vector::X)) 
+         && mag(pointCoord_[0].component(vector::Y)) ==
+            mag(pointCoord_[1].component(vector::Y))
+        )
         {
-            //Sort point coordinates by z-coordinates
+            // Sort point coordinates by z-coordinates
             sortByComp(pointCoord_, pointID_, vector::Z);
-
-            Info<< "SortByCompZ called" << pointID_.size() << pointCoord_.size() << endl;
         }
         else
         {
-            //Sort point coordinates by x-coordinates
+            // Sort point coordinates by x-coordinates
             sortByComp(pointCoord_, pointID_, vector::X);
-            Info << "SortByCompX since two or three coordinates are different" << endl;
         }
 
         // File update
@@ -278,7 +286,8 @@ Foam::solidPointDisplacementAlongLine::solidPointDisplacementAlongLine
             (
                 new OFstream
                 (
-                    historyDir/"solidPointDisplacementAlongLine_" + name + ".dat"
+                    historyDir/"solidPointDisplacementAlongLine_" + name 
+                    + ".dat"
                 )
             );
 
