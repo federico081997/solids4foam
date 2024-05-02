@@ -90,10 +90,10 @@ class neoHookeanElastic
         //  hydrostatic pressure
         void calculateStress
         (
- 			surfaceSymmTensorField& sigma,
- 			const surfaceTensorField& gradD,
-			const surfaceScalarField& p
-		);
+            surfaceSymmTensorField& sigma,
+            const surfaceTensorField& gradD,
+            const surfaceScalarField& p
+        );
 
         //- Disallow default bitwise assignment
         void operator=(const neoHookeanElastic&);
@@ -129,7 +129,7 @@ public:
 
         //- Return the material tangent field
         tmp<Field<RectangularMatrix<Foam::scalar>>>
-		materialTangentField() const;
+        materialTangentField() const;
 
         //- Return the bulk modulus field
         virtual tmp<volScalarField> bulkModulus() const;
