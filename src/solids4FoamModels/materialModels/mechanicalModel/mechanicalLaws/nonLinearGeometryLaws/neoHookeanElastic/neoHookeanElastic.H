@@ -27,7 +27,7 @@ Description
     where
     K        bulk modulus
     J        Jacobian of the deformation gradient
-    I        indentity tensor
+    I        identity tensor
     mu       shear modulus
     B        left Cauchy–Green deformation tensor = F & F.T()
     F        deformation gradient
@@ -63,7 +63,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class linearElastic Declaration
+                      Class neoHookeanElastic Declaration
 \*---------------------------------------------------------------------------*/
 
 class neoHookeanElastic
@@ -77,17 +77,22 @@ class neoHookeanElastic
 
         // Bulk modulus
         dimensionedScalar K_;
+        
+        //- Flag to solve Laplacian pressure equation
+        const Switch solvePressureEquation_;
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
         neoHookeanElastic(const neoHookeanElastic&);
 
-        //- Calculate stress
+        //- Calculate the stress given the displacement gradient and the
+        //  hydrostatic pressure
         void calculateStress
         (
  			surfaceSymmTensorField& sigma,
- 			const surfaceTensorField& gradD
+ 			const surfaceTensorField& gradD,
+			const surfaceScalarField& p
 		);
 
         //- Disallow default bitwise assignment
@@ -97,8 +102,6 @@ public:
 
     //- Runtime type information
     TypeName("neoHookeanElastic");
-
-    // Static data members
 
 
     // Constructors
@@ -124,17 +127,17 @@ public:
         //  This is the diffusivity for the Laplacian term
         virtual tmp<volScalarField> impK() const;
 
-        //- Return material tangent
-        Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
+        //- Return the material tangent field
+        tmp<Field<RectangularMatrix<Foam::scalar>>>
 		materialTangentField() const;
 
         //- Return the bulk modulus field
         virtual tmp<volScalarField> bulkModulus() const;
 
-        //- Calculate the stress
+        //- Calculate the volField stress
         virtual void correct(volSymmTensorField& sigma);
 
-        //- Calculate the stress
+        //- Calculate the surfaceField stress
         virtual void correct(surfaceSymmTensorField& sigma);
 
         //- Set restart: some mechanical laws may change the writeOpt of fields

@@ -35,24 +35,33 @@ namespace Foam
 
 void Foam::neoHookeanElastic::calculateStress
 (
- surfaceSymmTensorField& sigma,
- const surfaceTensorField& gradD
+	 surfaceSymmTensorField& sigma,
+	 const surfaceTensorField& gradD,
+     const surfaceScalarField& p
 )
 {
 	//Calculate F
 	Ff() = I + gradD.T();
 
     // Calculate the Jacobian of the deformation gradient
-    const surfaceScalarField J(det(Ff()));
+    const surfaceScalarField J = det(Ff());
 
     // Calculate left Cauchy Green strain tensor with volumetric term removed
-    const surfaceSymmTensorField bEbar(pow(J, -2.0/3.0)*symm(Ff() & Ff().T()));
+    const surfaceSymmTensorField bEbar = 
+        pow(J, -2.0/3.0)*symm(Ff() & Ff().T());
 
     // Calculate deviatoric stress
-    const surfaceSymmTensorField s(mu_*dev(bEbar));
-
+    const surfaceSymmTensorField s = mu_*dev(bEbar);
+    
     // Calculate the Cauchy stress
-    sigma = (1.0/J)*(0.5*K_*(pow(J, 2) - 1)*I + s);
+    if (solvePressureEquation_)
+    {
+        sigma = (1.0/J)*s - p*I;
+    }
+	else
+	{
+    	sigma = (1.0/J)*(0.5*K_*(pow(J, 2) - 1)*I + s);
+	}
 }
 
 
@@ -69,7 +78,15 @@ Foam::neoHookeanElastic::neoHookeanElastic
 :
     mechanicalLaw(name, mesh, dict, nonLinGeom),
     mu_("mu", dimPressure, 0.0),
-    K_("K", dimPressure, 0.0)
+    K_("K", dimPressure, 0.0),
+    solvePressureEquation_
+    (
+        dict.lookupOrDefault<Switch>
+        (
+            "solvePressureEquation",
+            false
+        )
+    )
 {
     // Read mechanical properties
     if
@@ -147,20 +164,20 @@ Foam::tmp<Foam::volScalarField> Foam::neoHookeanElastic::bulkModulus() const
 {
     return tmp<volScalarField>
     (
-     new volScalarField
-     (
-      IOobject
-      (
-       "impK",
-       mesh().time().timeName(),
-       mesh(),
-       IOobject::NO_READ,
-       IOobject::NO_WRITE
-       ),
-      mesh(),
-      K_
-      )
-     );
+        new volScalarField
+        (
+            IOobject
+            (
+                "impK",
+                mesh().time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh(),
+            K_
+        )
+    );
 }
 
 Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
@@ -169,7 +186,11 @@ Foam::neoHookeanElastic::materialTangentField() const
     // Prepare tmp field
     tmp<Field<Foam::RectangularMatrix<Foam::scalar>>> tresult
     (
-        new Field<Foam::RectangularMatrix<Foam::scalar>>(mesh().nFaces(), Foam::RectangularMatrix<scalar>(6,9,0))
+        new Field<Foam::RectangularMatrix<Foam::scalar>>
+        (
+            mesh().nFaces(), 
+            Foam::RectangularMatrix<scalar>(6,9,0)
+        )
     );
 #ifdef OPENFOAM_NOT_EXTEND
     Field<Foam::RectangularMatrix<Foam::scalar>>& result = tresult.ref();
@@ -181,36 +202,76 @@ Foam::neoHookeanElastic::materialTangentField() const
     const Switch numericalTangent(dict().lookup("numericalTangent"));
     if (numericalTangent)
     {
-        // Lookup current stress and store it as the reference
+        // Take a reference to the current stress
         const surfaceSymmTensorField& sigmaRef =
             mesh().lookupObject<surfaceSymmTensorField>("sigmaf");
-        // Lookup gradient of displacement
+        
+        // Take a reference to the current displacement gradient
         const surfaceTensorField& gradDRef =
             mesh().lookupObject<surfaceTensorField>("grad(D)f");
 
+        // Prepare the pressure field
+        tmp<surfaceScalarField> pRef
+        (
+            surfaceScalarField
+            (
+                IOobject
+                (
+                    "pRef",
+                    mesh().time().timeName(),
+                    sigmaRef.mesh(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                sigmaRef.mesh(),
+                dimensionedScalar("zero", dimPressure, 0)
+            )
+        );
+
+        // Take a reference to the current pressure field
+        if (solvePressureEquation_)
+        {
+            pRef = mesh().lookupObject<surfaceScalarField>("pf");
+        }
+               
         // Create fields to be used for perturbations
-        surfaceSymmTensorField sigmaPerturb("sigmaPerturb", sigmaRef);
-        surfaceTensorField gradDPerturb("gradDPerturb", gradDRef);
+        surfaceSymmTensorField sigmaPerturb
+        (
+            "sigmaPerturb",
+            sigmaRef
+        );
+        surfaceTensorField gradDPerturb
+        (
+            "gradDPerturb",
+            gradDRef
+        );
 
         // Small number used for perturbations
-        const scalar eps(readScalar(dict().lookup("tangentEps")));
+        const scalar eps = readScalar(dict().lookup("tangentEps"));
 
-        // For each component of gradD, sequentially apply a perturbation and
-        // then calculate the resulting sigma
+        // For each component of gradDRef, sequentially apply a perturbation 
+        // and then calculate the resulting sigma
         for (label cmptI = 0; cmptI < tensor::nComponents; cmptI++)
         {
 			// Reset gradDPerturb and multiply by 1.0 to avoid it being removed
 			// from the object registry
 			gradDPerturb = 1.0*gradDRef;
 
-            // Perturb this component of gradD and calculate FPerturb
+            // Perturb this component of gradDRef
             gradDPerturb.replace(cmptI, gradDRef.component(cmptI) + eps);
 
             // Calculate perturbed stress
-            const_cast<neoHookeanElastic&>(*this).calculateStress(sigmaPerturb, gradDPerturb);
+            const_cast<neoHookeanElastic&>(*this).calculateStress
+            (
+                sigmaPerturb, 
+                gradDPerturb, 
+                pRef
+            );
 
             // Calculate tangent component
-            const surfaceSymmTensorField tangCmpt((sigmaPerturb - sigmaRef)/eps);
+            const surfaceSymmTensorField tangCmpt = 
+                (sigmaPerturb - sigmaRef)/eps;
+
             const symmTensorField& tangCmptI = tangCmpt.internalField();
 
             // Insert tangent component
@@ -396,9 +457,7 @@ Foam::neoHookeanElastic::materialTangentField() const
     }
     else // Analytical tangent
     {
-
         notImplemented("Analytical tangent not implemented");
-
     }
 
     return tresult;
@@ -415,14 +474,33 @@ void Foam::neoHookeanElastic::correct(volSymmTensorField& sigma)
         return;
     }
 
+    // Prepare the pressure field
+    tmp<volScalarField> p
+    (
+        volScalarField
+        (
+            IOobject
+            (
+                "pTmp",
+                mesh().time().timeName(),
+                sigma.mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            sigma.mesh(),
+            dimensionedScalar("zero", dimPressure, 0)
+        )
+    );
+
     // Calculate the Jacobian of the deformation gradient
-    const volScalarField J(det(F()));
+    const volScalarField J = det(F()) ;
 
     // Calculate the volume preserving left Cauchy Green strain
-    const volSymmTensorField bEbar(pow(J, -2.0/3.0)*symm(F() & F().T()));
+    const volSymmTensorField bEbar = 
+        pow(J, -2.0/3.0)*symm(F() & F().T());
 
     // Calculate the deviatoric stress
-    const volSymmTensorField s(mu_*dev(bEbar));
+    const volSymmTensorField s = mu_*dev(bEbar);
 
     // Update the hydrostatic stress
     updateSigmaHyd
@@ -431,8 +509,16 @@ void Foam::neoHookeanElastic::correct(volSymmTensorField& sigma)
         (4.0/3.0)*mu_ + K_
     );
 
-    // Calculate the Cauchy stress
-    sigma = (1.0/J)*(sigmaHyd()*I + s);
+    // Update the Cauchy stress
+    if (solvePressureEquation_)
+    {
+        p = mesh().lookupObject<volScalarField>("p");
+      	sigma = (1.0/J)*s - p*I;
+    }
+    else
+    {
+    	sigma = (1.0/J)*(sigmaHyd()*I + s);
+	}
 }
 
 
@@ -446,17 +532,43 @@ void Foam::neoHookeanElastic::correct(surfaceSymmTensorField& sigma)
         return;
     }
 
+    // Prepare the pressure field
+    tmp<surfaceScalarField> pf
+    (
+        surfaceScalarField
+        (
+            IOobject
+            (
+                "pfTmp",
+                mesh().time().timeName(),
+                sigma.mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            sigma.mesh(),
+            dimensionedScalar("zero", dimPressure, 0)
+        )
+    );
+
     // Calculate the Jacobian of the deformation gradient
-    const surfaceScalarField J(det(Ff()));
+    const surfaceScalarField J = det(Ff());
 
     // Calculate left Cauchy Green strain tensor with volumetric term removed
-    const surfaceSymmTensorField bEbar(pow(J, -2.0/3.0)*symm(Ff() & Ff().T()));
+    const surfaceSymmTensorField bEbar =
+        pow(J, -2.0/3.0)*symm(Ff() & Ff().T());
 
     // Calculate deviatoric stress
-    const surfaceSymmTensorField s(mu_*dev(bEbar));
+    const surfaceSymmTensorField s = mu_*dev(bEbar);
 
-    // Calculate the Cauchy stress
-    sigma = (1.0/J)*(0.5*K_*(pow(J, 2) - 1)*I + s);
+    if (solvePressureEquation_)
+    {
+        pf = mesh().lookupObject<surfaceScalarField>("pf");
+      	sigma = (1.0/J)*s - pf*I;
+    }
+    else
+    {
+    	sigma = (1.0/J)*(0.5*K_*(pow(J, 2) - 1)*I + s);
+	}
 }
 
 
