@@ -117,7 +117,8 @@ namespace sparseMatrixTools
     //  Exit with a FatalError if it is greater than 0
     void checkErr(const int ierr);
 
-    //- Enforce fixed DOF contributions on the linear system
+    //- Enforce fixed DOF contributions on the linear system where the unknown
+    //  is a scalar
     void enforceFixedDof
     (
         sparseScalarMatrix& matrix,
@@ -129,7 +130,8 @@ namespace sparseMatrixTools
         const bool debug
     );
 
-    //- Enforce fixed DOF contributions on the linear system
+    //- Enforce fixed DOF contributions on the linear system where the unknown 
+    //  is a vector
     void enforceFixedDof
     (
         sparseMatrix& matrix,
@@ -139,24 +141,6 @@ namespace sparseMatrixTools
         const pointField& fixedDofValues,
         const scalar fixedDofScale
     );
-
-    //- Add fixed DOF contributions to the source
-    // void addFixedDofToSource
-    // (
-    //     vectorField& source,
-    //     const boolList& fixedDofs,
-    //     const symmTensorField& fixedDofDirections,
-    //     const scalar fixedDofScale
-    // );
-
-    //- Add fixed DOF contributions to the matrix
-    // void addFixedDofToMatrix
-    // (
-    //     sparseMatrix& matrix,
-    //     const boolList& fixedDofs,
-    //     const symmTensorField& fixedDofDirections,
-    //     const scalar fixedDofScale
-    // );
 
 } // End namespace sparseMatrixTools
 

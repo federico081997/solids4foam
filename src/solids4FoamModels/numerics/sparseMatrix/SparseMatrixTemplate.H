@@ -56,7 +56,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------* \
-                       Class SparseMatrixTemplate Declaration
+                     Class SparseMatrixTemplate Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>

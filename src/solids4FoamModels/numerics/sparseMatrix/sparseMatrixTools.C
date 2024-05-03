@@ -27,7 +27,7 @@ License
     #include <petscksp.h>
 #endif
 
-// * * * * * * * * * * * * * * * * * Functions  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * Functions  * * * * * * * * * * * * * * *//
 
 bool Foam::sparseMatrixTools::checkTwoD(const polyMesh& mesh)
 {
@@ -235,28 +235,67 @@ void Foam::sparseMatrixTools::solveLinearSystemEigen
             const label rowI = 2*iter.key()[0];
             const label colI = 2*iter.key()[1];
 
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI, colI, coeff.xx()));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI, colI+1, coeff.xy()));
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI, colI, coeff.xx())
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI, colI+1, coeff.xy())
+            );
 
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+1, colI, coeff.yx()));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+1, colI+1, coeff.yy()));
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+1, colI, coeff.yx())
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+1, colI+1, coeff.yy())
+            );
         }
         else // 3-D
         {
             const label rowI = 3*iter.key()[0];
             const label colI = 3*iter.key()[1];
 
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI, colI, coeff.xx()));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI, colI+1, coeff.xy()));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI, colI+2, coeff.xz()));
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI, colI, coeff.xx())
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI, colI+1, coeff.xy())
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI, colI+2, coeff.xz())
+            );
 
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+1, colI, coeff.yx()));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+1, colI+1, coeff.yy()));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+1, colI+2, coeff.yz()));
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+1, colI, coeff.yx())
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+1, colI+1, coeff.yy())
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+1, colI+2, coeff.yz())
+            );
 
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+2, colI, coeff.zx()));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+2, colI+1, coeff.zy()));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+2, colI+2, coeff.zz()));
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+2, colI, coeff.zx())
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+2, colI+1, coeff.zy())
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+2, colI+2, coeff.zz())
+            );
         }
     }
 
@@ -427,24 +466,30 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
     optionsFile.expand();
     // static char help[] = "Solves a linear system with KSP.\n\n";
     PetscErrorCode ierr;
-    // ierr = PetscInitialize(&argc, &args, optionsFile.c_str(), help); checkErr(ierr);
+    // ierr = PetscInitialize(&argc, &args, optionsFile.c_str(), help); 
+    // checkErr(ierr);
     if (debug)
     {
         Pout<< "PetscInitialize: start" << endl;
     }
-    ierr = PetscInitialize(NULL, NULL, optionsFile.c_str(), NULL); checkErr(ierr);
+    ierr = PetscInitialize(NULL, NULL, optionsFile.c_str(), NULL); 
+    checkErr(ierr);
     if (debug)
     {
         Pout<< "PetscInitialize: end" << endl;
     }
 
-
     //MPI_Comm_size(PETSC_COMM_WORLD,&size);
 
     //ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size);
     //ierr = PetscOptionsGetInt(NULL,NULL,"-n",&n,NULL);
-    //ierr = PetscOptionsGetBool(NULL,NULL,"-nonzero_guess",&nonzeroguess,NULL);
-
+    //ierr = PetscOptionsGetBool
+    //(
+    //   NULL,
+    //   NULL,
+    //   "-nonzero_guess",
+    //   &nonzeroguess,NULL
+    //);
 
     // Create PETSc matrix
 
@@ -468,10 +513,10 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
     // Pre-allocate matrix memory: this is critical for performance
 
     // Set on-core (d_nnz) and off-core (o_nnz) non-zeros per row
-    // o_nnz is currently not set correctly, as it distinguishes between on-core
-    // and off-core instead of owned (all on-core) vs not-owned (on-core and
-    // off-core). For now, we will just use the max on-core non-zeros to
-    // initialise not-owned values
+    // o_nnz is currently not set correctly, as it distinguishes between 
+    // on-core and off-core instead of owned (all on-core) vs not-owned 
+    // (on-core and off-core). For now, we will just use the max on-core 
+    // non-zeros to initialise not-owned values
 
     int* d_nnz = (int*)malloc(n*sizeof(int));
     int* o_nnz = (int*)malloc(n*sizeof(int));
@@ -504,28 +549,26 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
 
     // Parallel matrix
     ierr = MatMPIAIJSetPreallocation(A, 0, d_nnz, 0, o_nnz); checkErr(ierr);
-    //ierr = MatMPIAIJSetPreallocation(A, 0, d_nnz, d_nz, NULL); checkErr(ierr);
+    //ierr = MatMPIAIJSetPreallocation(A, 0, d_nnz, d_nz, NULL); 
+    //checkErr(ierr);
     // or conservatively as
     // ierr = MatMPIAIJSetPreallocation(A, d_nz, NULL, o_nz, NULL);
-    // ierr = MatMPIAIJSetPreallocation(A, d_nz, NULL, d_nz, NULL); checkErr(ierr);
+    // ierr = MatMPIAIJSetPreallocation(A, d_nz, NULL, d_nz, NULL); 
+    // checkErr(ierr);
     // const label nz = 81; // way too much in 2-D!
     // ierr = MatMPIAIJSetPreallocation(A, nz, NULL, nz, NULL);
 
     // Optional: no error if additional memory allocation is required
     // If false, then an error is thrown for additional allocations
-    // If preallocation was correct (or conservative) then an error should never
-    // be thrown
+    // If preallocation was correct (or conservative) then an error should 
+    // never be thrown
     // For now, we will disable this check in debug mode so we can see how many
     // mallocs were made
     // TO BE FIXED: some mallocs are still needed in parallel!
-    //if (debug)
-    {
-        MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-    }
+    MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 
     // Not sure if this set is needed but it does not hurt
     ierr = MatSetUp(A); checkErr(ierr);
-
 
     // Insert coefficients into the matrix
     // Note: we use global indices when inserting coefficients
@@ -714,14 +757,13 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
     {
         Pout<< "        Creating the linear solver" << endl;
     }
-    KSP            ksp;          /* linear solver context */
+    KSP            ksp;          // Linear solver context 
     ierr = KSPCreate(PETSC_COMM_WORLD, &ksp); checkErr(ierr);
 
 
     // Set operators. Here the matrix that defines the linear system
     // also serves as the preconditioning matrix.
     ierr = KSPSetOperators(ksp, A, A); checkErr(ierr);
-
 
     // Set linear solver defaults for this problem
     // This are overwritten by the options file
@@ -733,7 +775,15 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
     //   KSPSetFromOptions();
     // ierr = KSPGetPC(ksp,&pc);CHKERRQ(ierr);
     // ierr = PCSetType(pc,PCJACOBI);CHKERRQ(ierr);
-    // ierr = KSPSetTolerances(ksp,1.e-5,PETSC_DEFAULT,PETSC_DEFAULT,PETSC_DEFAULT);CHKERRQ(ierr);
+    // ierr = KSPSetTolerances
+    // (
+    //    ksp,
+    //    1.e-5,
+    //    PETSC_DEFAULT,
+    //    PETSC_DEFAULT,
+    //    PETSC_DEFAULT
+    // );
+    // CHKERRQ(ierr);
     if (debug)
     {
         Pout<< "        Creating the preconditioner solver" << endl;
@@ -765,7 +815,6 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
     //     ierr = VecSet(x,p);
     //     ierr = KSPSetInitialGuessNonzero(ksp,PETSC_TRUE);
     // }
-
 
     // Pass the point coordinates to PETSc to allow multigrid
     if (debug)
@@ -818,7 +867,6 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
     {
         Pout<< "        Solving the linear solver: end" << endl;
     }
-
 
     // Copy the results from the PETSc vector into the foam field
 
@@ -900,9 +948,23 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
         VecScatter ctx;
         ierr = VecScatterCreate(x, indexSet, xNotOwned, NULL, &ctx);
         checkErr(ierr);
-        ierr = VecScatterBegin(ctx, x, xNotOwned, INSERT_VALUES, SCATTER_FORWARD);
+        ierr = VecScatterBegin
+        (
+            ctx, 
+            x, 
+            xNotOwned, 
+            INSERT_VALUES, 
+            SCATTER_FORWARD
+        );
         checkErr(ierr);
-        ierr = VecScatterEnd(ctx, x, xNotOwned, INSERT_VALUES, SCATTER_FORWARD);
+        ierr = VecScatterEnd
+        (
+            ctx, 
+            x, 
+            xNotOwned, 
+            INSERT_VALUES, 
+            SCATTER_FORWARD
+        );
         checkErr(ierr);
         ierr = VecScatterDestroy(&ctx); checkErr(ierr);
 
@@ -938,32 +1000,45 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
         ierr = KSPView(ksp,PETSC_VIEWER_STDOUT_WORLD); checkErr(ierr);
     }
 
-
     // ierr = VecAXPY(x,neg_one,u);CHKERRQ(ierr);
     // ierr = VecNorm(x,NORM_2,&norm);CHKERRQ(ierr);
     // ierr = KSPGetIterationNumber(ksp,&its);CHKERRQ(ierr);
-    // ierr = PetscPrintf(PETSC_COMM_WORLD,"Norm of error %g, Iterations %D\n",(double)norm,its);CHKERRQ(ierr);
+    // ierr = PetscPrintf
+    // (
+    //     PETSC_COMM_WORLD,
+    //     "Norm of error %g,
+    //     Iterations %D\n",
+    //     (double)norm,its
+    // );
+    // CHKERRQ(ierr);
     //ierr = VecAXPY(x,neg_one,u);
     PetscInt       its;
     PetscReal      norm;         /* norm of solution error */
     ierr = VecNorm(x, NORM_2, &norm); checkErr(ierr);
     ierr = KSPGetIterationNumber(ksp, &its); checkErr(ierr);
-    //ierr = PetscPrintf(PETSC_COMM_WORLD,"Norm of error %g, Iterations %D\n",(double)norm,its);
+    //ierr = PetscPrintf
+    //(
+    //    PETSC_COMM_WORLD,
+    //    "Norm of error %g, 
+    //    Iterations %D\n",
+    //    (double)norm,
+    //    its
+    //);
     // Pout<< "    Error norm: " << norm << ", nIters = " << its << endl;
-
 
     // Free work space.  All PETSc objects should be destroyed when they
     // are no longer needed.
     // Pout<< "        Freeing memory" << endl;
-    // ierr = VecDestroy(&x);CHKERRQ(ierr); ierr = VecDestroy(&u);CHKERRQ(ierr);
-    // ierr = VecDestroy(&b);CHKERRQ(ierr); ierr = MatDestroy(&A);CHKERRQ(ierr);
+    // ierr = VecDestroy(&x);CHKERRQ(ierr); 
+    // ierr = VecDestroy(&u);CHKERRQ(ierr);
+    // ierr = VecDestroy(&b);CHKERRQ(ierr); 
+    // ierr = MatDestroy(&A);CHKERRQ(ierr);
     // ierr = KSPDestroy(&ksp);CHKERRQ(ierr);
     ierr = VecDestroy(&x); checkErr(ierr);
     //ierr = VecDestroy(&u);
     ierr = VecDestroy(&b); checkErr(ierr);
     ierr = MatDestroy(&A); checkErr(ierr);
     ierr = KSPDestroy(&ksp); checkErr(ierr);
-
 
     // I should not call this here otherwise I cannot call this function again
     // Always call PetscFinalize() before exiting a program.  This routine
@@ -1093,7 +1168,6 @@ void Foam::sparseMatrixTools::enforceFixedDof
     const bool debug
 )
 {
-
     // Loop though the matrix and overwrite the coefficients for fixed DOFs
     // To enforce the value we will set the diagonal to the identity and set
     // the source to zero. The reason the source is zero is that we are solving
@@ -1141,7 +1215,11 @@ void Foam::sparseMatrixTools::enforceFixedDof
                 Info<< "    coeff after: " << coeff << nl << endl;
             }
         }
-        else if (fixedDofs[blockColI] && mag(fixedDofDirections[blockRowI]) > 0)
+        else if 
+        (
+            fixedDofs[blockColI] 
+         && mag(fixedDofDirections[blockRowI]) > 0
+        )
         {
             // This equation refers to a fixed DOF
             // We will eliminate the coeff
@@ -1224,7 +1302,8 @@ void Foam::sparseMatrixTools::enforceFixedDof
                 // Fixed direction
                 const tensor& fixedDir = fixedDofDirections[blockRowI];
 
-                // Set the fixed direction diagonal to enforce a zero correction
+                // Set the fixed direction diagonal to enforce a zero 
+                // correction
                 coeff -= tensor(fixedDofScale*fixedDir);
             }
 
@@ -1262,70 +1341,5 @@ void Foam::sparseMatrixTools::enforceFixedDof
     }
 }
 
-
-// void Foam::sparseMatrixTools::addFixedDofToSource
-// (
-//     vectorField& source,
-//     const boolList& fixedDofs,
-//     const symmTensorField& fixedDofDirections,
-//     const scalar fixedDofScale
-// )
-// {
-//     forAll(fixedDofs, pointI)
-//     {
-//         // For now, we will only allow the full vector to be set
-//         // To-do: allow fixed components
-//         if (fixedDofs[pointI])
-//         {
-//             // Set the source to zero as the correction to the displacement
-//             // is zero
-//             source[pointI] = ((I - fixedDofDirections[pointI]) & source[pointI]);
-//         }
-//     }
-// }
-
-
-// void Foam::sparseMatrixTools::addFixedDofToMatrix
-// (
-//     sparseMatrix& matrix,
-//     const boolList& fixedDofs,
-//     const symmTensorField& fixedDofDirections,
-//     const scalar fixedDofScale
-// )
-// {
-//     // Loop though the matrix and overwrite the coefficients for fixed DOFs
-//     // To enforce the value we will set the diagonal to the identity
-//     // The preconditioner will be able to improve the conditioning for
-//     // iterative solvers
-//     sparseMatrixData& data = matrix.data();
-
-//     for (auto iter = data.begin(); iter != data.end(); ++iter)
-//     {
-//         const label blockRowI = iter.key()[0];
-
-//         if (fixedDofs[blockRowI])
-//         {
-//             const label blockColI = iter.key()[1];
-//             tensor& coeff = iter();
-
-//             if (blockRowI == blockColI)
-//             {
-//                 // Set the block diagonal to the identity matrix with scaling
-//                 // coeff = -fixedDofScale*tensor(I);
-//                 // Eliminate the fixed directions
-//                 coeff = ((I - fixedDofDirections[blockRowI]) & coeff);
-//                 // Set the fixed directions with scaling
-//                 coeff = coeff - fixedDofScale*fixedDofDirections[blockRowI];
-//             }
-//             else
-//             {
-//                 // Eliminate the off-diagonals
-//                 // coeff = tensor::zero;
-//                 // Eliminate the fixed directions
-//                 coeff = ((I - fixedDofDirections[blockRowI]) & coeff);
-//             }
-//         }
-//     }
-// }
 
 // ************************************************************************* //

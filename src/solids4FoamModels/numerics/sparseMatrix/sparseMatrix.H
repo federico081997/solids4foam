@@ -23,9 +23,6 @@ Description
     Values are stored using a HashTable where the Hash is based on the
     (rowI, columns) key.
 
-    For now, it is assumed that every value is a tensor, but the intention is to
-    template this.
-
     Used in coupled solid mechanics solvers in solids4foam.
 
     Example usage:
@@ -62,7 +59,7 @@ namespace Foam
     > sparseMatrixData;
 
 /*---------------------------------------------------------------------------*\
-                       Class sparseMatrix Declaration
+                         Class sparseMatrix Declaration
 \*---------------------------------------------------------------------------*/
 
 class sparseMatrix
