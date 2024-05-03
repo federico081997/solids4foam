@@ -27,7 +27,6 @@ namespace Foam
 
 tmp<pointSymmTensorField> symm(const pointTensorField& ptr)
 {
-
 	const pointMesh& pMesh =  ptr.mesh();
 
 	// Prepare the temporary field
@@ -54,14 +53,13 @@ tmp<pointSymmTensorField> symm(const pointTensorField& ptr)
 	pointSymmTensorField& result = tresult();
 #endif
 
-	//Set the result field to be symm(ptr)
+	// Set the result field to be symm(ptr)
 #ifdef OPENFOAM_NOT_EXTEND
     result.primitiveFieldRef() = symm(ptr.primitiveField());
 #else
     result.internalField() = symm(ptr.internalField());
 #endif
 
-	//Call the correctBoundaryConditions function
 	result.correctBoundaryConditions();
 
 	return tresult;
@@ -69,7 +67,6 @@ tmp<pointSymmTensorField> symm(const pointTensorField& ptr)
 
 tmp<pointSymmTensorField> dev(const pointSymmTensorField& ptr)
 {
-
 	const pointMesh& pMesh =  ptr.mesh();
 
 	// Prepare the temporary field
@@ -96,14 +93,13 @@ tmp<pointSymmTensorField> dev(const pointSymmTensorField& ptr)
 	pointSymmTensorField& result = tresult();
 #endif
 
-	//Set the result field to be symm(ptr)
+	// Set the result field to be dev(ptr)
 #ifdef OPENFOAM_NOT_EXTEND
     result.primitiveFieldRef() = dev(ptr.primitiveField());
 #else
     pointD.internalField() = dev(ptr.internalField());
 #endif
 
-	//Call the correctBoundaryConditions function
 	result.correctBoundaryConditions();
 
 	return tresult;
@@ -111,7 +107,6 @@ tmp<pointSymmTensorField> dev(const pointSymmTensorField& ptr)
 
 tmp<pointScalarField> tr(const pointSymmTensorField& ptr)
 {
-
 	const pointMesh& pMesh =  ptr.mesh();
 
 	// Prepare the temporary field
@@ -138,14 +133,13 @@ tmp<pointScalarField> tr(const pointSymmTensorField& ptr)
 	pointScalarField& result = tresult();
 #endif
 
-	//Set the result field to be symm(ptr)
+	// Set the result field to be tr(ptr)
 #ifdef OPENFOAM_NOT_EXTEND
     result.primitiveFieldRef() = tr(ptr.primitiveField());
 #else
     pointD.internalField() = tr(ptr.internalField());
 #endif
 
-	//Call the correctBoundaryConditions function
 	result.correctBoundaryConditions();
 
 	return tresult;
@@ -153,7 +147,6 @@ tmp<pointScalarField> tr(const pointSymmTensorField& ptr)
 
 tmp<pointTensorField> cof(const pointTensorField& ptr)
 {
-
 	const pointMesh& pMesh =  ptr.mesh();
 
 	// Prepare the temporary field
@@ -180,14 +173,13 @@ tmp<pointTensorField> cof(const pointTensorField& ptr)
 	pointTensorField& result = tresult();
 #endif
 
-	//Set the result field to be cof(ptr)
+	// Set the result field to be cof(ptr)
 #ifdef OPENFOAM_NOT_EXTEND
     result.primitiveFieldRef() = cof(ptr.primitiveField());
 #else
     pointD.internalField() = cof(ptr.internalField());
 #endif
 
-	//Call the correctBoundaryConditions function
 	result.correctBoundaryConditions();
 
 	return tresult;
@@ -195,7 +187,6 @@ tmp<pointTensorField> cof(const pointTensorField& ptr)
 
 tmp<pointScalarField> sqr(const pointScalarField& ptr)
 {
-
 	const pointMesh& pMesh =  ptr.mesh();
 
 	// Prepare the temporary field
@@ -222,22 +213,24 @@ tmp<pointScalarField> sqr(const pointScalarField& ptr)
 	pointScalarField& result = tresult();
 #endif
 
-	//Set the result field to be symm(ptr)
+	// Set the result field to be sqr(ptr)
 #ifdef OPENFOAM_NOT_EXTEND
     result.primitiveFieldRef() = sqr(ptr.primitiveField());
 #else
     pointD.internalField() = sqr(ptr.internalField());
 #endif
 
-	//Call the correctBoundaryConditions function
 	result.correctBoundaryConditions();
 
 	return tresult;
 }
 
-tmp<pointScalarField> pow(const pointScalarField& ptr, const scalar& power)
+tmp<pointScalarField> pow
+(
+    const pointScalarField& ptr, 
+    const scalar& power
+)
 {
-
 	const pointMesh& pMesh =  ptr.mesh();
 
 	// Prepare the temporary field
@@ -264,14 +257,13 @@ tmp<pointScalarField> pow(const pointScalarField& ptr, const scalar& power)
 	pointScalarField& result = tresult();
 #endif
 
-	//Set the result field to be symm(ptr)
+	// Set the result field to be pow(ptr, power)
 #ifdef OPENFOAM_NOT_EXTEND
     result.primitiveFieldRef() = pow(ptr.primitiveField(), power);
 #else
     pointD.internalField() = pow(ptr.internalField(), power);
 #endif
 
-	//Call the correctBoundaryConditions function
 	result.correctBoundaryConditions();
 
 	return tresult;

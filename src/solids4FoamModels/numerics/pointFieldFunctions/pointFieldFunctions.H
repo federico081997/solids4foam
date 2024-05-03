@@ -21,10 +21,6 @@ Function
 Description
     Functions for point fields
 
-    The reason for this function is because the delta patch function returns the
-    true delta vector in foam-extend, but it returns the normal vector in
-    OpenFOAM.com and OpenFOAM.org.
-
 SourceFile
     pointFieldFunctions.C
 
@@ -61,7 +57,11 @@ namespace Foam
     tmp<pointScalarField> sqr(const pointScalarField& ptr);
     
     // Return the power of a pointScalarField
-    tmp<pointScalarField> pow(const pointScalarField& ptr, const scalar& power);
+    tmp<pointScalarField> pow
+    (
+        const pointScalarField& ptr, 
+        const scalar& power
+    );
 
 
 } // End namespace Foam
