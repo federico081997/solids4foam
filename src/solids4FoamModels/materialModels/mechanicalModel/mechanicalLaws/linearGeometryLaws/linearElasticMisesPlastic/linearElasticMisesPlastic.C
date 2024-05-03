@@ -353,7 +353,7 @@ void Foam::linearElasticMisesPlastic::calculateStress
     }
 
     // Update DEpsilonP
-    const surfaceSymmTensorField DEpsilonP = DLambda*plasticN;
+    const surfaceSymmTensorField DEpsilonP(DLambda*plasticN);
 
     // Calculate deviatoric stress
     const surfaceSymmTensorField s(sTrial - 2*mu_*DEpsilonP);
@@ -984,7 +984,7 @@ void Foam::linearElasticMisesPlastic::calculatePStress
     }
     
     // Update DEpsilonP
-    const pointSymmTensorField DEpsilonP = DLambda*plasticN;
+    const pointSymmTensorField DEpsilonP(DLambda*plasticN);
 
     // Calculate deviatoric stress
     const pointSymmTensorField s(sTrial - 2*mu_*DEpsilonP);
@@ -1049,7 +1049,7 @@ Foam::linearElasticMisesPlastic::materialTangentField() const
     );
 
     // Return direction
-    const surfaceSymmTensorField plasticN = sTrial/magSTrial;
+    const surfaceSymmTensorField plasticN(sTrial/magSTrial);
 
     // Calculate tangent field
     const Switch numericalTangent(dict().lookup("numericalTangent"));
@@ -1621,7 +1621,7 @@ void Foam::linearElasticMisesPlastic::correct(surfaceSymmTensorField& sigma)
         updateSigmaHyd(K_*tr(epsilon()), (4.0/3.0)*mu_ + K_);
 
         // Interpolate to faces
-        const surfaceScalarField sigmaHydf = fvc::interpolate(sigmaHyd());
+        const surfaceScalarField sigmaHydf(fvc::interpolate(sigmaHyd()));
 
         // Update the stress
         sigma = sigmaHydf*I + s;
