@@ -873,7 +873,7 @@ tmp<volScalarField> interpolate
             (
                 "zero", pointP.dimensions(), 0
             ),
-            "calculated"
+            "zeroGradient"
         )
     );
 #ifdef OPENFOAM_NOT_EXTEND
@@ -985,22 +985,22 @@ tmp<surfaceScalarField> interpolate
             // Primary mesh cell in which dualFaceI resides
             const label cellID = dualFaceToCell[dualFaceI];
 
-            // Dual cell owner of dualFaceI
-            const label dualOwnCellID = dualOwn[dualFaceI];
+    //        // Dual cell owner of dualFaceI
+            //const label dualOwnCellID = dualOwn[dualFaceI];
 
-            // Dual cell neighbour of dualFaceI
-            const label dualNeiCellID = dualNei[dualFaceI];
+            //// Dual cell neighbour of dualFaceI
+            //const label dualNeiCellID = dualNei[dualFaceI];
 
-            // Primary mesh point at the centre of dualOwnCellID
-            const label ownPointID = dualCellToPoint[dualOwnCellID];
+            //// Primary mesh point at the centre of dualOwnCellID
+            //const label ownPointID = dualCellToPoint[dualOwnCellID];
 
-            // Primary mesh point at the centre of dualNeiCellID
-            const label neiPointID = dualCellToPoint[dualNeiCellID];
+            //// Primary mesh point at the centre of dualNeiCellID
+            //const label neiPointID = dualCellToPoint[dualNeiCellID];
 
-            // Unit edge vector from the own point to the nei point
-            vector edgeDir = points[neiPointID] - points[ownPointID];
-            const scalar edgeLength = mag(edgeDir);
-            edgeDir /= edgeLength;
+            //// Unit edge vector from the own point to the nei point
+            //vector edgeDir = points[neiPointID] - points[ownPointID];
+            //const scalar edgeLength = mag(edgeDir);
+            //edgeDir /= edgeLength;
 
             // Calculate the gradient component in the edge direction using
             // central-differencing and use the primary mesh cell value for the
@@ -1021,21 +1021,17 @@ tmp<surfaceScalarField> interpolate
 
                 // Primary mesh cell in which dualFaceI resides
                 const label cellID = dualFaceToCell[dualFaceI];
-
-				if (cellID > -1)
-				{
-
-		            // Use the gradient in the adjacent primary cell-centre
-		            // This will result in inconsistent values at processor patches
-		            // Is this an issue?
+		            
+				// Use the gradient in the adjacent primary cell-centre    
+				// This will result in inconsistent values at processor patches
+				// Is this an issue?
 #ifdef OPENFOAM_NOT_EXTEND
-		            result.boundaryFieldRef()[dualPatchID][localDualFaceID] =
-		                volPI[cellID];
+				result.boundaryFieldRef()[dualPatchID][localDualFaceID] =
+					volPI[cellID];
 #else
-		            result.boundaryField()[dualPatchID][localDualFaceID] =
-		                volPI[cellID];
+				result.boundaryField()[dualPatchID][localDualFaceID] =
+					volPI[cellID];
 #endif
-				}
             }
         }
     }
