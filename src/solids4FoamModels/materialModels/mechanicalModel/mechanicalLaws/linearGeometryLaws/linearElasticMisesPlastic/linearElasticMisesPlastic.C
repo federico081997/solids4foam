@@ -240,18 +240,22 @@ void Foam::linearElasticMisesPlastic::calculateStress
 ) const
 {
     // Calculate strain
-    const surfaceSymmTensorField epsilon = symm(gradD);
+    const surfaceSymmTensorField epsilon(symm(gradD));
 
     // Calculate deviatoric strain
-    const surfaceSymmTensorField e = dev(epsilon);
+    const surfaceSymmTensorField e(dev(epsilon));
 
     // Calculate deviatoric trial stress
-    const surfaceSymmTensorField sTrial = 
-        2.0*mu_*(e - dev(epsilonPf_.oldTime()));
+    const surfaceSymmTensorField sTrial
+    ( 
+        2.0*mu_*(e - dev(epsilonPf_.oldTime()))
+    );
 
     // Calculate the yield function
-    const surfaceScalarField fTrial = 
-        mag(sTrial) - sqrtTwoOverThree_*sigmaYf_;
+    const surfaceScalarField fTrial
+    ( 
+        mag(sTrial) - sqrtTwoOverThree_*sigmaYf_
+    );
 
     // Make a copy of history fields that are updated
     surfaceSymmTensorField plasticN("plasticNtmp", 1.0*plasticNf_);
@@ -352,7 +356,7 @@ void Foam::linearElasticMisesPlastic::calculateStress
     const surfaceSymmTensorField DEpsilonP = DLambda*plasticN;
 
     // Calculate deviatoric stress
-    const surfaceSymmTensorField s = sTrial - 2*mu_*DEpsilonP;
+    const surfaceSymmTensorField s(sTrial - 2*mu_*DEpsilonP);
 
     // Calculate the Cauchy stress
     if (solveVertexCentredPressureEqn())
@@ -805,10 +809,10 @@ Foam::linearElasticMisesPlastic::impK() const
     // This is similar to the tangent matrix in FE procedures
 
     // Calculate deviatoric strain
-    const volSymmTensorField e = dev(epsilon());
+    const volSymmTensorField e(dev(epsilon()));
 
     // Calculate deviatoric trial stress
-    const volSymmTensorField sTrial = 2.0*mu_*(e - dev(epsilonP_.oldTime()));
+    const volSymmTensorField sTrial(2.0*mu_*(e - dev(epsilonP_.oldTime())));
 
     // Magnitude of the deviatoric trial stress
     const volScalarField magSTrial
@@ -817,7 +821,7 @@ Foam::linearElasticMisesPlastic::impK() const
     );
 
     // Calculate scaling factor
-    const volScalarField scaleFactor = 1.0 - (2.0*mu_*DLambda_/magSTrial);
+    const volScalarField scaleFactor(1.0 - (2.0*mu_*DLambda_/magSTrial));
 
     return tmp<volScalarField>
     (
@@ -845,10 +849,10 @@ Foam::linearElasticMisesPlastic::impKdiagTensor() const
     // This is similar to the tangent matrix in FE procedures
 
     // Calculate deviatoric strain
-    const volSymmTensorField e = dev(epsilon());
+    const volSymmTensorField e(dev(epsilon()));
 
     // Calculate deviatoric trial stress
-    const volSymmTensorField sTrial = 2.0*mu_*(e - dev(epsilonP_.oldTime()));
+    const volSymmTensorField sTrial(2.0*mu_*(e - dev(epsilonP_.oldTime())));
 
     // Magnitude of the deviatoric trial stress
     const volScalarField magSTrial
@@ -857,10 +861,10 @@ Foam::linearElasticMisesPlastic::impKdiagTensor() const
     );
 
     // Calculate scaling factor
-    const volScalarField theta = 1.0 - (2.0*mu_*DLambda_/magSTrial);
+    const volScalarField theta(1.0 - (2.0*mu_*DLambda_/magSTrial));
 
     // Calculate N squared where N is the plastic return direction
-    const volTensorField NsquaredTensor = plasticN_ & plasticN_;
+    const volTensorField NsquaredTensor(plasticN_ & plasticN_);
     volDiagTensorField Nsquared
     (
         IOobject
@@ -926,17 +930,19 @@ void Foam::linearElasticMisesPlastic::calculatePStress
     );
 
     // Calculate strain
-    const pointSymmTensorField pEpsilon = symm(pGradD);
+    const pointSymmTensorField pEpsilon(symm(pGradD));
 
     // Calculate deviatoric strain
-    const pointSymmTensorField e = dev(pEpsilon);
+    const pointSymmTensorField e(dev(pEpsilon));
 
     // Calculate deviatoric trial stress
-    const pointSymmTensorField sTrial =
-        2.0*mu_*(e - dev(pEpsilonP_.oldTime()));
+    const pointSymmTensorField sTrial
+    (
+        2.0*mu_*(e - dev(pEpsilonP_.oldTime()))
+    );
 
     // Calculate the yield function
-    const pointScalarField fTrial = mag(sTrial) - sqrtTwoOverThree_*pSigmaY_;
+    const pointScalarField fTrial(mag(sTrial) - sqrtTwoOverThree_*pSigmaY_);
 
     // Make a copy of history fields that are updated
     pointSymmTensorField plasticN("plasticNtmp", 1.0*pPlasticN_);
@@ -981,7 +987,7 @@ void Foam::linearElasticMisesPlastic::calculatePStress
     const pointSymmTensorField DEpsilonP = DLambda*plasticN;
 
     // Calculate deviatoric stress
-    const pointSymmTensorField s = sTrial - 2*mu_*DEpsilonP;
+    const pointSymmTensorField s(sTrial - 2*mu_*DEpsilonP);
 
     // Update the stress for vertex-centred approach
     if (solveVertexCentredPressureEqn())
@@ -1022,11 +1028,13 @@ Foam::linearElasticMisesPlastic::materialTangentField() const
     const_cast<linearElasticMisesPlastic&>(*this).updateEpsilonf();
 
     // Calculate deviatoric strain
-    const surfaceSymmTensorField e = dev(epsilonf());
+    const surfaceSymmTensorField e(dev(epsilonf()));
 
     // Calculate deviatoric trial stress
-    const surfaceSymmTensorField sTrial = 
-        2.0*mu_*(e - dev(epsilonPf_.oldTime()));
+    const surfaceSymmTensorField sTrial
+    ( 
+        2.0*mu_*(e - dev(epsilonPf_.oldTime()))
+    );
 
     // Magnitude of the deviatoric trial stress
     const surfaceScalarField magSTrial
@@ -1035,8 +1043,10 @@ Foam::linearElasticMisesPlastic::materialTangentField() const
     );
 
     // Calculate the yield function
-    const surfaceScalarField fTrial =
-        mag(sTrial) - sqrtTwoOverThree_*sigmaYf_.oldTime();
+    const surfaceScalarField fTrial
+    (
+        mag(sTrial) - sqrtTwoOverThree_*sigmaYf_.oldTime()
+    );
 
     // Return direction
     const surfaceSymmTensorField plasticN = sTrial/magSTrial;
@@ -1109,8 +1119,11 @@ Foam::linearElasticMisesPlastic::materialTangentField() const
             );
 
             // Calculate tangent component
-            const surfaceSymmTensorField tangCmpt =
-                (sigmaPerturb - sigmaRef)/eps;
+            const surfaceSymmTensorField tangCmpt
+            (
+                (sigmaPerturb - sigmaRef)/eps
+            );
+
             const symmTensorField& tangCmptI = tangCmpt.internalField();
 
             // Insert tangent component
@@ -1325,14 +1338,16 @@ void Foam::linearElasticMisesPlastic::correct(volSymmTensorField& sigma)
     updateEpsilon();
 
     // Calculate deviatoric strain
-    const volSymmTensorField e = dev(epsilon());
+    const volSymmTensorField e(dev(epsilon()));
 
     // Calculate deviatoric trial stress
-    const volSymmTensorField sTrial = 2.0*mu_*(e - dev(epsilonP_.oldTime()));
+    const volSymmTensorField sTrial(2.0*mu_*(e - dev(epsilonP_.oldTime())));
 
     // Calculate the yield function
-    const volScalarField fTrial =
-        mag(sTrial) - sqrtTwoOverThree_*sigmaY_.oldTime();
+    const volScalarField fTrial
+    (
+        mag(sTrial) - sqrtTwoOverThree_*sigmaY_.oldTime()
+    );
 
 #ifdef OPENFOAM_NOT_EXTEND
     // Normalise residual in Newton method with respect to mag(bE)
@@ -1435,7 +1450,7 @@ void Foam::linearElasticMisesPlastic::correct(volSymmTensorField& sigma)
     epsilonPEq_ = epsilonPEq_.oldTime() + DEpsilonPEq_;
 
     // Calculate deviatoric stress
-    const volSymmTensorField s = sTrial - 2*mu_*DEpsilonP_;
+    const volSymmTensorField s(sTrial - 2*mu_*DEpsilonP_);
 
     // Update hydrostatic stress
     updateSigmaHyd
@@ -1478,15 +1493,19 @@ void Foam::linearElasticMisesPlastic::correct(surfaceSymmTensorField& sigma)
     updateEpsilonf();
 
     // Calculate deviatoric strain
-    const surfaceSymmTensorField e = dev(epsilonf());
+    const surfaceSymmTensorField e(dev(epsilonf()));
 
     // Calculate deviatoric trial stress
-    const surfaceSymmTensorField sTrial =
-        2.0*mu_*(e - dev(epsilonPf_.oldTime()));
+    const surfaceSymmTensorField sTrial
+    (
+        2.0*mu_*(e - dev(epsilonPf_.oldTime()))
+    );
 
     // Calculate the yield function
-    const surfaceScalarField fTrial = 
-        mag(sTrial) - sqrtTwoOverThree_*sigmaYf_;
+    const surfaceScalarField fTrial
+    ( 
+        mag(sTrial) - sqrtTwoOverThree_*sigmaYf_
+    );
 
 #ifdef OPENFOAM_NOT_EXTEND
     // Normalise residual in Newton method with respect to mag(bE)
@@ -1592,7 +1611,7 @@ void Foam::linearElasticMisesPlastic::correct(surfaceSymmTensorField& sigma)
     epsilonPEqf_ = epsilonPEqf_.oldTime() + DEpsilonPEqf_;
 
     // Calculate deviatoric stress
-    const surfaceSymmTensorField s = sTrial - 2*mu_*DEpsilonPf_;
+    const surfaceSymmTensorField s(sTrial - 2*mu_*DEpsilonPf_);
     
     // Solve pressure equation for cell-centred approach
     if (solvePressureEqn())
@@ -1618,7 +1637,7 @@ void Foam::linearElasticMisesPlastic::correct(surfaceSymmTensorField& sigma)
     else
     {
         // Calculate hydrostatic stress at the faces
-        const surfaceScalarField sigmaHydf = K_*tr(epsilonf());
+        const surfaceScalarField sigmaHydf(K_*tr(epsilonf()));
 
         // Update the stress
         sigma = sigmaHydf*I + s;
@@ -1772,7 +1791,7 @@ Foam::scalar Foam::linearElasticMisesPlastic::newDeltaT()
     // Analysis and Design 16 (1994) 99-139.
 
     // Calculate equivalent strain, for normalisation of the error
-    const volScalarField epsilonEq = sqrt((2.0/3.0)*magSqr(dev(epsilon())));
+    const volScalarField epsilonEq(sqrt((2.0/3.0)*magSqr(dev(epsilon()))));
 
     // Take reference to internal fields
 #ifdef OPENFOAM_NOT_EXTEND
@@ -1788,9 +1807,11 @@ Foam::scalar Foam::linearElasticMisesPlastic::newDeltaT()
 #endif
 
     // Calculate error field
-    const symmTensorField DEpsilonPErrorI =
+    const symmTensorField DEpsilonPErrorI
+    (
         Foam::sqrt(3.0/8.0)*DEpsilonPI*mag(plasticNI - plasticNIold)
-       /(epsilonEqI + SMALL);
+       /(epsilonEqI + SMALL)
+    );
 
     // Max error
     const scalar maxMagDEpsilonPErr = gMax(mag(DEpsilonPErrorI));

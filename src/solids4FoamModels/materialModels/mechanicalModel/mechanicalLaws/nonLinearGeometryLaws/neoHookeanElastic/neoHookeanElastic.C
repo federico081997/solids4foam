@@ -44,14 +44,13 @@ void Foam::neoHookeanElastic::calculateStress
     Ff() = I + gradD.T();
 
     // Calculate the Jacobian of the deformation gradient
-    const surfaceScalarField J = det(Ff());
+    const surfaceScalarField J(det(Ff()));
 
     // Calculate left Cauchy Green strain tensor with volumetric term removed
-    const surfaceSymmTensorField bEbar = 
-        pow(J, -2.0/3.0)*symm(Ff() & Ff().T());
+    const surfaceSymmTensorField bEbar(pow(J, -2.0/3.0)*symm(Ff() & Ff().T()));
 
     // Calculate deviatoric stress
-    const surfaceSymmTensorField s = mu_*dev(bEbar);
+    const surfaceSymmTensorField s(mu_*dev(bEbar));
     
     // Calculate the Cauchy stress
     if (solveVertexCentredPressureEqn())
@@ -236,7 +235,7 @@ Foam::neoHookeanElastic::materialTangentField() const
         );
 
         // Small number used for perturbations
-        const scalar eps = readScalar(dict().lookup("tangentEps"));
+        const scalar eps(readScalar(dict().lookup("tangentEps")));
 
         // For each component of gradDRef, sequentially apply a perturbation 
         // and then calculate the resulting sigma
@@ -258,8 +257,10 @@ Foam::neoHookeanElastic::materialTangentField() const
             );
 
             // Calculate tangent component
-            const surfaceSymmTensorField tangCmpt = 
-                (sigmaPerturb - sigmaRef)/eps;
+            const surfaceSymmTensorField tangCmpt 
+            ( 
+                (sigmaPerturb - sigmaRef)/eps
+            );
 
             const symmTensorField& tangCmptI = tangCmpt.internalField();
 
@@ -479,14 +480,13 @@ void Foam::neoHookeanElastic::correct(volSymmTensorField& sigma)
     );
 
     // Calculate the Jacobian of the deformation gradient
-    const volScalarField J = det(F()) ;
+    const volScalarField J(det(F()));
 
     // Calculate the volume preserving left Cauchy Green strain
-    const volSymmTensorField bEbar = 
-        pow(J, -2.0/3.0)*symm(F() & F().T());
+    const volSymmTensorField bEbar(pow(J, -2.0/3.0)*symm(F() & F().T()));
 
     // Calculate the deviatoric stress
-    const volSymmTensorField s = mu_*dev(bEbar);
+    const volSymmTensorField s(mu_*dev(bEbar));
 
     // Update the hydrostatic stress
     updateSigmaHyd
@@ -534,14 +534,13 @@ void Foam::neoHookeanElastic::correct(surfaceSymmTensorField& sigma)
     );
 
     // Calculate the Jacobian of the deformation gradient
-    const surfaceScalarField J = det(Ff());
+    const surfaceScalarField J(det(Ff()));
 
     // Calculate left Cauchy Green strain tensor with volumetric term removed
-    const surfaceSymmTensorField bEbar =
-        pow(J, -2.0/3.0)*symm(Ff() & Ff().T());
+    const surfaceSymmTensorField bEbar(pow(J, -2.0/3.0)*symm(Ff() & Ff().T()));
 
     // Calculate deviatoric stress
-    const surfaceSymmTensorField s = mu_*dev(bEbar);
+    const surfaceSymmTensorField s(mu_*dev(bEbar));
 
     if (solveVertexCentredPressureEqn())
     {
