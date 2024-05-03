@@ -60,7 +60,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class linearElastic Declaration
+                Class neoHookeanElasticMisesPlastic Declaration
 \*---------------------------------------------------------------------------*/
 
 class neoHookeanElasticMisesPlastic
@@ -73,7 +73,7 @@ class neoHookeanElasticMisesPlastic
         dimensionedScalar mu_;
 
         //- Bulk modulus
-                dimensionedScalar K_;
+        dimensionedScalar K_;
 
         //- Jacobian of the toal deformation gradient volField
         autoPtr<volScalarField> JPtr_;
@@ -161,9 +161,6 @@ class neoHookeanElasticMisesPlastic
         //- Update bEbar consistently with the assumption that det(bEbar) == 1
         //  defaults to off
         const Switch updateBEbarConsistent_;
-
-        //- Flag to add pressure
-        const Switch solvePressureEquation_;
 
         //- Linear plastic modulus. It is only used if plasticity is linear,
         //  defined by two points on the stress-plastic strain curve
@@ -255,19 +252,10 @@ class neoHookeanElasticMisesPlastic
             const surfaceScalarField& p
         );
 
-        //-Calculate hydrostatic stress given gradD
-        void calculateSigmaHyd
-        (
-            surfaceScalarField& sigmaHyd,
-            const surfaceTensorField& gradD
-        );
-
 public:
 
     //- Runtime type information
     TypeName("neoHookeanElasticMisesPlastic");
-
-    // Static data members
 
     // Constructors
 
@@ -293,12 +281,13 @@ public:
         virtual tmp<volScalarField> impK() const;
 
         //- Material tangent for Newton Raphson loop
-        virtual tmp<Field<RectangularMatrix<scalar>>> materialTangentField() const;
+        virtual tmp<Field<RectangularMatrix<scalar>>> 
+        materialTangentField() const;
 
-        //- Update the stress
+        //- Update the volField stress
         virtual void correct(volSymmTensorField& sigma);
 
-        //- Update the stress surface field
+        //- Update the surfaceField stress
         virtual void correct(surfaceSymmTensorField& sigma);
 
         //- Return material residual i.e. a measured of how convergence of

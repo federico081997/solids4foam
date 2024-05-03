@@ -323,7 +323,8 @@ Foam::tmp<Foam::volScalarField> Foam::neoHookeanElasticMisesPlastic::Ibar
 
             if (fac2 >= 1.0)
             {
-                alpha1 = 3.0*Foam::sqrt(fac1)*Foam::cosh(Foam::acosh(fac2)/3.0);
+                alpha1 = 3.0*Foam::sqrt(fac1)
+                    *Foam::cosh(Foam::acosh(fac2)/3.0);
             }
             else
             {
@@ -471,7 +472,8 @@ Foam::tmp<Foam::surfaceScalarField> Foam::neoHookeanElasticMisesPlastic::Ibar
 
             if (fac2 >= 1.0)
             {
-                alpha1 = 3.0*Foam::sqrt(fac1)*Foam::cosh(Foam::acosh(fac2)/3.0);
+                alpha1 = 3.0*Foam::sqrt(fac1)
+                    *Foam::cosh(Foam::acosh(fac2)/3.0);
             }
             else
             {
@@ -562,20 +564,20 @@ void Foam::neoHookeanElasticMisesPlastic::calculateStress
     relFf() = Ff() & inv(Ff().oldTime());
 
     // Calculate the relative Jacobian
-    const surfaceScalarField relJ(Jf()/Jf().oldTime());
+    const surfaceScalarField relJ = Jf()/Jf().oldTime();
 
     // Calculate the relative deformation gradient with the volumetric term
     // removed
-    const surfaceTensorField relFbar(pow(relJ, -1.0/3.0)*relFf());
+    const surfaceTensorField relFbar = pow(relJ, -1.0/3.0)*relFf();
 
     // Update bE trial
     bEbarTrialf_ = transform(relFbar, bEbarf_.oldTime());
 
     // Calculate trial deviatoric stress
-    const surfaceSymmTensorField sTrial(mu_*dev(bEbarTrialf_));
+    const surfaceSymmTensorField sTrial = mu_*dev(bEbarTrialf_);
 
-    const surfaceScalarField Ibar(tr(bEbarTrialf_)/3.0);
-    const surfaceScalarField muBar(Ibar*mu_);
+    const surfaceScalarField Ibar = tr(bEbarTrialf_)/3.0;
+    const surfaceScalarField muBar = Ibar*mu_;
 
     // Check for plastic loading
     // and calculate increment of plastic equivalent strain
@@ -587,17 +589,17 @@ void Foam::neoHookeanElasticMisesPlastic::calculateStress
 
     // Normalise residual in Newton method with respect to mag(bE)
 #ifdef OPENFOAM_NOT_EXTEND
-    const scalar maxMagBE = max(gMax(mag(bEbarTrialf_.primitiveField())), SMALL);
+    const scalar maxMagBE = 
+        max(gMax(mag(bEbarTrialf_.primitiveField())), SMALL);
 #else
-    const scalar maxMagBE = max(gMax(mag(bEbarTrialf_.internalField())), SMALL);
+    const scalar maxMagBE = 
+        max(gMax(mag(bEbarTrialf_.internalField())), SMALL);
 #endif
 
     // Trial yield function
     // sigmaY is the Cauchy yield stress so we scale it by J
-    const surfaceScalarField fTrial
-    (
-        mag(sTrial) - sqrtTwoOverThree_*Jf()*sigmaYf_
-    );
+    const surfaceScalarField fTrial =
+        mag(sTrial) - sqrtTwoOverThree_*Jf()*sigmaYf_;
 
     // Magnitude of hardening slope
     const scalar magHp = mag(Hp_);
@@ -612,7 +614,8 @@ void Foam::neoHookeanElasticMisesPlastic::calculateStress
     const scalarField& muBarI = muBar.primitiveField();
     const scalarField& JI = Jf().primitiveField();
     const scalarField& sigmaYI = sigmaYf_.primitiveField();
-    const scalarField& epsilonPEqOldI = epsilonPEqf_.oldTime().primitiveField();
+    const scalarField& epsilonPEqOldI = 
+        epsilonPEqf_.oldTime().primitiveField();
 #else
     const scalarField& fTrialI = fTrial.internalField();
     const symmTensorField& sTrialI = sTrial.internalField();
@@ -638,7 +641,7 @@ void Foam::neoHookeanElasticMisesPlastic::calculateStress
         // Calculate DLambda/DEpsilonPEq
         if (fTrialI[faceI] < SMALL)
         {
-            // elastic
+            // Elastic
             DSigmaYI[faceI] = 0.0;
             DLambdaI[faceI] = 0.0;
         }
@@ -646,8 +649,9 @@ void Foam::neoHookeanElasticMisesPlastic::calculateStress
         {
             if (nonLinearPlasticity_)
             {
-                // Total equivalent plastic strain where t is start of time-step
-                scalar curSigmaY = 0.0; // updated in loop below
+                // Total equivalent plastic strain where t is start of 
+                // time-step
+                scalar curSigmaY = 0.0; // Updated in loop below
 
                 // Calculates DEpsilonPEq using Newtons's method
                 newtonLoop
@@ -682,77 +686,74 @@ void Foam::neoHookeanElasticMisesPlastic::calculateStress
 
     forAll(fTrial.boundaryField(), patchI)
     {
-        // Calculate on coupled for surface fields
-        //if (!fTrial.boundaryField()[patchI].coupled())
-        {
-            // Take references to the boundary patch fields for efficiency
-            const scalarField& fTrialP = fTrial.boundaryField()[patchI];
-            const symmTensorField& sTrialP = sTrial.boundaryField()[patchI];
+        // Take references to the boundary patch fields for efficiency
+        const scalarField& fTrialP = fTrial.boundaryField()[patchI];
+        const symmTensorField& sTrialP = sTrial.boundaryField()[patchI];
 #ifdef OPENFOAM_NOT_EXTEND
-            symmTensorField& plasticNP = plasticNf_.boundaryFieldRef()[patchI];
-            scalarField& DSigmaYP = DSigmaYf_.boundaryFieldRef()[patchI];
-            scalarField& DLambdaP = DLambdaf_.boundaryFieldRef()[patchI];
+        symmTensorField& plasticNP = plasticNf_.boundaryFieldRef()[patchI];
+        scalarField& DSigmaYP = DSigmaYf_.boundaryFieldRef()[patchI];
+        scalarField& DLambdaP = DLambdaf_.boundaryFieldRef()[patchI];
 #else
-            symmTensorField& plasticNP = plasticNf_.boundaryField()[patchI];
-            scalarField& DSigmaYP = DSigmaYf_.boundaryField()[patchI];
-            scalarField& DLambdaP = DLambdaf_.boundaryField()[patchI];
+        symmTensorField& plasticNP = plasticNf_.boundaryField()[patchI];
+        scalarField& DSigmaYP = DSigmaYf_.boundaryField()[patchI];
+        scalarField& DLambdaP = DLambdaf_.boundaryField()[patchI];
 #endif
-            const scalarField& muBarP = muBar.boundaryField()[patchI];
-            const scalarField& JP = Jf().boundaryField()[patchI];
-            const scalarField& sigmaYP = sigmaYf_.boundaryField()[patchI];
-            const scalarField& epsilonPEqOldP =
-                epsilonPEq_.oldTime().boundaryField()[patchI];
+        const scalarField& muBarP = muBar.boundaryField()[patchI];
+        const scalarField& JP = Jf().boundaryField()[patchI];
+        const scalarField& sigmaYP = sigmaYf_.boundaryField()[patchI];
+        const scalarField& epsilonPEqOldP =
+            epsilonPEq_.oldTime().boundaryField()[patchI];
 
-            forAll(fTrialP, faceI)
+        forAll(fTrialP, faceI)
+        {
+            // Calculate direction plasticN
+            const scalar magS = mag(sTrialP[faceI]);
+            if (magS > SMALL)
             {
-                // Calculate direction plasticN
-                const scalar magS = mag(sTrialP[faceI]);
-                if (magS > SMALL)
-                {
-                    plasticNP[faceI] = sTrialP[faceI]/magS;
-                }
+                plasticNP[faceI] = sTrialP[faceI]/magS;
+            }
 
-                // Calculate DEpsilonPEq
-                if (fTrialP[faceI] < SMALL)
+            // Calculate DEpsilonPEq
+            if (fTrialP[faceI] < SMALL)
+            {
+                // Elasticity
+                DSigmaYP[faceI] = 0.0;
+                DLambdaP[faceI] = 0.0;
+            }
+            else
+            {
+                // Yielding
+                if (nonLinearPlasticity_)
                 {
-                    // elasticity
-                    DSigmaYP[faceI] = 0.0;
-                    DLambdaP[faceI] = 0.0;
+                    scalar curSigmaY = 0.0; // Updated in loop below
+
+                    // Calculate DEpsilonPEq and curSigmaY
+                    newtonLoop
+                    (
+                        DLambdaP[faceI],
+                        curSigmaY,
+                        epsilonPEqOldP[faceI],
+                        magS,
+                        muBarP[faceI],
+                        JP[faceI],
+                        maxMagBE
+                    );
+
+                    // Update increment of yield stress
+                    DSigmaYP[faceI] = curSigmaY - sigmaYP[faceI];
                 }
                 else
                 {
-                    // yielding
-                    if (nonLinearPlasticity_)
-                    {
-                        scalar curSigmaY = 0.0; // updated in loop below
+                    // Plastic modulus is linear
+                    DLambdaP[faceI] = fTrialP[faceI]/(2.0*muBarP[faceI]);
 
-                        // Calculate DEpsilonPEq and curSigmaY
-                        newtonLoop
-                        (
-                            DLambdaP[faceI],
-                            curSigmaY,
-                            epsilonPEqOldP[faceI],
-                            magS,
-                            muBarP[faceI],
-                            JP[faceI],
-                            maxMagBE
-                        );
+                    if (magHp > SMALL)
+                    {
+                        DLambdaP[faceI] /= 1.0 + Hp_/(3.0*muBarP[faceI]);
 
                         // Update increment of yield stress
-                        DSigmaYP[faceI] = curSigmaY - sigmaYP[faceI];
-                    }
-                    else
-                    {
-                        // Plastic modulus is linear
-                        DLambdaP[faceI] = fTrialP[faceI]/(2.0*muBarP[faceI]);
-
-                        if (magHp > SMALL)
-                        {
-                            DLambdaP[faceI] /= 1.0 + Hp_/(3.0*muBarP[faceI]);
-
-                            // Update increment of yield stress
-                            DSigmaYP[faceI] = sqrtTwoOverThree_*DLambdaP[faceI]*Hp_;
-                        }
+                        DSigmaYP[faceI] = 
+                            sqrtTwoOverThree_*DLambdaP[faceI]*Hp_;
                     }
                 }
             }
@@ -765,53 +766,22 @@ void Foam::neoHookeanElasticMisesPlastic::calculateStress
     plasticNf_.correctBoundaryConditions();
 #endif
 
-    // Update DEpsilonP and DEpsilonPEq
-    //DEpsilonPEqf_ = sqrtTwoOverThree_*DLambdaf_;
+    // Update DEpsilonPf
     DEpsilonPf_ = Ibar*DLambdaf_*plasticNf_;
     DEpsilonPf_.relax();
 
     // Calculate deviatoric stress
-    const surfaceSymmTensorField s(sTrial - 2*mu_*DEpsilonPf_);
+    const surfaceSymmTensorField s = sTrial - 2*mu_*DEpsilonPf_;
 
-//    //Update bEbar
-//    if (updateBEbarConsistent_)
-//    {
-//        const surfaceSymmTensorField devBEbar(s/mu_);
-//        bEbarf_ = devBEbar + this->Ibar(devBEbar)*I;
-//    }
-//    else
-//    {
-//        bEbarf_ = (s/mu_) + Ibar*I;
-//    }
-
-    // Update the Cauchy stress
-
-    if (solvePressureEquation_)
+    // Update the Cauchy stress for vertex-centred approach
+    if (solveVertexCentredPressureEqn())
     {
-        sigma = (1.0/Jf())*(s - p*I);;
+        sigma = (1.0/Jf())*s - p*I;
     }
     else
     {
-//    	surfaceScalarField pf(0.5*K_*(pow(Jf(), 2) - 1));
-//    	Info << pf << endl;
         sigma = (1.0/Jf())*(0.5*K_*(pow(Jf(), 2) - 1)*I + s);
     }
-}
-
-void Foam::neoHookeanElasticMisesPlastic::calculateSigmaHyd
-(
-	surfaceScalarField& sigmaHyd,
-	const surfaceTensorField& gradD
-)
-{
-    // Calculate F
-    Ff() = I + gradD.T();
-
-    // Calculate the Jacobian of the total deformation gradient
-    Jf() = det(Ff());
-
-    // Calculate the hydrostatic stress
-    sigmaHyd = 0.5*K_*(pow(Jf(), 2.0) - 1.0);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -1119,14 +1089,6 @@ Foam::neoHookeanElasticMisesPlastic::neoHookeanElasticMisesPlastic
             Switch(true)
         )
     ),
-    solvePressureEquation_
-    (
-        dict.lookupOrDefault<Switch>
-        (
-            "solvePressureEquation",
-            false
-        )
-    ),
     Hp_(0.0),
     maxDeltaErr_
     (
@@ -1255,9 +1217,6 @@ Foam::neoHookeanElasticMisesPlastic::impK() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            //mesh(),
-            //(4.0/3.0)*mu_ + K_, // == 2*mu + lambda
-            //zeroGradientFvPatchScalarField::typeName
             scaleFactor*(4.0/3.0)*mu_ + K_
         )
     );
@@ -1270,7 +1229,11 @@ Foam::neoHookeanElasticMisesPlastic::materialTangentField() const
     // Prepare tmp field
     tmp<Field<Foam::RectangularMatrix<Foam::scalar>>> tresult
     (
-        new Field<Foam::RectangularMatrix<Foam::scalar>>(mesh().nFaces(), Foam::RectangularMatrix<scalar>(6,9,0))
+        new Field<Foam::RectangularMatrix<Foam::scalar>>
+        (
+            mesh().nFaces(), 
+            Foam::RectangularMatrix<scalar>(6,9,0)
+        )
     );
 #ifdef OPENFOAM_NOT_EXTEND
     Field<Foam::RectangularMatrix<Foam::scalar>>& result = tresult.ref();
@@ -1282,22 +1245,47 @@ Foam::neoHookeanElasticMisesPlastic::materialTangentField() const
     const Switch numericalTangent(dict().lookup("numericalTangent"));
     if (numericalTangent)
     {
-
-        // Look up current pressure and store it as the reference
-        const surfaceScalarField& pRef =
-        mesh().lookupObject<surfaceScalarField>("pf");
-
-        // Lookup current stress and store it as the reference
+        // Take a reference to the current stress
         const surfaceSymmTensorField& sigmaRef =
             mesh().lookupObject<surfaceSymmTensorField>("sigmaf");
-        // Lookup gradient of displacement
+        
+        // Take a reference to the current displacement gradient
         const surfaceTensorField& gradDRef =
             mesh().lookupObject<surfaceTensorField>("grad(D)f");
 
-        // Create fields to be used for perturbations
-        surfaceSymmTensorField sigmaPerturb("sigmaPerturb", sigmaRef);
-        surfaceTensorField gradDPerturb("gradDPerturb", gradDRef);
+        // Prepare the pressure field
+        surfaceScalarField pRef
+        (
+            IOobject
+            (
+                "pRef",
+                mesh().time().timeName(),
+                sigmaRef.mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            sigmaRef.mesh(),
+            dimensionedScalar("zero", dimPressure, 0)
+        );
 
+        // Take a reference to the current pressure field
+        if (solveVertexCentredPressureEqn())
+        {
+            pRef = mesh().lookupObject<surfaceScalarField>("pf");
+        }
+
+        // Create fields to be used for perturbations
+        surfaceSymmTensorField sigmaPerturb
+        (
+            "sigmaPerturb",
+            sigmaRef
+        );
+        surfaceTensorField gradDPerturb
+        (
+            "gradDPerturb",
+            gradDRef
+        );
+        
         // Small number used for perturbations
         const scalar eps(readScalar(dict().lookup("tangentEps")));
 
@@ -1313,18 +1301,19 @@ Foam::neoHookeanElasticMisesPlastic::materialTangentField() const
             gradDPerturb.replace(cmptI, gradDRef.component(cmptI) + eps);
 
             // Calculate perturbed stress
-            const_cast<neoHookeanElasticMisesPlastic&>(*this).calculateStress(sigmaPerturb, gradDPerturb, pRef);
+            const_cast<neoHookeanElasticMisesPlastic&>(*this).calculateStress
+            (
+                sigmaPerturb, 
+                gradDPerturb, 
+                pRef
+            );
 
-//            Info << "sigmaRef: " << sigmaRef << endl;
-//            Info << "sigmaPerturb: " << sigmaPerturb << endl;
-//            Info << "sigmaPerturb - sigmaRef: " << sigmaPerturb - sigmaRef << endl;
-
-            // Calculate tangent component
-            const surfaceSymmTensorField tangCmpt((sigmaPerturb - sigmaRef)/eps);
+            // Calculate tangent components
+            const surfaceSymmTensorField tangCmpt =
+                (sigmaPerturb - sigmaRef)/eps;
             const symmTensorField& tangCmptI = tangCmpt.internalField();
 
-
-            // Insert tangent component
+            // Insert tangent components
             forAll(tangCmptI, faceI)
             {
                 if (cmptI == tensor::XX)
@@ -1507,16 +1496,17 @@ Foam::neoHookeanElasticMisesPlastic::materialTangentField() const
     }
     else // Analytical tangent
     {
-
         notImplemented("Analytical tangent not implemented");
-
     }
 
     return tresult;
 }
 
 
-void Foam::neoHookeanElasticMisesPlastic::correct(volSymmTensorField& sigma)
+void Foam::neoHookeanElasticMisesPlastic::correct
+(
+    volSymmTensorField& sigma
+)
 {
     // Update the deformation gradient field
     // Note: if true is returned, it means that linearised elasticity was
@@ -1526,27 +1516,39 @@ void Foam::neoHookeanElasticMisesPlastic::correct(volSymmTensorField& sigma)
         return;
     }
 
-	// Look up the pressure field
-	const volScalarField& p =	mesh().lookupObject<volScalarField>("volP");
+    // Prepare the pressure field
+    volScalarField p
+    (
+        IOobject
+        (
+            "p",
+            mesh().time().timeName(),
+            sigma.mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        sigma.mesh(),
+        dimensionedScalar("zero", dimPressure, 0)
+    );
 
     // Update the Jacobian of the total deformation gradient
     J() = det(F());
 
     // Calculate the relative Jacobian
-    const volScalarField relJ(J()/J().oldTime());
+    const volScalarField relJ = J()/J().oldTime();
 
     // Calculate the relative deformation gradient with the volumetric term
     // removed
-    const volTensorField relFbar(pow(relJ, -1.0/3.0)*relF());
+    const volTensorField relFbar = pow(relJ, -1.0/3.0)*relF();
 
     // Update bE trial
     bEbarTrial_ = transform(relFbar, bEbar_.oldTime());
 
     // Calculate trial deviatoric stress
-    const volSymmTensorField sTrial(mu_*dev(bEbarTrial_));
+    const volSymmTensorField sTrial = mu_*dev(bEbarTrial_);
 
-    const volScalarField Ibar(tr(bEbarTrial_)/3.0);
-    const volScalarField muBar(Ibar*mu_);
+    const volScalarField Ibar = tr(bEbarTrial_)/3.0;
+    const volScalarField muBar = Ibar*mu_;
 
     // Check for plastic loading
     // and calculate increment of plastic equivalent strain
@@ -1558,14 +1560,15 @@ void Foam::neoHookeanElasticMisesPlastic::correct(volSymmTensorField& sigma)
 
     // Normalise residual in Newton method with respect to mag(bE)
 #ifdef OPENFOAM_NOT_EXTEND
-    const scalar maxMagBE = max(gMax(mag(bEbarTrial_.primitiveField())), SMALL);
+    const scalar maxMagBE = 
+        max(gMax(mag(bEbarTrial_.primitiveField())), SMALL);
 #else
     const scalar maxMagBE = max(gMax(mag(bEbarTrial_.internalField())), SMALL);
 #endif
 
     // Trial yield function
     // sigmaY is the Cauchy yield stress so we scale it by J
-    const volScalarField fTrial(mag(sTrial) - sqrtTwoOverThree_*J()*sigmaY_);
+    const volScalarField fTrial = mag(sTrial) - sqrtTwoOverThree_*J()*sigmaY_;
 
     // Magnitude of hardening slope
     const scalar magHp = mag(Hp_);
@@ -1606,7 +1609,7 @@ void Foam::neoHookeanElasticMisesPlastic::correct(volSymmTensorField& sigma)
         // Calculate DLambda/DEpsilonPEq
         if (fTrialI[cellI] < SMALL)
         {
-            // elastic
+            // Elastic
             DSigmaYI[cellI] = 0.0;
             DLambdaI[cellI] = 0.0;
         }
@@ -1614,8 +1617,9 @@ void Foam::neoHookeanElasticMisesPlastic::correct(volSymmTensorField& sigma)
         {
             if (nonLinearPlasticity_)
             {
-                // Total equivalent plastic strain where t is start of time-step
-                scalar curSigmaY = 0.0; // updated in loop below
+                // Total equivalent plastic strain where t is start of 
+                // time-step
+                scalar curSigmaY = 0.0; // Updated in loop below
 
                 // Calculates DEpsilonPEq using Newtons's method
                 newtonLoop
@@ -1680,16 +1684,16 @@ void Foam::neoHookeanElasticMisesPlastic::correct(volSymmTensorField& sigma)
             // Calculate DEpsilonPEq
             if (fTrialP[faceI] < SMALL)
             {
-                // elasticity
+                // Elasticity
                 DSigmaYP[faceI] = 0.0;
                 DLambdaP[faceI] = 0.0;
             }
             else
             {
-                // yielding
+                // Yielding
                 if (nonLinearPlasticity_)
                 {
-                    scalar curSigmaY = 0.0; // updated in loop below
+                    scalar curSigmaY = 0.0; // Updated in loop below
 
                     // Calculate DEpsilonPEq and curSigmaY
                     newtonLoop
@@ -1716,7 +1720,8 @@ void Foam::neoHookeanElasticMisesPlastic::correct(volSymmTensorField& sigma)
                         DLambdaP[faceI] /= 1.0 + Hp_/(3.0*muBarP[faceI]);
 
                         // Update increment of yield stress
-                        DSigmaYP[faceI] = sqrtTwoOverThree_*DLambdaP[faceI]*Hp_;
+                        DSigmaYP[faceI] = 
+                            sqrtTwoOverThree_*DLambdaP[faceI]*Hp_;
                     }
                 }
             }
@@ -1729,12 +1734,12 @@ void Foam::neoHookeanElasticMisesPlastic::correct(volSymmTensorField& sigma)
     DEpsilonP_.relax();
 
     // Calculate deviatoric stress
-    const volSymmTensorField s(sTrial - 2*mu_*DEpsilonP_);
+    const volSymmTensorField s = sTrial - 2*mu_*DEpsilonP_;
 
     // Update bEbar
     if (updateBEbarConsistent_)
     {
-        const volSymmTensorField devBEbar(s/mu_);
+        const volSymmTensorField devBEbar = s/mu_;
         bEbar_ = devBEbar + this->Ibar(devBEbar)*I;
     }
     else
@@ -1749,21 +1754,24 @@ void Foam::neoHookeanElasticMisesPlastic::correct(volSymmTensorField& sigma)
         (4.0/3.0)*mu_ + K_
     );
 
-    // Update the Cauchy stress
-    if (solvePressureEquation_)
+    // Update the stress for vertex-centred approach
+    if (solveVertexCentredPressureEqn())
     {
-      	sigma = (1.0/J())*(s - p*I);
+        p = mesh().lookupObject<volScalarField>("p");
+        sigma = (1.0/J())*s - p*I;
     }
     else
     {
-      	sigma = (1.0/J())*(sigmaHyd()*I + s);
+        sigma = (1.0/J())*(sigmaHyd()*I + s);   
     }
 }
 
 
-void Foam::neoHookeanElasticMisesPlastic::correct(surfaceSymmTensorField& sigma)
+void Foam::neoHookeanElasticMisesPlastic::correct
+(
+    surfaceSymmTensorField& sigma
+)
 {
-
     // Update the deformation gradient field
     // Note: if true is returned, it means that linearised elasticity was
     // enforced by the solver via the enforceLinear switch
@@ -1772,33 +1780,39 @@ void Foam::neoHookeanElasticMisesPlastic::correct(surfaceSymmTensorField& sigma)
         return;
     }
 
-    // Look up the pressure field
-    const surfaceScalarField& p =
-    mesh().lookupObject<surfaceScalarField>("pf");
+    // Prepare the pressure field
+    surfaceScalarField pf
+    (
+        IOobject
+        (
+            "pf",
+            mesh().time().timeName(),
+            sigma.mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        sigma.mesh(),
+        dimensionedScalar("zero", dimPressure, 0)
+    );
 
     // Update the Jacobian of the total deformation gradient
     Jf() = det(Ff());
 
     // Calculate the relative Jacobian
-    const surfaceScalarField relJ(Jf()/Jf().oldTime());
+    const surfaceScalarField relJ = Jf()/Jf().oldTime();
 
     // Calculate the relative deformation gradient with the volumetric term
     // removed
-    const surfaceTensorField relFbar(pow(relJ, -1.0/3.0)*relFf());
-
-//    Info << "Ff: " << Ff()[0] << endl;
-//    Info << "relFf: " << relFf()[0] << endl;
-
-    //bEbarTrialf_ = pow(relJ, -2.0/3.0)*symm(relFf() & relFf().T());
+    const surfaceTensorField relFbar = pow(relJ, -1.0/3.0)*relFf();
 
     // Update bE trial
     bEbarTrialf_ = transform(relFbar, bEbarf_.oldTime());
 
     // Calculate trial deviatoric stress
-    const surfaceSymmTensorField sTrial(mu_*dev(bEbarTrialf_));
+    const surfaceSymmTensorField sTrial = mu_*dev(bEbarTrialf_);
 
-    const surfaceScalarField Ibar(tr(bEbarTrialf_)/3.0);
-    const surfaceScalarField muBar(Ibar*mu_);
+    const surfaceScalarField Ibar = tr(bEbarTrialf_)/3.0;
+    const surfaceScalarField muBar = Ibar*mu_;
 
     // Check for plastic loading
     // and calculate increment of plastic equivalent strain
@@ -1810,17 +1824,17 @@ void Foam::neoHookeanElasticMisesPlastic::correct(surfaceSymmTensorField& sigma)
 
     // Normalise residual in Newton method with respect to mag(bE)
 #ifdef OPENFOAM_NOT_EXTEND
-    const scalar maxMagBE = max(gMax(mag(bEbarTrialf_.primitiveField())), SMALL);
+    const scalar maxMagBE = 
+        max(gMax(mag(bEbarTrialf_.primitiveField())), SMALL);
 #else
-    const scalar maxMagBE = max(gMax(mag(bEbarTrialf_.internalField())), SMALL);
+    const scalar maxMagBE =
+        max(gMax(mag(bEbarTrialf_.internalField())), SMALL);
 #endif
 
     // Trial yield function
     // sigmaY is the Cauchy yield stress so we scale it by J
-    const surfaceScalarField fTrial
-    (
-        mag(sTrial) - sqrtTwoOverThree_*Jf()*sigmaYf_
-    );
+    const surfaceScalarField fTrial =
+        mag(sTrial) - sqrtTwoOverThree_*Jf()*sigmaYf_;
 
     // Magnitude of hardening slope
     const scalar magHp = mag(Hp_);
@@ -1835,7 +1849,8 @@ void Foam::neoHookeanElasticMisesPlastic::correct(surfaceSymmTensorField& sigma)
     const scalarField& muBarI = muBar.primitiveField();
     const scalarField& JI = Jf().primitiveField();
     const scalarField& sigmaYI = sigmaYf_.primitiveField();
-    const scalarField& epsilonPEqOldI = epsilonPEqf_.oldTime().primitiveField();
+    const scalarField& epsilonPEqOldI = 
+        epsilonPEqf_.oldTime().primitiveField();
 #else
     const scalarField& fTrialI = fTrial.internalField();
     const symmTensorField& sTrialI = sTrial.internalField();
@@ -1861,7 +1876,7 @@ void Foam::neoHookeanElasticMisesPlastic::correct(surfaceSymmTensorField& sigma)
         // Calculate DLambda/DEpsilonPEq
         if (fTrialI[faceI] < SMALL)
         {
-            // elastic
+            // Elastic
             DSigmaYI[faceI] = 0.0;
             DLambdaI[faceI] = 0.0;
         }
@@ -1869,8 +1884,9 @@ void Foam::neoHookeanElasticMisesPlastic::correct(surfaceSymmTensorField& sigma)
         {
             if (nonLinearPlasticity_)
             {
-                // Total equivalent plastic strain where t is start of time-step
-                scalar curSigmaY = 0.0; // updated in loop below
+                // Total equivalent plastic strain where t is start of 
+                // time-step
+                scalar curSigmaY = 0.0; // Updated in loop below
 
                 // Calculates DEpsilonPEq using Newtons's method
                 newtonLoop
@@ -1905,77 +1921,74 @@ void Foam::neoHookeanElasticMisesPlastic::correct(surfaceSymmTensorField& sigma)
 
     forAll(fTrial.boundaryField(), patchI)
     {
-        // Calculate on coupled for surface fields
-        //if (!fTrial.boundaryField()[patchI].coupled())
-        {
-            // Take references to the boundary patch fields for efficiency
-            const scalarField& fTrialP = fTrial.boundaryField()[patchI];
-            const symmTensorField& sTrialP = sTrial.boundaryField()[patchI];
+        // Take references to the boundary patch fields for efficiency
+        const scalarField& fTrialP = fTrial.boundaryField()[patchI];
+        const symmTensorField& sTrialP = sTrial.boundaryField()[patchI];
 #ifdef OPENFOAM_NOT_EXTEND
-            symmTensorField& plasticNP = plasticNf_.boundaryFieldRef()[patchI];
-            scalarField& DSigmaYP = DSigmaYf_.boundaryFieldRef()[patchI];
-            scalarField& DLambdaP = DLambdaf_.boundaryFieldRef()[patchI];
+        symmTensorField& plasticNP = plasticNf_.boundaryFieldRef()[patchI];
+        scalarField& DSigmaYP = DSigmaYf_.boundaryFieldRef()[patchI];
+        scalarField& DLambdaP = DLambdaf_.boundaryFieldRef()[patchI];
 #else
-            symmTensorField& plasticNP = plasticNf_.boundaryField()[patchI];
-            scalarField& DSigmaYP = DSigmaYf_.boundaryField()[patchI];
-            scalarField& DLambdaP = DLambdaf_.boundaryField()[patchI];
+        symmTensorField& plasticNP = plasticNf_.boundaryField()[patchI];
+        scalarField& DSigmaYP = DSigmaYf_.boundaryField()[patchI];
+        scalarField& DLambdaP = DLambdaf_.boundaryField()[patchI];
 #endif
-            const scalarField& muBarP = muBar.boundaryField()[patchI];
-            const scalarField& JP = Jf().boundaryField()[patchI];
-            const scalarField& sigmaYP = sigmaYf_.boundaryField()[patchI];
-            const scalarField& epsilonPEqOldP =
-                epsilonPEq_.oldTime().boundaryField()[patchI];
+        const scalarField& muBarP = muBar.boundaryField()[patchI];
+        const scalarField& JP = Jf().boundaryField()[patchI];
+        const scalarField& sigmaYP = sigmaYf_.boundaryField()[patchI];
+        const scalarField& epsilonPEqOldP =
+            epsilonPEq_.oldTime().boundaryField()[patchI];
 
-            forAll(fTrialP, faceI)
+        forAll(fTrialP, faceI)
+        {
+            // Calculate direction plasticN
+            const scalar magS = mag(sTrialP[faceI]);
+            if (magS > SMALL)
             {
-                // Calculate direction plasticN
-                const scalar magS = mag(sTrialP[faceI]);
-                if (magS > SMALL)
-                {
-                    plasticNP[faceI] = sTrialP[faceI]/magS;
-                }
+                plasticNP[faceI] = sTrialP[faceI]/magS;
+            }
 
-                // Calculate DEpsilonPEq
-                if (fTrialP[faceI] < SMALL)
+            // Calculate DEpsilonPEq
+            if (fTrialP[faceI] < SMALL)
+            {
+                // Elasticity
+                DSigmaYP[faceI] = 0.0;
+                DLambdaP[faceI] = 0.0;
+            }
+            else
+            {
+                // Yielding
+                if (nonLinearPlasticity_)
                 {
-                    // elasticity
-                    DSigmaYP[faceI] = 0.0;
-                    DLambdaP[faceI] = 0.0;
+                    scalar curSigmaY = 0.0; // Updated in loop below
+
+                    // Calculate DEpsilonPEq and curSigmaY
+                    newtonLoop
+                    (
+                        DLambdaP[faceI],
+                        curSigmaY,
+                        epsilonPEqOldP[faceI],
+                        magS,
+                        muBarP[faceI],
+                        JP[faceI],
+                        maxMagBE
+                    );
+
+                    // Update increment of yield stress
+                    DSigmaYP[faceI] = curSigmaY - sigmaYP[faceI];
                 }
                 else
                 {
-                    // yielding
-                    if (nonLinearPlasticity_)
-                    {
-                        scalar curSigmaY = 0.0; // updated in loop below
+                    // Plastic modulus is linear
+                    DLambdaP[faceI] = fTrialP[faceI]/(2.0*muBarP[faceI]);
 
-                        // Calculate DEpsilonPEq and curSigmaY
-                        newtonLoop
-                        (
-                            DLambdaP[faceI],
-                            curSigmaY,
-                            epsilonPEqOldP[faceI],
-                            magS,
-                            muBarP[faceI],
-                            JP[faceI],
-                            maxMagBE
-                        );
+                    if (magHp > SMALL)
+                    {
+                        DLambdaP[faceI] /= 1.0 + Hp_/(3.0*muBarP[faceI]);
 
                         // Update increment of yield stress
-                        DSigmaYP[faceI] = curSigmaY - sigmaYP[faceI];
-                    }
-                    else
-                    {
-                        // Plastic modulus is linear
-                        DLambdaP[faceI] = fTrialP[faceI]/(2.0*muBarP[faceI]);
-
-                        if (magHp > SMALL)
-                        {
-                            DLambdaP[faceI] /= 1.0 + Hp_/(3.0*muBarP[faceI]);
-
-                            // Update increment of yield stress
-                            DSigmaYP[faceI] = sqrtTwoOverThree_*DLambdaP[faceI]*Hp_;
-                        }
+                        DSigmaYP[faceI] = 
+                            sqrtTwoOverThree_*DLambdaP[faceI]*Hp_;
                     }
                 }
             }
@@ -1994,12 +2007,12 @@ void Foam::neoHookeanElasticMisesPlastic::correct(surfaceSymmTensorField& sigma)
     DEpsilonPf_.relax();
 
     // Calculate deviatoric stress
-    const surfaceSymmTensorField s(sTrial - 2*mu_*DEpsilonPf_);
+    const surfaceSymmTensorField s = sTrial - 2*mu_*DEpsilonPf_;
 
     // Update bEbar
     if (updateBEbarConsistent_)
     {
-        const surfaceSymmTensorField devBEbar(s/mu_);
+        const surfaceSymmTensorField devBEbar = s/mu_;
         bEbarf_ = devBEbar + this->Ibar(devBEbar)*I;
     }
     else
@@ -2010,13 +2023,14 @@ void Foam::neoHookeanElasticMisesPlastic::correct(surfaceSymmTensorField& sigma)
     // Update the Cauchy stress
     // Note: updayeSigmaHyd is not implemented for surface fields
 
-    if (solvePressureEquation_)
+    if (solveVertexCentredPressureEqn())
     {
-      	sigma = (1.0/Jf())*(s - p*I);
+        pf = mesh().lookupObject<surfaceScalarField>("pf");
+        sigma = (1.0/Jf())*s - pf*I;
     }
     else
     {
-      	sigma = (1.0/Jf())*(0.5*K_*(pow(Jf(), 2) - 1)*I + s);
+        sigma = (1.0/Jf())*(0.5*K_*(pow(Jf(), 2) - 1)*I + s);
     }
 }
 
@@ -2084,8 +2098,6 @@ void Foam::neoHookeanElasticMisesPlastic::updateTotalFields()
     Info<< nl << "Updating total accumulated fields" << endl;
     sigmaY_ += DSigmaY_;
     sigmaYf_ += DSigmaYf_;
-
-    //Info<< "    Max DEpsilonPEq is " << gMax(DEpsilonPEq_) << endl;
     epsilonPEq_ += DEpsilonPEq_;
     epsilonPEqf_ += DEpsilonPEqf_;
     epsilonP_ += DEpsilonP_;
@@ -2159,20 +2171,15 @@ void Foam::neoHookeanElasticMisesPlastic::updateTotalFields()
             << 100.0*scalar(numCellsYielding)/scalar(nTotalCells)
             << "% of the cells in this material) are actively yielding"
             << nl << endl;
-
-//    Info<< "    " << numCellsYielding << " cells ("
-//		    << 100.0*scalar(numCellsYielding)/scalar(nTotalCells)
-//		    << "% of the cells in this material) are actively yielding"
-//		    << nl << endl;
 }
 
 
 Foam::scalar Foam::neoHookeanElasticMisesPlastic::newDeltaT()
 {
     // In the calculation of the plastic strain increment, the return direction
-    // is kept constant for the time-step; we can approximate the error based on
-    // the difference in the return direction from the start to the end of the
-    // time-step, where the return direction is given normalised deviatoric
+    // is kept constant for the time-step; we can approximate the error based 
+    // on the difference in the return direction from the start to the end of 
+    // the time-step, where the return direction is given normalised deviatoric
     // strain. The error approximation is obtained using the difference between
     // the trapezoidal rule and the EUler backward method, as described in:
 
@@ -2180,7 +2187,7 @@ Foam::scalar Foam::neoHookeanElasticMisesPlastic::newDeltaT()
     // in large deformation finite element analysis, Finite Elements in
     // Analysis and Design 16 (1994) 99-139.
 
-    // Update the total deformatio gradient: already done by updateF
+    // Update the total deformation gradient: already done by updateF
     // if (mesh().foundObject<surfaceTensorField>("grad(DD)f"))
     // {
     //     F() = fvc::average(relFf()) & F().oldTime();
@@ -2191,10 +2198,10 @@ Foam::scalar Foam::neoHookeanElasticMisesPlastic::newDeltaT()
     // }
 
     // Calculate the total true (Hencky) strain
-    const volSymmTensorField epsilon(0.5*log(symm(F().T() & F())));
+    const volSymmTensorField epsilon = 0.5*log(symm(F().T() & F()));
 
     // Calculate equivalent strain, for normalisation of the error
-    const volScalarField epsilonEq(sqrt((2.0/3.0)*magSqr(dev(epsilon))));
+    const volScalarField epsilonEq = sqrt((2.0/3.0)*magSqr(dev(epsilon)));
 
     // Take reference to internal fields
 #ifdef OPENFOAM_NOT_EXTEND
@@ -2210,11 +2217,9 @@ Foam::scalar Foam::neoHookeanElasticMisesPlastic::newDeltaT()
 #endif
 
     // Calculate error field
-    const symmTensorField DEpsilonPErrorI
-    (
+    const symmTensorField DEpsilonPErrorI =
         Foam::sqrt(3.0/8.0)*DEpsilonPI*mag(plasticNI - plasticNIold)
-       /(epsilonEqI + SMALL)
-    );
+       /(epsilonEqI + SMALL);
 
     // Max error
     const scalar maxMagDEpsilonPErr = gMax(mag(DEpsilonPErrorI));
