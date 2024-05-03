@@ -50,6 +50,7 @@ Foam::label Foam::sparseMatrixExtended::nBlockRows() const
     return nBlockRows + 1;
 }
 
+
 Foam::RectangularMatrix<Foam::scalar>& Foam::sparseMatrixExtended::operator()
 (
     const label rowI,
@@ -75,6 +76,7 @@ Foam::RectangularMatrix<Foam::scalar>& Foam::sparseMatrixExtended::operator()
         return *iter;
     }
 }
+
 
 void Foam::sparseMatrixExtended::print() const
 {
@@ -121,7 +123,6 @@ void Foam::sparseMatrixExtended::print() const
         Info << "(" << rowI << ", " << colI << ") : " << coeff << endl;
     }
 }
-
 
 
 // ************************************************************************* //

@@ -27,7 +27,7 @@ License
     #include <petscksp.h>
 #endif
 
-// * * * * * * * * * * * * * * * * * Functions  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * Functions  * * * * * * * * * * * * * * *//
 
 bool Foam::sparseMatrixExtendedTools::checkTwoD(const polyMesh& mesh)
 {
@@ -76,7 +76,10 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
 )
 {
 #ifdef S4F_NO_USE_EIGEN
-    FatalErrorIn("void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen(...)")
+    FatalErrorIn
+    (
+        "void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen(...)"
+    )
         << "This function cannot be called as the S4F_NO_USE_EIGEN variable "
         << " is set.  If you would like to use this option then unset the "
         << "S4F_NO_USE_EIGEN variable and re-run the top-level Allwmake script"
@@ -115,42 +118,117 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
             const label rowI = 3*iter.key()[0];
             const label colI = 3*iter.key()[1];
 
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI, colI, coeff(0,0)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI, colI+1, coeff(0,1)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI, colI+2, coeff(0,2)));
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI, colI, coeff(0,0))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI, colI+1, coeff(0,1))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI, colI+2, coeff(0,2))
+            );
 
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+1, colI, coeff(1,0)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+1, colI+1, coeff(1,1)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+1, colI+2, coeff(1,2)));
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+1, colI, coeff(1,0))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+1, colI+1, coeff(1,1))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+1, colI+2, coeff(1,2))
+            );
             
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+2, colI, coeff(2,0)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+2, colI+1, coeff(2,1)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+2, colI+2, coeff(2,2)));
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+2, colI, coeff(2,0))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+2, colI+1, coeff(2,1))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+2, colI+2, coeff(2,2))
+            );
         }
         else // 3-D
         {
             const label rowI = 4*iter.key()[0];
             const label colI = 4*iter.key()[1];
 
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI, colI, coeff(0,0)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI, colI+1, coeff(0,1)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI, colI+2, coeff(0,2)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI, colI+3, coeff(0,3)));
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI, colI, coeff(0,0))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI, colI+1, coeff(0,1))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI, colI+2, coeff(0,2))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI, colI+3, coeff(0,3))
+            );
 
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+1, colI, coeff(1,0)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+1, colI+1, coeff(1,1)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+1, colI+2, coeff(1,2)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+1, colI+3, coeff(1,3)));
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+1, colI, coeff(1,0))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+1, colI+1, coeff(1,1))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+1, colI+2, coeff(1,2))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+1, colI+3, coeff(1,3))
+            );
 
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+2, colI, coeff(2,0)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+2, colI+1, coeff(2,1)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+2, colI+2, coeff(2,2)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+2, colI+3, coeff(2,3)));
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+2, colI, coeff(2,0))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+2, colI+1, coeff(2,1))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+2, colI+2, coeff(2,2))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+2, colI+3, coeff(2,3))
+            );
             
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+3, colI, coeff(3,0)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+3, colI+1, coeff(3,1)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+3, colI+2, coeff(3,2)));
-            coefficients.push_back(Eigen::Triplet<scalar>(rowI+3, colI+3, coeff(3,3)));
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+3, colI, coeff(3,0))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+3, colI+1, coeff(3,1))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+3, colI+2, coeff(3,2))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+3, colI+3, coeff(3,3))
+            );
         }
     }
 
@@ -267,7 +345,8 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     if (debug)
     {
         Info<< "BlockSolverPerformance<vector> "
-            << "sparseMatrixExtendedTools::solveLinearSystemPETSc: start" << endl;
+            << "sparseMatrixExtendedTools::solveLinearSystemPETSc: start" 
+            << endl;
     }
 
     // Set the block coefficient size (3 for 2-D, 4 for 3-D)
@@ -323,7 +402,8 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     optionsFile.expand();
     // static char help[] = "Solves a linear system with KSP.\n\n";
     PetscErrorCode ierr;
-    // ierr = PetscInitialize(&argc, &args, optionsFile.c_str(), help); checkErr(ierr);
+    // ierr = PetscInitialize(&argc, &args, optionsFile.c_str(), help); 
+    // checkErr(ierr);
     if (debug)
     {
         Pout<< "PetscInitialize: start" << endl;
@@ -339,8 +419,14 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
 
     //ierr = MPI_Comm_size(PETSC_COMM_WORLD,&size);
     //ierr = PetscOptionsGetInt(NULL,NULL,"-n",&n,NULL);
-    //ierr = PetscOptionsGetBool(NULL,NULL,"-nonzero_guess",&nonzeroguess,NULL);
-
+    //ierr = PetscOptionsGetBool
+    //(
+    //    NULL,
+    //    NULL,
+    //    "-nonzero_guess",
+    //    &nonzeroguess,
+    //    NULL
+    //);
 
     // Create PETSc matrix
 
@@ -364,10 +450,10 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     // Pre-allocate matrix memory: this is critical for performance
 
     // Set on-core (d_nnz) and off-core (o_nnz) non-zeros per row
-    // o_nnz is currently not set correctly, as it distinguishes between on-core
-    // and off-core instead of owned (all on-core) vs not-owned (on-core and
-    // off-core). For now, we will just use the max on-core non-zeros to
-    // initialise not-owned values
+    // o_nnz is currently not set correctly, as it distinguishes between 
+    // on-core and off-core instead of owned (all on-core) vs not-owned 
+    // (on-core and off-core). For now, we will just use the max on-core 
+    // non-zeros to initialise not-owned values
 
     int* d_nnz = (int*)malloc(n*sizeof(int));
     int* o_nnz = (int*)malloc(n*sizeof(int));
@@ -400,27 +486,25 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
 
     // Parallel matrix
     ierr = MatMPIAIJSetPreallocation(A, 0, d_nnz, 0, o_nnz); checkErr(ierr);
-    //ierr = MatMPIAIJSetPreallocation(A, 0, d_nnz, d_nz, NULL); checkErr(ierr);
+    //ierr = MatMPIAIJSetPreallocation(A, 0, d_nnz, d_nz, NULL); 
+    //checkErr(ierr);
     // or conservatively as
     // ierr = MatMPIAIJSetPreallocation(A, d_nz, NULL, o_nz, NULL);
-    // ierr = MatMPIAIJSetPreallocation(A, d_nz, NULL, d_nz, NULL); checkErr(ierr);
+    // ierr = MatMPIAIJSetPreallocation(A, d_nz, NULL, d_nz, NULL); 
+    // checkErr(ierr);
     // const label nz = 81; // way too much in 2-D!
     // ierr = MatMPIAIJSetPreallocation(A, nz, NULL, nz, NULL);
 
     // Optional: no error if additional memory allocation is required
     // If false, then an error is thrown for additional allocations
-    // If preallocation was correct (or conservative) then an error should never
-    // be thrown
+    // If preallocation was correct (or conservative) then an error should 
+    // never be thrown
     // For now, we will disable this check in debug mode so we can see how many
     // mallocs were made
-    //if (debug)
-    {
-        MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
-    }
+    MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
 
     // Not sure if this set is needed but it does not hurt
     ierr = MatSetUp(A); checkErr(ierr);
-
 
     // Insert coefficients into the matrix
     // Note: we use global indices when inserting coefficients
@@ -556,7 +640,12 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
             if (twoD)
             {
                 // Prepare values
-                const PetscScalar values[3] = {sourceI(0,0), sourceI(1,0), sourceI(2,0)};
+                const PetscScalar values[3] = 
+                {
+                    sourceI(0,0), 
+                    sourceI(1,0), 
+                    sourceI(2,0)
+                };
 
                 // Insert values
                 ierr = VecSetValuesBlocked
@@ -569,7 +658,10 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
                 // Prepare values
                 const PetscScalar values[4] =
                 {
-                    sourceI(0,0), sourceI(1,0), sourceI(2,0), sourceI(3,0)
+                    sourceI(0,0), 
+                    sourceI(1,0), 
+                    sourceI(2,0), 
+                    sourceI(3,0)
                 };
 
                 // Insert values
@@ -606,7 +698,15 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     //   KSPSetFromOptions();
     // ierr = KSPGetPC(ksp,&pc);CHKERRQ(ierr);
     // ierr = PCSetType(pc,PCJACOBI);CHKERRQ(ierr);
-    // ierr = KSPSetTolerances(ksp,1.e-5,PETSC_DEFAULT,PETSC_DEFAULT,PETSC_DEFAULT);CHKERRQ(ierr);
+    // ierr = KSPSetTolerances
+    // (
+    //     ksp,
+    //     1.e-5,
+    //     PETSC_DEFAULT,
+    //     PETSC_DEFAULT,
+    //     PETSC_DEFAULT
+    // );
+    // CHKERRQ(ierr);
     PC pc;
     ierr = KSPGetPC(ksp, &pc); checkErr(ierr);
     //ierr = KSPSetType(ksp, KSPFGMRES);
@@ -676,7 +776,6 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     {
         Pout<< "        Solving the linear solver: start" << endl;
     }
-        //Info << "file: " << __FILE__ << ", line: " << __LINE__ << endl;
     ierr = KSPSolve(ksp, b, x); checkErr(ierr);
 
 
@@ -684,7 +783,6 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     {
         Pout<< "        Solving the linear solver: end" << endl;
     }
-
 
     // Copy the results from the PETSc vector into the foam field
 
@@ -772,9 +870,23 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
         VecScatter ctx;
         ierr = VecScatterCreate(x, indexSet, xNotOwned, NULL, &ctx);
         checkErr(ierr);
-        ierr = VecScatterBegin(ctx, x, xNotOwned, INSERT_VALUES, SCATTER_FORWARD);
+        ierr = VecScatterBegin
+        (
+            ctx, 
+            x, 
+            xNotOwned, 
+            INSERT_VALUES, 
+            SCATTER_FORWARD
+        );
         checkErr(ierr);
-        ierr = VecScatterEnd(ctx, x, xNotOwned, INSERT_VALUES, SCATTER_FORWARD);
+        ierr = VecScatterEnd
+        (
+            ctx, 
+            x, 
+            xNotOwned, 
+            INSERT_VALUES, 
+            SCATTER_FORWARD
+        );
         checkErr(ierr);
         ierr = VecScatterDestroy(&ctx); checkErr(ierr);
 
@@ -820,28 +932,43 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     // ierr = VecAXPY(x,neg_one,u);CHKERRQ(ierr);
     // ierr = VecNorm(x,NORM_2,&norm);CHKERRQ(ierr);
     // ierr = KSPGetIterationNumber(ksp,&its);CHKERRQ(ierr);
-    // ierr = PetscPrintf(PETSC_COMM_WORLD,"Norm of error %g, Iterations %D\n",(double)norm,its);CHKERRQ(ierr);
+    // ierr = PetscPrintf
+    // (
+    //     PETSC_COMM_WORLD,
+    //     "Norm of error %g, 
+    //     Iterations %D\n",
+    //     (double)norm,
+    //     its
+    // );
+    // CHKERRQ(ierr);
     //ierr = VecAXPY(x,neg_one,u);
     PetscInt       its;
     PetscReal      norm;         /* norm of solution error */
     ierr = VecNorm(x, NORM_2, &norm); checkErr(ierr);
     ierr = KSPGetIterationNumber(ksp, &its); checkErr(ierr);
-    //ierr = PetscPrintf(PETSC_COMM_WORLD,"Norm of error %g, Iterations %D\n",(double)norm,its);
+    // ierr = PetscPrintf
+    // (
+    //     PETSC_COMM_WORLD,
+    //     "Norm of error %g, 
+    //     Iterations %D\n",
+    //     (double)norm,
+    //     its
+    // );
     // Pout<< "    Error norm: " << norm << ", nIters = " << its << endl;
-
 
     // Free work space.  All PETSc objects should be destroyed when they
     // are no longer needed.
     // Pout<< "        Freeing memory" << endl;
-    // ierr = VecDestroy(&x);CHKERRQ(ierr); ierr = VecDestroy(&u);CHKERRQ(ierr);
-    // ierr = VecDestroy(&b);CHKERRQ(ierr); ierr = MatDestroy(&A);CHKERRQ(ierr);
+    // ierr = VecDestroy(&x);CHKERRQ(ierr); ierr = VecDestroy(&u);
+    // CHKERRQ(ierr);
+    // ierr = VecDestroy(&b);CHKERRQ(ierr); ierr = MatDestroy(&A);
+    // CHKERRQ(ierr);
     // ierr = KSPDestroy(&ksp);CHKERRQ(ierr);
     ierr = VecDestroy(&x); checkErr(ierr);
     //ierr = VecDestroy(&u);
     ierr = VecDestroy(&b); checkErr(ierr);
     ierr = MatDestroy(&A); checkErr(ierr);
     ierr = KSPDestroy(&ksp); checkErr(ierr);
-
 
     // I should not call this here otherwise I cannot call this function again
     // Always call PetscFinalize() before exiting a program.  This routine
@@ -853,7 +980,8 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     if (debug)
     {
         Pout<< "BlockSolverPerformance<vector> "
-            << "sparseMatrixExtendedTools::solveLinearSystemPETSc: end" << endl;
+            << "sparseMatrixExtendedTools::solveLinearSystemPETSc: end" 
+            << endl;
     }
 
     vector initRes(vector::one);
@@ -963,308 +1091,6 @@ void Foam::sparseMatrixExtendedTools::checkErr(const int ierr)
 }
 
 
-//void Foam::sparseMatrixExtendedTools::enforceFixedDof
-//(
-//    sparseMatrixExtended& matrix,
-//    Field<RectangularMatrix<scalar>>& source,
-//    const bool twoD,
-//    const boolList& fixedDofs,
-//    const symmTensorField& fixedDofDirections,
-//    const pointField& fixedDofValues,
-//    const scalar fixedDofScale
-//)
-//{
-//    const bool debug = 0;
-
-//    // Loop though the matrix and overwrite the coefficients for fixed DOFs
-//    // To enforce the value we will set the diagonal to the identity and set
-//    // the source to zero. The reason the source is zero is that we are solving
-//    // for the correction and the correction is zero for fixed values.
-//    // Rather than setting the identity on the diagonal, we will scale it by
-//    // fixedDofScale to improve the condition number, although the
-//    // preconditioner should not care.
-//    // Secondly, for any non-fixed-DOF equations which refer to fixed DOFs, we
-//    // will eliminate these coeffs and add their contribution (which is known)
-//    // to the source.
-//    // This is only done for the displacement coefficients and source terms
-//    // of the momentum equation.
-//    sparseMatrixExtendedData& data = matrix.data();
-//    for (auto iter = data.begin(); iter != data.end(); ++iter)
-//    {
-//        const label blockRowI = iter.key()[0];
-//        const label blockColI = iter.key()[1];
-
-//        if (fixedDofs[blockRowI])
-//        {
-//            RectangularMatrix<scalar>& coeff = iter();
-//            
-////            Info << "coeff before: " << coeff << endl;
-
-//            // Extract the displacement coefficients of the momentum equation
-//            // on the left-hand side
-//            tensor momDispCoeff(tensor::zero);
-
-//            if (twoD)
-//            {
-//                momDispCoeff.xx() = coeff(0,0);
-//                momDispCoeff.xy() = coeff(0,1);
-//                momDispCoeff.yx() = coeff(1,0);
-//                momDispCoeff.yy() = coeff(1,1);
-//            }
-//            else
-//            {
-//                momDispCoeff.xx() = coeff(0,0);
-//                momDispCoeff.xy() = coeff(0,1);
-//                momDispCoeff.xz() = coeff(0,2);
-//                momDispCoeff.yx() = coeff(1,0);
-//                momDispCoeff.yy() = coeff(1,1);
-//                momDispCoeff.yz() = coeff(1,2);
-//                momDispCoeff.zx() = coeff(2,0);
-//                momDispCoeff.zy() = coeff(2,1);
-//                momDispCoeff.zz() = coeff(2,2);
-//            }
-//            
-//            // Extract the pressure coefficients of the momentum equation
-//            vector momPressCoeff(vector::zero);
-
-//            if (twoD)
-//            {
-//                momPressCoeff.x() = coeff(0,2);
-//                momPressCoeff.y() = coeff(1,2);
-//            }
-//            else
-//            {
-//				momPressCoeff.x() = coeff(0,3);
-//                momPressCoeff.y() = coeff(1,3);
-//                momPressCoeff.z() = coeff(2,3);
-//            }
-
-//            // Extract the source terms of the momentum equation
-//            vector sourceTerms(vector::zero);
-
-//            if (twoD)
-//            {
-//                sourceTerms.x() = source[blockRowI](0,0);
-//                sourceTerms.y() = source[blockRowI](1,0);
-//            }
-//            else
-//            {
-//                sourceTerms.x() = source[blockRowI](0,0);
-//                sourceTerms.y() = source[blockRowI](1,0);
-//                sourceTerms.z() = source[blockRowI](2,0);
-//            }
-
-//            if (debug)
-//            {
-//                Info<< "blockRow fixed: " << blockRowI << nl
-//                    << "    row,col: " << blockRowI << "," << blockColI << nl
-//                    << "    fixedDir: " << fixedDofDirections[blockRowI] << nl
-//                    << "    Displacement coeff before: " << momDispCoeff << nl
-//                    << "    Pressure coeff before: " << momPressCoeff << endl;
-//            }
-
-//            // Free direction
-//            const tensor freeDir(I - fixedDofDirections[blockRowI]);
-//            
-////            Info << "blockRowI: " << blockRowI << endl;
-////            Info << "freeDir: " << freeDir << endl;
-
-//            // Set the source to zero as the correction to the displacement
-//            // is zero
-//            //source[blockRowI] = (freeDir & source[blockRowI]);
-//            sourceTerms = (freeDir & sourceTerms);
-
-//            // Eliminate the fixed directions from the coeff
-//            momDispCoeff = (freeDir & momDispCoeff);
-//            momPressCoeff = (freeDir & momPressCoeff);
-
-//            if (blockRowI == blockColI)
-//            {
-//                // Remove the fixed component from the free component equation
-//                momDispCoeff = (freeDir & momDispCoeff & freeDir);
-//                //momPressCoeff = vector::zero;
-
-//                // Fixed direction
-//                const tensor& fixedDir = fixedDofDirections[blockRowI];
-//                
-////                Info << "fixedDir: " << fixedDir << endl;
-
-//                // Set the fixed direction diagonal to enforce a zero correction
-//                momDispCoeff -= tensor(fixedDofScale*fixedDir);
-//            }
-
-//            //Insert the changed displacement coefficients back into the matrix
-//            if (twoD)
-//            {
-//                coeff(0,0) = momDispCoeff.xx();
-//                coeff(0,1) = momDispCoeff.xy();
-//                coeff(1,0) = momDispCoeff.yx();
-//                coeff(1,1) = momDispCoeff.yy();
-//            }
-//            else
-//            {
-//                coeff(0,0) = momDispCoeff.xx();
-//                coeff(0,1) = momDispCoeff.xy();
-//                coeff(0,2) = momDispCoeff.xz();
-//                coeff(1,0) = momDispCoeff.yx();
-//                coeff(1,1) = momDispCoeff.yy();
-//                coeff(1,2) = momDispCoeff.yz();
-//                coeff(2,0) = momDispCoeff.zx();
-//                coeff(2,1) = momDispCoeff.zy();
-//                coeff(2,2) = momDispCoeff.zz();
-//            }
-//            
-//            //Insert the changed pressure coefficients back into the matrix
-//         	if (twoD)
-//            {
-//                coeff(0,2) = momPressCoeff.x();
-//                coeff(1,2) = momPressCoeff.y();
-//            }
-//            else
-//            {
-//                coeff(0,3) = momPressCoeff.x();
-//                coeff(1,3) = momPressCoeff.y();
-//                coeff(2,3) = momPressCoeff.z();
-//            }    
-//                   
-//            //Insert the changed source terms back into the source
-//            if (twoD)
-//            {
-//                source[blockRowI](0,0) = sourceTerms.x();
-//                source[blockRowI](1,0) = sourceTerms.y();
-//            }
-//            else
-//            {
-//                source[blockRowI](0,0) = sourceTerms.x();
-//                source[blockRowI](1,0) = sourceTerms.y();
-//                source[blockRowI](2,0) = sourceTerms.z();
-//            }
-//            
-////            Info << "coeff after: " << coeff << endl;
-
-//            if (debug)
-//            {
-//                Info<< "    Displacement coeff after: " << momDispCoeff << nl;
-//                Info<< "    Pressure coeff after: " << momPressCoeff << nl << endl;
-//            }
-
-//        }
-//        else if (fixedDofs[blockColI])
-//        {
-//            // This equation refers to a fixed direction
-//            // We will eliminate the coeff and add the contribution to the
-//            // source
-//            RectangularMatrix<scalar>& coeff = iter();
-//            
-////            Info << "coeff before: " << coeff << endl;
-
-//            if (debug)
-//            {
-//                Info<< "blockCol fixed: " << blockColI << nl
-//                    << "    row,col: " << blockRowI << "," << blockColI << nl
-//                    << "    fixedDir: " << fixedDofDirections[blockColI] << nl
-//                    << "    coeff before: " << coeff << endl;
-//            }
-
-//            // Extract the displacement coefficients of the momentum equation
-//            // on the left-hand side
-//            tensor momDispCoeff(tensor::zero);
-
-//            if (twoD)
-//            {
-//                momDispCoeff.xx() = coeff(0,0);
-//                momDispCoeff.xy() = coeff(0,1);
-//                momDispCoeff.yx() = coeff(1,0);
-//                momDispCoeff.yy() = coeff(1,1);
-//            }
-//            else
-//            {
-//                momDispCoeff.xx() = coeff(0,0);
-//                momDispCoeff.xy() = coeff(0,1);
-//                momDispCoeff.xz() = coeff(0,2);
-//                momDispCoeff.yx() = coeff(1,0);
-//                momDispCoeff.yy() = coeff(1,1);
-//                momDispCoeff.yz() = coeff(1,2);
-//                momDispCoeff.zx() = coeff(2,0);
-//                momDispCoeff.zy() = coeff(2,1);
-//                momDispCoeff.zz() = coeff(2,2);
-//            }
-//            
-//            // Extract the displacement coefficients of the pressure equation
-//            vector pressDispCoeff(vector::zero);
-
-//            if (twoD)
-//            {
-//                pressDispCoeff.x() = coeff(2,0);
-//                pressDispCoeff.y() = coeff(2,1);
-//            }
-//            else
-//            {
-//				pressDispCoeff.x() = coeff(3,0);
-//                pressDispCoeff.y() = coeff(3,1);
-//                pressDispCoeff.z() = coeff(3,2);
-//            }
-
-//            // Directions where the DOFs are unknown
-//            const tensor freeDir(I - fixedDofDirections[blockColI]);
-
-////			Info << "blockColI: " << blockColI << endl;
-////			Info << "freeDir: " << freeDir << endl;
-
-////			Info << "pressDispCoeff: " << pressDispCoeff << endl;
-
-//            // Eliminate the fixed directions
-//            momDispCoeff = (momDispCoeff & freeDir);
-//            pressDispCoeff = (freeDir & pressDispCoeff);
-//            
-////            Info << "pressDispCoeff: " << pressDispCoeff << endl;
-
-//            //Insert the changed coefficients back into the matrix
-//            if (twoD)
-//            {
-//                coeff(0,0) = momDispCoeff.xx();
-//                coeff(0,1) = momDispCoeff.xy();
-//                coeff(1,0) = momDispCoeff.yx();
-//                coeff(1,1) = momDispCoeff.yy();
-//            }
-//            else
-//            {
-//                coeff(0,0) = momDispCoeff.xx();
-//                coeff(0,1) = momDispCoeff.xy();
-//                coeff(0,2) = momDispCoeff.xz();
-//                coeff(1,0) = momDispCoeff.yx();
-//                coeff(1,1) = momDispCoeff.yy();
-//                coeff(1,2) = momDispCoeff.yz();
-//                coeff(2,0) = momDispCoeff.zx();
-//                coeff(2,1) = momDispCoeff.zy();
-//                coeff(2,2) = momDispCoeff.zz();
-//            }
-//            
-//            //Insert the changed pressure coefficients back into the matrix
-//         	if (twoD)
-//            {
-//                coeff(2,0) = pressDispCoeff.x();
-//                coeff(2,1) = pressDispCoeff.y();
-//            }
-//            else
-//            {
-//                coeff(3,0) = pressDispCoeff.x();
-//                coeff(3,1) = pressDispCoeff.y();
-//                coeff(3,2) = pressDispCoeff.z();
-//            }  
-//            
-////            Info << "coeff after: " << coeff << endl;
-
-//            if (debug)
-//            {
-//                Info<< "    coeff after: " << momDispCoeff << nl << endl;
-//            }
-
-//        }
-//    }
-//}
-
-
 void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
 (
     sparseMatrixExtended& matrix,
@@ -1297,8 +1123,6 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
         if (fixedDofs[blockRowI])
         {
             RectangularMatrix<scalar>& coeff = iter();
-
-//            Info << "coeff before: " << coeff << endl;
 
             // Extract the displacement coefficients of the momentum equation
             tensor momentumEqnDispCoeff(tensor::zero);
@@ -1333,7 +1157,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             }
             else
             {
-				momentumEqnPressCoeff.x() = coeff(0,3);
+                momentumEqnPressCoeff.x() = coeff(0,3);
                 momentumEqnPressCoeff.y() = coeff(1,3);
                 momentumEqnPressCoeff.z() = coeff(2,3);
             }
@@ -1348,7 +1172,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             }
             else
             {
-				pressureEqnDispCoeff.x() = coeff(3,0);
+                pressureEqnDispCoeff.x() = coeff(3,0);
                 pressureEqnDispCoeff.y() = coeff(3,1);
                 pressureEqnDispCoeff.z() = coeff(3,2);
             }
@@ -1373,48 +1197,43 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 Info<< "blockRow fixed: " << blockRowI << nl
                     << "    row,col: " << blockRowI << "," << blockColI << nl
                     << "    fixedDir: " << fixedDofDirections[blockRowI] << nl
-                    << "    Displacement coeff before: " << momentumEqnDispCoeff << nl
-                    << "    Pressure coeff before: " << momentumEqnPressCoeff << endl;
+                    << "    Displacement coeff of momentum equation before: " 
+                    << momentumEqnDispCoeff << nl 
+                    << "    Displacement coeff of pressure equation before: " 
+                    << pressureEqnDispCoeff << nl
+                    << "    Pressure coeff of momentum equation before: " 
+                    << momentumEqnPressCoeff << nl
+                    << "    Source before: " << sourceTerms << endl;
             }
 
             // Free direction
             const tensor freeDir(I - fixedDofDirections[blockRowI]);
 
-//            Info << "blockRowI: " << blockRowI << endl;
-//            Info << "freeDir: " << freeDir << endl;
-
             // Set the source to zero as the correction to the displacement
             // is zero
-            //source[blockRowI] = (freeDir & source[blockRowI]);
             sourceTerms = (freeDir & sourceTerms);
 
             // Eliminate the fixed directions from the coeffs
             momentumEqnDispCoeff = (freeDir & momentumEqnDispCoeff);
-			momentumEqnPressCoeff = (freeDir & momentumEqnPressCoeff);
-			
-            if (fixedDofs[blockColI])
-            {
-                pressureEqnDispCoeff = (freeDir & pressureEqnDispCoeff);
-            }
-			
+            momentumEqnPressCoeff = (freeDir & momentumEqnPressCoeff);
+            
             if (blockRowI == blockColI)
             {
                 // Remove the fixed component from the free component equation
-                momentumEqnDispCoeff = (freeDir & momentumEqnDispCoeff & freeDir);
-                pressureEqnDispCoeff = (freeDir & pressureEqnDispCoeff);
-                //momPressCoeff = vector::zero;
+                momentumEqnDispCoeff = 
+                    freeDir & momentumEqnDispCoeff & freeDir;
+                pressureEqnDispCoeff = freeDir & pressureEqnDispCoeff;
 
                 // Fixed direction
                 const tensor& fixedDir = fixedDofDirections[blockRowI];
 
-//                Info << "fixedDir: " << fixedDir << endl;
-
-                // Set the fixed direction diagonal to enforce a zero correction
+                // Set the fixed direction diagonal to enforce a zero 
+                // correction
                 momentumEqnDispCoeff -= tensor(fixedDofScale*fixedDir);
-			   // pressureEqnDispCoeff = (freeDir & pressureEqnDispCoeff);
             }
 
-            // Insert the changed displacement coefficients back into the matrix
+            // Insert the changed displacement coefficients of the momentum
+            // equation back into the matrix
             if (twoD)
             {
                 coeff(0,0) = momentumEqnDispCoeff.xx();
@@ -1435,8 +1254,9 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 coeff(2,2) = momentumEqnDispCoeff.zz();
             }
             
-            //Insert the changed pressure coefficients back into the matrix
-         	if (twoD)
+            // Insert the changed pressure coefficients of the momentum 
+            // equation back into the matrix
+            if (twoD)
             {
                 coeff(0,2) = momentumEqnPressCoeff.x();
                 coeff(1,2) = momentumEqnPressCoeff.y();
@@ -1448,8 +1268,9 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 coeff(2,3) = momentumEqnPressCoeff.z();
             }   
             
-            //Insert the changed pressure coefficients back into the matrix
-         	if (twoD)
+            // Insert the changed pressure coefficients of the pressure 
+            // equation back into the matrix
+            if (twoD)
             {
                 coeff(2,0) = pressureEqnDispCoeff.x();
                 coeff(2,1) = pressureEqnDispCoeff.y();
@@ -1461,7 +1282,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 coeff(3,2) = pressureEqnDispCoeff.z();
             }   
                    
-            //Insert the changed source terms back into the source
+            // Insert the changed source terms back into the source
             if (twoD)
             {
                 source[blockRowI](0,0) = sourceTerms.x();
@@ -1474,12 +1295,15 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 source[blockRowI](2,0) = sourceTerms.z();
             }
 
-//            Info << "coeff after: " << coeff << endl;
-
             if (debug)
             {
-                Info<< "    Displacement coeff after: " << momentumEqnDispCoeff << nl;
-                Info<< "    Pressure coeff after: " << momentumEqnPressCoeff << nl << endl;
+                Info<< "    Displacement coeff of momentum equation after: " 
+                    << momentumEqnDispCoeff << nl 
+                    << "    Displacement coeff of pressure equation after: " 
+                    << pressureEqnDispCoeff << nl
+                    << "    Pressure coeff of momentum equation after: " 
+                    << momentumEqnPressCoeff << nl
+                    << "    Source before: " << sourceTerms << endl;
             }
 
         }
@@ -1489,16 +1313,6 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             // We will eliminate the coeff and add the contribution to the
             // source
             RectangularMatrix<scalar>& coeff = iter();
-
-//            Info << "coeff before: " << coeff << endl;
-
-            if (debug)
-            {
-                Info<< "blockCol fixed: " << blockColI << nl
-                    << "    row,col: " << blockRowI << "," << blockColI << nl
-                    << "    fixedDir: " << fixedDofDirections[blockColI] << nl
-                    << "    coeff before: " << coeff << endl;
-            }
 
             // Extract the displacement coefficients of the momentum equation
             tensor momentumEqnDispCoeff(tensor::zero);
@@ -1523,21 +1337,6 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 momentumEqnDispCoeff.zz() = coeff(2,2);
             }
             
-            //// Extract the pressure coefficients of the momentum equation
-            //vector momentumEqnPressCoeff(vector::zero);
-
-            //if (twoD)
-            //{
-                //momentumEqnPressCoeff.x() = coeff(0,2);
-                //momentumEqnPressCoeff.y() = coeff(1,2);
-            //}
-            //else
-            //{
-				//momentumEqnPressCoeff.x() = coeff(0,3);
-                //momentumEqnPressCoeff.y() = coeff(1,3);
-                //momentumEqnPressCoeff.z() = coeff(2,3);
-            //}
-
             // Extract the displacement coefficients of the pressure equation
             vector pressureEqnDispCoeff(vector::zero);
 
@@ -1548,29 +1347,31 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             }
             else
             {
-				pressureEqnDispCoeff.x() = coeff(3,0);
+                pressureEqnDispCoeff.x() = coeff(3,0);
                 pressureEqnDispCoeff.y() = coeff(3,1);
                 pressureEqnDispCoeff.z() = coeff(3,2);
+            }
+            
+            if (debug)
+            {
+                Info<< "blockCol fixed: " << blockColI << nl
+                    << "    row,col: " << blockRowI << "," << blockColI << nl
+                    << "    fixedDir: " << fixedDofDirections[blockColI] << nl
+                    << "    Displacement coeff of momentum equation before: " 
+                    << momentumEqnDispCoeff << nl
+                    << "    Displacement coeff of pressure equation before: " 
+                    << pressureEqnDispCoeff << endl;
             }
 
             // Directions where the DOFs are unknown
             const tensor freeDir(I - fixedDofDirections[blockColI]);
 
-//			Info << "blockColI: " << blockColI << endl;
-//			Info << "freeDir: " << freeDir << endl;
-
-//			Info << "pressDispCoeff: " << pressDispCoeff << endl;
-
             // Eliminate the fixed directions
-            momentumEqnDispCoeff = (momentumEqnDispCoeff & freeDir);
-            //momentumEqnPressCoeff = (freeDir & momentumEqnPressCoeff);
-            pressureEqnDispCoeff = (freeDir & pressureEqnDispCoeff);
+            momentumEqnDispCoeff = momentumEqnDispCoeff & freeDir;
+            pressureEqnDispCoeff = freeDir & pressureEqnDispCoeff;
 
-			//Info << "freeDir for blockRowI: " << blockRowI << " and blockColI: " << blockColI << endl;
-            
-//            Info << "pressDispCoeff: " << pressDispCoeff << endl;
-
-            // Insert the changed coefficients back into the matrix
+            // Insert the changed displacement coefficients of the momentum
+            // equation back into the matrix
             if (twoD)
             {
                 coeff(0,0) = momentumEqnDispCoeff.xx();
@@ -1591,21 +1392,9 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 coeff(2,2) = momentumEqnDispCoeff.zz();
             }
 
-            //// Insert the changed pressure coefficients back into the matrix
-            //if (twoD)
-            //{
-                //coeff(0,2) = momentumEqnPressCoeff.x();
-                //coeff(1,2) = momentumEqnPressCoeff.y();
-            //}
-            //else
-            //{
-                //coeff(0,3) = momentumEqnPressCoeff.x();
-                //coeff(1,3) = momentumEqnPressCoeff.y();
-                //coeff(2,3) = momentumEqnPressCoeff.z();
-            //} 
-            
-            //Insert the changed pressure coefficients back into the matrix
-         	if (twoD)
+            // Insert the changed displacement coefficients of the pressure
+            // equation back into the matrix
+            if (twoD)
             {
                 coeff(2,0) = pressureEqnDispCoeff.x();
                 coeff(2,1) = pressureEqnDispCoeff.y();
@@ -1617,11 +1406,12 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 coeff(3,2) = pressureEqnDispCoeff.z();
             }  
             
-//            Info << "coeff after: " << coeff << endl;
-
             if (debug)
             {
-                Info<< "    coeff after: " << momentumEqnDispCoeff << nl << endl;
+                Info<< "    Displacement coeff of momentum equation after: " 
+                    << momentumEqnDispCoeff << nl
+                    << "    Displacement coeff of pressure equation after: " 
+                    << pressureEqnDispCoeff << endl;
             }
         }
     }
@@ -1637,8 +1427,6 @@ void Foam::sparseMatrixExtendedTools::enforceFixedPressureDof
     const symmTensorField& fixedDofDirections
 )
 {
-    const bool debug = 0;
-
     // Loop though the matrix and overwrite the coefficients for fixed DOFs
     // To enforce the value we will set the diagonal to the identity and set
     // the source to zero. The reason the source is zero is that we are solving
@@ -1661,7 +1449,8 @@ void Foam::sparseMatrixExtendedTools::enforceFixedPressureDof
         {
             RectangularMatrix<scalar>& coeff = iter();
             
-            // Set the displacement coefficients of the pressure equation to zero
+            // Set the displacement coefficients of the pressure equation to 
+            // zero
             coeff(3,0) = 0;
             coeff(3,1) = 0;
             coeff(3,2) = 0;
@@ -1678,9 +1467,8 @@ void Foam::sparseMatrixExtendedTools::enforceFixedPressureDof
         {
             RectangularMatrix<scalar>& coeff = iter();
             
-            //Info << "coeff before: " << coeff << endl;
-            
-            // Set the displacement coefficients of the momentum equation to zero
+            // Set the displacement coefficients of the momentum equation to 
+            // zero
             coeff(0,3) = 0; 
             coeff(1,3) = 0; 
             coeff(2,3) = 0;  
@@ -1691,990 +1479,5 @@ void Foam::sparseMatrixExtendedTools::enforceFixedPressureDof
     }          
 }
 
-
-void Foam::sparseMatrixExtendedTools::enforceKnownPressure
-(
-    sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source
-)
-{
-    // Loop though the matrix and overwrite the coefficients of the
-    // pressure equation.
-    // To enforce the value we will set the diagonal to the identity and set
-    // the source to zero. The reason the source is zero is that we are solving
-    // for the correction and the correction is zero if the pressure is known.
-    sparseMatrixExtendedData& data = matrix.data();
-    for (auto iter = data.begin(); iter != data.end(); ++iter)
-    {
-        const label blockRowI = iter.key()[0];
-        const label blockColI = iter.key()[1];
-        
-        RectangularMatrix<scalar>& coeff = iter();
-        
-        // Set the coefficients of the pressure equation to zero
-        coeff(3,0) = 0; 
-        coeff(3,1) = 0; 
-        coeff(3,2) = 0; 
-        coeff(3,3) = 0;
-        
-        if (blockRowI == blockColI)
-        {
-            // Set the diagonal to the identity
-            coeff(3,3) = 1;
-        }
-        
-        // Set the source of the pressure equation to zero
-        source[blockRowI](3,0) = 0;             
-    }          
-}
-
-void Foam::sparseMatrixExtendedTools::enforceKnownDisplacement
-(
-    sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source
-)
-{
-    // Loop though the matrix and overwrite the coefficients of the
-    // momentum equation.
-    // To enforce the value we will set the diagonal to the identity and set
-    // the source to zero. The reason the source is zero is that we are solving
-    // for the correction and the correction is zero if the displacement is known.
-    sparseMatrixExtendedData& data = matrix.data();
-    for (auto iter = data.begin(); iter != data.end(); ++iter)
-    {
-        const label blockRowI = iter.key()[0];
-        const label blockColI = iter.key()[1];
-        
-        RectangularMatrix<scalar>& coeff = iter();
-        
-        // Set the coefficients to zero
-        coeff(0,0) = 0; 
-        coeff(0,1) = 0; 
-        coeff(0,2) = 0; 
-        coeff(0,3) = 0; 
-        
-        coeff(1,0) = 0; 
-        coeff(1,1) = 0; 
-        coeff(1,2) = 0; 
-        coeff(1,3) = 0; 
-        
-        coeff(2,0) = 0; 
-        coeff(2,1) = 0; 
-        coeff(2,2) = 0; 
-        coeff(2,3) = 0;  
-        
-        if (blockRowI == blockColI)
-        {
-            // Set the diagonal to the identity
-            coeff(0,0) = 1;
-            coeff(1,1) = 1;
-            coeff(2,2) = 1;
-        }
-        
-        // Set the source of the momentum equation to zero
-        source[blockRowI](0,0) = 0;  
-        source[blockRowI](1,0) = 0;
-        source[blockRowI](2,0) = 0;           
-    }          
-}
-
-
-void Foam::sparseMatrixExtendedTools::enforceKnownInternalAndTractionDisplacement
-(
-    sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source
-)
-{
-    // Loop though the matrix and overwrite the coefficients of the
-    // momentum equation.
-    // To enforce the value we will set the diagonal to the identity and set
-    // the source to zero. The reason the source is zero is that we are solving
-    // for the correction and the correction is zero if the displacement is known.
-    sparseMatrixExtendedData& data = matrix.data();
-    for (auto iter = data.begin(); iter != data.end(); ++iter)
-    {
-        const label blockRowI = iter.key()[0];
-        const label blockColI = iter.key()[1];
-        
-        RectangularMatrix<scalar>& coeff = iter();
-        
-        if (blockRowI == 17 || blockRowI == 18 || blockRowI == 19
-        	|| blockRowI == 21 || blockRowI == 22 || blockRowI == 23
-        	|| blockRowI == 25 || blockRowI == 26 || blockRowI == 27
-        	|| blockRowI == 33 || blockRowI == 34 || blockRowI == 35 
-        	|| blockRowI == 37 || blockRowI == 38 || blockRowI == 39
-        	|| blockRowI == 41 || blockRowI == 42 || blockRowI == 43
-        	|| blockRowI == 49 || blockRowI == 50 || blockRowI == 51
-        	|| blockRowI == 53 || blockRowI == 54 || blockRowI == 55
-        	|| blockRowI == 57 || blockRowI == 58 || blockRowI == 59) 
-        { 
-        
-		    // Set the coefficients to zero
-		    coeff(0,0) = 0; 
-		    coeff(0,1) = 0; 
-		    coeff(0,2) = 0; 
-		    coeff(0,3) = 0; 
-		    
-		    coeff(1,0) = 0; 
-		    coeff(1,1) = 0; 
-		    coeff(1,2) = 0; 
-		    coeff(1,3) = 0; 
-		    
-		    coeff(2,0) = 0; 
-		    coeff(2,1) = 0; 
-		    coeff(2,2) = 0; 
-		    coeff(2,3) = 0;  
-		    
-		    if (blockRowI == blockColI)
-		    {
-		        // Set the diagonal to the identity
-		        coeff(0,0) = 1;
-		        coeff(1,1) = 1;
-		        coeff(2,2) = 1;
-		    }
-		    
-		    // Set the source of the momentum equation to zero
-		    source[blockRowI](0,0) = 0;  
-		    source[blockRowI](1,0) = 0;
-		    source[blockRowI](2,0) = 0;
-		}           
-    }          
-}
-
-
-void Foam::sparseMatrixExtendedTools::enforceAllBoundaryDisplacement
-(
-    sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source
-)
-{
-    // Loop though the matrix and overwrite the coefficients of the
-    // momentum equation.
-    // To enforce the value we will set the diagonal to the identity and set
-    // the source to zero. The reason the source is zero is that we are solving
-    // for the correction and the correction is zero if the displacement is known.
-    sparseMatrixExtendedData& data = matrix.data();
-    for (auto iter = data.begin(); iter != data.end(); ++iter)
-    {
-        const label blockRowI = iter.key()[0];
-        const label blockColI = iter.key()[1];
-        
-        RectangularMatrix<scalar>& coeff = iter();
-        
-        if (blockRowI == 0 || blockRowI == 1 || blockRowI == 2
-        	|| blockRowI == 3 || blockRowI == 4 || blockRowI == 5
-        	|| blockRowI == 6 || blockRowI == 7 || blockRowI == 8
-        	|| blockRowI == 9 || blockRowI == 10 || blockRowI == 11
-        	|| blockRowI == 12 || blockRowI == 13 || blockRowI == 14 
-        	|| blockRowI == 15 || blockRowI == 16 || blockRowI == 17
-        	|| blockRowI == 18 || blockRowI == 19 || blockRowI == 20
-        	|| blockRowI == 23 || blockRowI == 24 || blockRowI == 27
-        	|| blockRowI == 28 || blockRowI == 29 || blockRowI == 30 
-        	|| blockRowI == 31 || blockRowI == 32 || blockRowI == 33
-        	|| blockRowI == 34 || blockRowI == 35 || blockRowI == 36
-        	|| blockRowI == 39 || blockRowI == 40 || blockRowI == 43
-			|| blockRowI == 44 || blockRowI == 45 || blockRowI == 46 
-			|| blockRowI == 47 || blockRowI == 48 || blockRowI == 49 
-			|| blockRowI == 50 || blockRowI == 51 || blockRowI == 52
-			|| blockRowI == 53 || blockRowI == 54 || blockRowI == 55
-			|| blockRowI == 56 || blockRowI == 57 || blockRowI == 58
-			|| blockRowI == 59 || blockRowI == 60 || blockRowI == 61 
-			|| blockRowI == 62 || blockRowI == 63)
-        { 
-        
-		    // Set the coefficients to zero
-		    coeff(0,0) = 0; 
-		    coeff(0,1) = 0; 
-		    coeff(0,2) = 0; 
-		    coeff(0,3) = 0; 
-		    
-		    coeff(1,0) = 0; 
-		    coeff(1,1) = 0; 
-		    coeff(1,2) = 0; 
-		    coeff(1,3) = 0; 
-		    
-		    coeff(2,0) = 0; 
-		    coeff(2,1) = 0; 
-		    coeff(2,2) = 0; 
-		    coeff(2,3) = 0;  
-		    
-		    if (blockRowI == blockColI)
-		    {
-		        // Set the diagonal to the identity
-		        coeff(0,0) = 1;
-		        coeff(1,1) = 1;
-		        coeff(2,2) = 1;
-		    }
-		    
-		    // Set the source of the momentum equation to zero
-		    source[blockRowI](0,0) = 0;  
-		    source[blockRowI](1,0) = 0;
-		    source[blockRowI](2,0) = 0;
-		}           
-    }          
-}
-
-
-void Foam::sparseMatrixExtendedTools::enforceFixedDisplacement
-(
-    sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source
-)
-{
-    // Loop though the matrix and overwrite the coefficients of the
-    // momentum equation.
-    // To enforce the value we will set the diagonal to the identity and set
-    // the source to zero. The reason the source is zero is that we are solving
-    // for the correction and the correction is zero if the displacement is known.
-    sparseMatrixExtendedData& data = matrix.data();
-    for (auto iter = data.begin(); iter != data.end(); ++iter)
-    {
-        const label blockRowI = iter.key()[0];
-        const label blockColI = iter.key()[1];
-        
-        RectangularMatrix<scalar>& coeff = iter();
-        
-        if  (blockRowI == 0 || blockRowI == 1 || blockRowI == 2
-        	|| blockRowI == 3 || blockRowI == 4 || blockRowI == 5
-        	|| blockRowI == 6 || blockRowI == 7 || blockRowI == 8
-        	|| blockRowI == 9 || blockRowI == 10 || blockRowI == 11
-        	|| blockRowI == 12 || blockRowI == 13 || blockRowI == 14 
-        	|| blockRowI == 15 || blockRowI == 16 || blockRowI == 20
-        	|| blockRowI == 24 || blockRowI == 28 || blockRowI == 29
-        	|| blockRowI == 30 || blockRowI == 31 || blockRowI == 32 
-        	|| blockRowI == 36 || blockRowI == 40 || blockRowI == 44
-        	|| blockRowI == 45 || blockRowI == 46 || blockRowI == 47
-        	|| blockRowI == 48 || blockRowI == 52 || blockRowI == 56 
-        	|| blockRowI == 60 || blockRowI == 61 || blockRowI == 62
-        	|| blockRowI == 63) 
-        { 
-        
-		    // Set the coefficients to zero
-		    coeff(0,0) = 0; 
-		    coeff(0,1) = 0; 
-		    coeff(0,2) = 0; 
-		    coeff(0,3) = 0; 
-		    
-		    coeff(1,0) = 0; 
-		    coeff(1,1) = 0; 
-		    coeff(1,2) = 0; 
-		    coeff(1,3) = 0; 
-		    
-		    coeff(2,0) = 0; 
-		    coeff(2,1) = 0; 
-		    coeff(2,2) = 0; 
-		    coeff(2,3) = 0;  
-		    
-		    if (blockRowI == blockColI)
-		    {
-		        // Set the diagonal to the identity
-		        coeff(0,0) = 1;
-		        coeff(1,1) = 1;
-		        coeff(2,2) = 1;
-		    }
-		    
-		    // Set the source of the momentum equation to zero
-		    source[blockRowI](0,0) = 0;  
-		    source[blockRowI](1,0) = 0;
-		    source[blockRowI](2,0) = 0;
-		}           
-    }          
-}
-
-
-void Foam::sparseMatrixExtendedTools::enforceRelatedToFixedDOFs
-(
-    sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source
-)
-{
-    // Loop though the matrix and overwrite the coefficients of the
-    // momentum equation.
-    // To enforce the value we will set the diagonal to the identity and set
-    // the source to zero. The reason the source is zero is that we are solving
-    // for the correction and the correction is zero if the displacement is known.
-    sparseMatrixExtendedData& data = matrix.data();
-    for (auto iter = data.begin(); iter != data.end(); ++iter)
-    {
-        const label blockRowI = iter.key()[0];
-        const label blockColI = iter.key()[1];
-        
-        RectangularMatrix<scalar>& coeff = iter();
-        
-        if  (blockRowI == 0 || blockRowI == 1 || blockRowI == 2
-        	|| blockRowI == 3 || blockRowI == 4 || blockRowI == 5
-        	|| blockRowI == 6 || blockRowI == 7 || blockRowI == 8
-        	|| blockRowI == 9 || blockRowI == 10 || blockRowI == 11
-        	|| blockRowI == 12 || blockRowI == 13 || blockRowI == 14 
-        	|| blockRowI == 15 || blockRowI == 16 || blockRowI == 17
-        	|| blockRowI == 18 || blockRowI == 19 || blockRowI == 20
-        	|| blockRowI == 21 || blockRowI == 22 || blockRowI == 23
-        	|| blockRowI == 24 || blockRowI == 25 || blockRowI == 26 
-        	|| blockRowI == 27 || blockRowI == 28 || blockRowI == 29
-        	|| blockRowI == 30 || blockRowI == 31 || blockRowI == 32 
-        	|| blockRowI == 33 || blockRowI == 36 || blockRowI == 37
-        	|| blockRowI == 40 || blockRowI == 41 || blockRowI == 42 
-        	|| blockRowI == 43 || blockRowI == 44 || blockRowI == 45 
-        	|| blockRowI == 46 || blockRowI == 47 || blockRowI == 48 
-        	|| blockRowI == 49 || blockRowI == 52 || blockRowI == 53
-        	|| blockRowI == 56 || blockRowI == 57 || blockRowI == 58
-        	|| blockRowI == 59 || blockRowI == 60 || blockRowI == 61 
-        	|| blockRowI == 62 || blockRowI == 63)
-        { 
-        
-		    // Set the coefficients to zero
-		    coeff(0,0) = 0; 
-		    coeff(0,1) = 0; 
-		    coeff(0,2) = 0; 
-		    coeff(0,3) = 0; 
-		    
-		    coeff(1,0) = 0; 
-		    coeff(1,1) = 0; 
-		    coeff(1,2) = 0; 
-		    coeff(1,3) = 0; 
-		    
-		    coeff(2,0) = 0; 
-		    coeff(2,1) = 0; 
-		    coeff(2,2) = 0; 
-		    coeff(2,3) = 0;  
-		    
-		    if (blockRowI == blockColI)
-		    {
-		        // Set the diagonal to the identity
-		        coeff(0,0) = 1;
-		        coeff(1,1) = 1;
-		        coeff(2,2) = 1;
-		    }
-		    
-		    // Set the source of the momentum equation to zero
-		    source[blockRowI](0,0) = 0;  
-		    source[blockRowI](1,0) = 0;
-		    source[blockRowI](2,0) = 0;
-		}           
-    }          
-}
-
-void Foam::sparseMatrixExtendedTools::enforceAllBoundaryPressureDisplacement
-(
-    sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source
-)
-{
-    // Loop though the matrix and overwrite the coefficients of the
-    // momentum equation.
-    // To enforce the value we will set the diagonal to the identity and set
-    // the source to zero. The reason the source is zero is that we are solving
-    // for the correction and the correction is zero if the displacement is known.
-    sparseMatrixExtendedData& data = matrix.data();
-    for (auto iter = data.begin(); iter != data.end(); ++iter)
-    {
-        const label blockRowI = iter.key()[0];
-        const label blockColI = iter.key()[1];
-        
-        RectangularMatrix<scalar>& coeff = iter();
-        
-        if (blockRowI == 0 || blockRowI == 1 || blockRowI == 2
-        	|| blockRowI == 3 || blockRowI == 4 || blockRowI == 5
-        	|| blockRowI == 6 || blockRowI == 7 || blockRowI == 8
-        	|| blockRowI == 9 || blockRowI == 10 || blockRowI == 11
-        	|| blockRowI == 12 || blockRowI == 13 || blockRowI == 14 
-        	|| blockRowI == 15 || blockRowI == 16 || blockRowI == 17
-        	|| blockRowI == 18 || blockRowI == 19 || blockRowI == 20
-        	|| blockRowI == 23 || blockRowI == 24 || blockRowI == 27
-        	|| blockRowI == 28 || blockRowI == 29 || blockRowI == 30 
-        	|| blockRowI == 31 || blockRowI == 32 || blockRowI == 33
-        	|| blockRowI == 34 || blockRowI == 35 || blockRowI == 36
-        	|| blockRowI == 39 || blockRowI == 40 || blockRowI == 43
-			|| blockRowI == 44 || blockRowI == 45 || blockRowI == 46 
-			|| blockRowI == 47 || blockRowI == 48 || blockRowI == 49 
-			|| blockRowI == 50 || blockRowI == 51 || blockRowI == 52
-			|| blockRowI == 53 || blockRowI == 54 || blockRowI == 55
-			|| blockRowI == 56 || blockRowI == 57 || blockRowI == 58
-			|| blockRowI == 59 || blockRowI == 60 || blockRowI == 61 
-			|| blockRowI == 62 || blockRowI == 63)
-        { 
-        
-		    // Set the coefficients to zero
-		    coeff(0,0) = 0; 
-		    coeff(0,1) = 0; 
-		    coeff(0,2) = 0; 
-		    coeff(0,3) = 0; 
-		    
-		    coeff(1,0) = 0; 
-		    coeff(1,1) = 0; 
-		    coeff(1,2) = 0; 
-		    coeff(1,3) = 0; 
-		    
-		    coeff(2,0) = 0; 
-		    coeff(2,1) = 0; 
-		    coeff(2,2) = 0; 
-		    coeff(2,3) = 0;  
-		    
-//		    coeff(3,0) = 0; 
-//		    coeff(3,1) = 0; 
-//		    coeff(3,2) = 0; 
-//		    coeff(3,3) = 0; 
-		    
-		    if (blockRowI == blockColI)
-		    {
-		        // Set the diagonal to the identity
-		        coeff(0,0) = 1;
-		        coeff(1,1) = 1;
-		        coeff(2,2) = 1;
-//		        coeff(3,3) = 1;
-		    }
-		    
-		    // Set the source of the momentum equation to zero
-		    source[blockRowI](0,0) = 0;  
-		    source[blockRowI](1,0) = 0;
-		    source[blockRowI](2,0) = 0;
-//		    source[blockRowI](3,0) = 0;
-		}		           
-    }          
-}
-
-void Foam::sparseMatrixExtendedTools::enforceSymmBoundaries
-(
-    sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source
-)
-{
-    // Loop though the matrix and overwrite the coefficients of the
-    // momentum equation.
-    // To enforce the value we will set the diagonal to the identity and set
-    // the source to zero. The reason the source is zero is that we are solving
-    // for the correction and the correction is zero if the displacement is known.
-    sparseMatrixExtendedData& data = matrix.data();
-    for (auto iter = data.begin(); iter != data.end(); ++iter)
-    {
-        const label blockRowI = iter.key()[0];
-        const label blockColI = iter.key()[1];
-        
-        RectangularMatrix<scalar>& coeff = iter();
-        
-        if (blockRowI == 0 || blockRowI == 1 || blockRowI == 2
-        	|| blockRowI == 3 || blockRowI == 4 || blockRowI == 5
-        	|| blockRowI == 6 || blockRowI == 7 || blockRowI == 8
-        	|| blockRowI == 9 || blockRowI == 10 || blockRowI == 11
-        	|| blockRowI == 12 || blockRowI == 13 || blockRowI == 14 
-        	|| blockRowI == 15 || blockRowI == 16 || blockRowI == 20
-        	|| blockRowI == 24 || blockRowI == 28 || blockRowI == 29 
-        	|| blockRowI == 30 || blockRowI == 31 || blockRowI == 32 
-        	|| blockRowI == 36 || blockRowI == 40 || blockRowI == 44
-        	|| blockRowI == 45 || blockRowI == 46 || blockRowI == 47
-        	|| blockRowI == 48 || blockRowI == 52 || blockRowI == 56
-        	|| blockRowI == 60 || blockRowI == 61 || blockRowI == 62
-        	|| blockRowI == 63) 
-        { 
-        
-		    // Set the coefficients to zero
-		    coeff(0,0) = 0; 
-		    coeff(0,1) = 0; 
-		    coeff(0,2) = 0; 
-		    coeff(0,3) = 0; 
-		    
-		    coeff(1,0) = 0; 
-		    coeff(1,1) = 0; 
-		    coeff(1,2) = 0; 
-		    coeff(1,3) = 0; 
-		    
-		    coeff(2,0) = 0; 
-		    coeff(2,1) = 0; 
-		    coeff(2,2) = 0; 
-		    coeff(2,3) = 0;  
-		    
-		    coeff(3,0) = 0; 
-		    coeff(3,1) = 0; 
-		    coeff(3,2) = 0; 
-		    coeff(3,3) = 0; 
-		    
-		    if (blockRowI == blockColI)
-		    {
-		        // Set the diagonal to the identity
-		        coeff(0,0) = 1;
-		        coeff(1,1) = 1;
-		        coeff(2,2) = 1;
-		        coeff(3,3) = 1;
-		    }
-		    
-		    // Set the source of the momentum equation to zero
-		    source[blockRowI](0,0) = 0;  
-		    source[blockRowI](1,0) = 0;
-		    source[blockRowI](2,0) = 0;
-		    source[blockRowI](3,0) = 0;
-		}
-		else if (blockColI == 0 || blockColI == 1 || blockColI == 2
-        	|| blockColI == 3 || blockColI == 4 || blockColI == 5
-        	|| blockColI == 6 || blockColI == 7 || blockColI == 8
-        	|| blockColI == 9 || blockColI == 10 || blockColI == 11
-        	|| blockColI == 12 || blockColI == 13 || blockColI == 14 
-        	|| blockColI == 15 || blockColI == 16 || blockColI == 20
-        	|| blockColI == 24 || blockColI == 28 || blockColI == 29 
-        	|| blockColI == 30 || blockColI == 31 || blockColI == 32 
-        	|| blockColI == 36 || blockColI == 40 || blockColI == 44
-        	|| blockColI == 45 || blockColI == 46 || blockColI == 47
-        	|| blockColI == 48 || blockColI == 52 || blockColI == 56
-        	|| blockColI == 60 || blockColI == 61 || blockColI == 62
-        	|| blockColI == 63) 
-        {
-		    // Set the coefficients to zero
-		    coeff(0,0) = 0; 
-		    coeff(0,1) = 0; 
-		    coeff(0,2) = 0; 
-		    coeff(0,3) = 0; 
-		    
-		    coeff(1,0) = 0; 
-		    coeff(1,1) = 0; 
-		    coeff(1,2) = 0; 
-		    coeff(1,3) = 0; 
-		    
-		    coeff(2,0) = 0; 
-		    coeff(2,1) = 0; 
-		    coeff(2,2) = 0; 
-		    coeff(2,3) = 0;  
-		    
-		    coeff(3,0) = 0; 
-		    coeff(3,1) = 0; 
-		    coeff(3,2) = 0; 
-		    coeff(3,3) = 0;         
-        }           
-    }          
-}
-
-void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementPressure
-(
-    sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source
-)
-{
-    // Loop though the matrix and overwrite the coefficients of the
-    // momentum equation.
-    // To enforce the value we will set the diagonal to the identity and set
-    // the source to zero. The reason the source is zero is that we are solving
-    // for the correction and the correction is zero if the displacement is known.
-    sparseMatrixExtendedData& data = matrix.data();
-    for (auto iter = data.begin(); iter != data.end(); ++iter)
-    {
-        const label blockRowI = iter.key()[0];
-        const label blockColI = iter.key()[1];
-        
-        RectangularMatrix<scalar>& coeff = iter();
-        
-        if (blockRowI == 0 || blockRowI == 1 || blockRowI == 2
-        	|| blockRowI == 3 || blockRowI == 4 || blockRowI == 5
-        	|| blockRowI == 6 || blockRowI == 7 || blockRowI == 8
-        	|| blockRowI == 9 || blockRowI == 10 || blockRowI == 11
-        	|| blockRowI == 12 || blockRowI == 13 || blockRowI == 14 
-        	|| blockRowI == 15 || blockRowI == 16 || blockRowI == 20
-        	|| blockRowI == 24 || blockRowI == 28 || blockRowI == 29
-        	|| blockRowI == 30 || blockRowI == 31 || blockRowI == 32
-        	|| blockRowI == 36 || blockRowI == 40 || blockRowI == 44
-        	|| blockRowI == 45 || blockRowI == 46 || blockRowI == 47
-        	|| blockRowI == 48 || blockRowI == 52 || blockRowI == 56
-        	|| blockRowI == 60 || blockRowI == 61 || blockRowI == 62
-        	|| blockRowI == 63)
-        { 
-        
-		    // Set the coefficients to zero
-		    coeff(0,0) = 0; 
-		    coeff(0,1) = 0; 
-		    coeff(0,2) = 0; 
-		    coeff(0,3) = 0; 
-		    
-		    coeff(1,0) = 0; 
-		    coeff(1,1) = 0; 
-		    coeff(1,2) = 0; 
-		    coeff(1,3) = 0; 
-		    
-		    coeff(2,0) = 0; 
-		    coeff(2,1) = 0; 
-		    coeff(2,2) = 0; 
-		    coeff(2,3) = 0;  
-		    
-//		    coeff(3,0) = 0; 
-//		    coeff(3,1) = 0; 
-//		    coeff(3,2) = 0; 
-//		    coeff(3,3) = 0; 
-		    
-		    if (blockRowI == blockColI)
-		    {
-		        // Set the diagonal to the identity
-		        coeff(0,0) = 1;
-		        coeff(1,1) = 1;
-		        coeff(2,2) = 1;
-//		        coeff(3,3) = 1;
-		    }
-		    
-		    // Set the source of the momentum equation to zero
-		    source[blockRowI](0,0) = 0;  
-		    source[blockRowI](1,0) = 0;
-		    source[blockRowI](2,0) = 0;
-//		    source[blockRowI](3,0) = 0;
-		}           
-    }          
-}
-
-
-void Foam::sparseMatrixExtendedTools::enforceNotFixedDisplacementPressure
-(
-    sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source
-)
-{
-    // Loop though the matrix and overwrite the coefficients of the
-    // momentum equation.
-    // To enforce the value we will set the diagonal to the identity and set
-    // the source to zero. The reason the source is zero is that we are solving
-    // for the correction and the correction is zero if the displacement is known.
-    sparseMatrixExtendedData& data = matrix.data();
-    for (auto iter = data.begin(); iter != data.end(); ++iter)
-    {
-        const label blockRowI = iter.key()[0];
-        const label blockColI = iter.key()[1];
-        
-        RectangularMatrix<scalar>& coeff = iter();
-        
-        if (blockRowI == 17 || blockRowI == 18 || blockRowI == 19
-        	|| blockRowI == 21 || blockRowI == 22 || blockRowI == 23
-        	|| blockRowI == 25 || blockRowI == 26 || blockRowI == 27
-        	|| blockRowI == 33 || blockRowI == 34 || blockRowI == 35
-        	|| blockRowI == 37 || blockRowI == 38 || blockRowI == 39
-        	|| blockRowI == 41 || blockRowI == 42 || blockRowI == 43
-        	|| blockRowI == 49 || blockRowI == 50 || blockRowI == 51
-        	|| blockRowI == 53 || blockRowI == 54 || blockRowI == 55
-        	|| blockRowI == 57 || blockRowI == 58 || blockRowI == 59)
-        { 
-        
-		    // Set the coefficients to zero
-		    coeff(0,0) = 0; 
-		    coeff(0,1) = 0; 
-		    coeff(0,2) = 0; 
-		    coeff(0,3) = 0; 
-		    
-		    coeff(1,0) = 0; 
-		    coeff(1,1) = 0; 
-		    coeff(1,2) = 0; 
-		    coeff(1,3) = 0; 
-		    
-		    coeff(2,0) = 0; 
-		    coeff(2,1) = 0; 
-		    coeff(2,2) = 0; 
-		    coeff(2,3) = 0;  
-		    
-		    coeff(3,0) = 0; 
-		    coeff(3,1) = 0; 
-		    coeff(3,2) = 0; 
-		    coeff(3,3) = 0; 
-		    
-		    if (blockRowI == blockColI)
-		    {
-		        // Set the diagonal to the identity
-		        coeff(0,0) = 1;
-		        coeff(1,1) = 1;
-		        coeff(2,2) = 1;
-		        coeff(3,3) = 1;
-		    }
-		    
-		    // Set the source of the momentum equation to zero
-		    source[blockRowI](0,0) = 0;  
-		    source[blockRowI](1,0) = 0;
-		    source[blockRowI](2,0) = 0;
-		    source[blockRowI](3,0) = 0;
-		}           
-    }          
-}
-
-
-void Foam::sparseMatrixExtendedTools::enforceAllBoundariesExceptRightTraction
-(
-    sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source
-)
-{
-    // Loop though the matrix and overwrite the coefficients of the
-    // momentum equation.
-    // To enforce the value we will set the diagonal to the identity and set
-    // the source to zero. The reason the source is zero is that we are solving
-    // for the correction and the correction is zero if the displacement is known.
-    sparseMatrixExtendedData& data = matrix.data();
-    for (auto iter = data.begin(); iter != data.end(); ++iter)
-    {
-        const label blockRowI = iter.key()[0];
-        const label blockColI = iter.key()[1];
-        
-        RectangularMatrix<scalar>& coeff = iter();
-        
-        if (blockRowI == 0 || blockRowI == 1 || blockRowI == 2
-        	|| blockRowI == 4 || blockRowI == 5
-        	|| blockRowI == 6 || blockRowI == 8
-        	|| blockRowI == 9 || blockRowI == 10 
-        	|| blockRowI == 12 || blockRowI == 13 || blockRowI == 14 
-        	|| blockRowI == 16 || blockRowI == 17
-        	|| blockRowI == 18 || blockRowI == 20
-        	|| blockRowI == 24 
-        	|| blockRowI == 28 || blockRowI == 29 || blockRowI == 30 
-        	|| blockRowI == 32 || blockRowI == 33
-        	|| blockRowI == 34 || blockRowI == 36
-        	|| blockRowI == 40 
-			|| blockRowI == 44 || blockRowI == 45 || blockRowI == 46 
-			|| blockRowI == 48 || blockRowI == 49 
-			|| blockRowI == 50 || blockRowI == 52
-			|| blockRowI == 53 || blockRowI == 54 
-			|| blockRowI == 56 || blockRowI == 57 || blockRowI == 58
-			|| blockRowI == 60 || blockRowI == 61 
-			|| blockRowI == 62)
-        { 
-        
-		    // Set the coefficients to zero
-		    coeff(0,0) = 0; 
-		    coeff(0,1) = 0; 
-		    coeff(0,2) = 0; 
-		    coeff(0,3) = 0; 
-		    
-		    coeff(1,0) = 0; 
-		    coeff(1,1) = 0; 
-		    coeff(1,2) = 0; 
-		    coeff(1,3) = 0; 
-		    
-		    coeff(2,0) = 0; 
-		    coeff(2,1) = 0; 
-		    coeff(2,2) = 0; 
-		    coeff(2,3) = 0;  
-		    
-//		    coeff(3,0) = 0; 
-//		    coeff(3,1) = 0; 
-//		    coeff(3,2) = 0; 
-//		    coeff(3,3) = 0; 
-		    
-		    if (blockRowI == blockColI)
-		    {
-		        // Set the diagonal to the identity
-		        coeff(0,0) = 1;
-		        coeff(1,1) = 1;
-		        coeff(2,2) = 1;
-//		        coeff(3,3) = 1;
-		    }
-		    
-		    // Set the source of the momentum equation to zero
-		    source[blockRowI](0,0) = 0;  
-		    source[blockRowI](1,0) = 0;
-		    source[blockRowI](2,0) = 0;
-//		    source[blockRowI](3,0) = 0;
-		}		           
-    }          
-}
-
-
-void Foam::sparseMatrixExtendedTools::enforceAllTractions
-(
-    sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source
-)
-{
-    // Loop though the matrix and overwrite the coefficients of the
-    // momentum equation.
-    // To enforce the value we will set the diagonal to the identity and set
-    // the source to zero. The reason the source is zero is that we are solving
-    // for the correction and the correction is zero if the displacement is known.
-    sparseMatrixExtendedData& data = matrix.data();
-    for (auto iter = data.begin(); iter != data.end(); ++iter)
-    {
-        const label blockRowI = iter.key()[0];
-        const label blockColI = iter.key()[1];
-        
-        RectangularMatrix<scalar>& coeff = iter();
-        
-        if (blockRowI == 0 || blockRowI == 1 || blockRowI == 2
-        	|| blockRowI == 3 || blockRowI == 7 || blockRowI == 11 
-        	|| blockRowI == 15 || blockRowI == 16 || blockRowI == 17
-        	|| blockRowI == 18 || blockRowI == 19 || blockRowI == 23 
-			|| blockRowI == 27 || blockRowI == 31 || blockRowI == 32 
-			|| blockRowI == 33 || blockRowI == 34 || blockRowI == 35
-        	|| blockRowI == 39 || blockRowI == 43 || blockRowI == 47 
-        	|| blockRowI == 48 || blockRowI == 49 || blockRowI == 50 
-        	|| blockRowI == 51 || blockRowI == 52 || blockRowI == 53 
-        	|| blockRowI == 54 || blockRowI == 55 || blockRowI == 56 
-        	|| blockRowI == 57 || blockRowI == 58 || blockRowI == 59 
-        	|| blockRowI == 60 || blockRowI == 61 || blockRowI == 62 
-        	|| blockRowI == 63)
-        { 
-        
-		    // Set the coefficients to zero
-		    coeff(0,0) = 0; 
-		    coeff(0,1) = 0; 
-		    coeff(0,2) = 0; 
-		    coeff(0,3) = 0; 
-		    
-		    coeff(1,0) = 0; 
-		    coeff(1,1) = 0; 
-		    coeff(1,2) = 0; 
-		    coeff(1,3) = 0; 
-		    
-		    coeff(2,0) = 0; 
-		    coeff(2,1) = 0; 
-		    coeff(2,2) = 0; 
-		    coeff(2,3) = 0;  
-		    
-//		    coeff(3,0) = 0; 
-//		    coeff(3,1) = 0; 
-//		    coeff(3,2) = 0; 
-//		    coeff(3,3) = 0; 
-		    
-		    if (blockRowI == blockColI)
-		    {
-		        // Set the diagonal to the identity
-		        coeff(0,0) = 1;
-		        coeff(1,1) = 1;
-		        coeff(2,2) = 1;
-//		        coeff(3,3) = 1;
-		    }
-		    
-		    // Set the source of the momentum equation to zero
-		    source[blockRowI](0,0) = 0;  
-		    source[blockRowI](1,0) = 0;
-		    source[blockRowI](2,0) = 0;
-//		    source[blockRowI](3,0) = 0;
-		}		           
-    }          
-}
-
-//void Foam::sparseMatrixExtendedTools::enforceAppliedTractions
-//(
-//    sparseMatrixExtended& matrix,
-//    Field<RectangularMatrix<scalar>>& source
-//)
-//{
-//    // Loop though the matrix and overwrite the coefficients of the
-//    // momentum equation.
-//    // To enforce the value we will set the diagonal to the identity and set
-//    // the source to zero. The reason the source is zero is that we are solving
-//    // for the correction and the correction is zero if the displacement is known.
-//    sparseMatrixExtendedData& data = matrix.data();
-//    for (auto iter = data.begin(); iter != data.end(); ++iter)
-//    {
-//        const label blockRowI = iter.key()[0];
-//        const label blockColI = iter.key()[1];
-//        
-//        RectangularMatrix<scalar>& coeff = iter();
-//        
-//        if (blockRowI == 0 || blockRowI == 1 || blockRowI == 2
-//        	|| blockRowI == 3 || blockRowI == 7 || blockRowI == 11 
-//        	|| blockRowI == 15 || blockRowI == 16 || blockRowI == 17
-//        	|| blockRowI == 18 || blockRowI == 19 || blockRowI == 23 
-//			|| blockRowI == 27 || blockRowI == 31 || blockRowI == 32 
-//			|| blockRowI == 33 || blockRowI == 34 || blockRowI == 35
-//        	|| blockRowI == 39 || blockRowI == 43 || blockRowI == 47 
-//        	|| blockRowI == 48 || blockRowI == 49 || blockRowI == 50 
-//        	|| blockRowI == 51 || blockRowI == 52 || blockRowI == 53 
-//        	|| blockRowI == 54 || blockRowI == 55 || blockRowI == 56 
-//        	|| blockRowI == 57 || blockRowI == 58 || blockRowI == 59 
-//        	|| blockRowI == 60 || blockRowI == 61 || blockRowI == 62 
-//        	|| blockRowI == 63)
-//        { 
-//        
-//		    // Set the coefficients to zero
-//		    coeff(0,0) = 0; 
-//		    coeff(0,1) = 0; 
-//		    coeff(0,2) = 0; 
-//		    coeff(0,3) = 0; 
-//		    
-//		    coeff(1,0) = 0; 
-//		    coeff(1,1) = 0; 
-//		    coeff(1,2) = 0; 
-//		    coeff(1,3) = 0; 
-//		    
-//		    coeff(2,0) = 0; 
-//		    coeff(2,1) = 0; 
-//		    coeff(2,2) = 0; 
-//		    coeff(2,3) = 0;  
-//		    
-////		    coeff(3,0) = 0; 
-////		    coeff(3,1) = 0; 
-////		    coeff(3,2) = 0; 
-////		    coeff(3,3) = 0; 
-//		    
-//		    if (blockRowI == blockColI)
-//		    {
-//		        // Set the diagonal to the identity
-//		        coeff(0,0) = 1;
-//		        coeff(1,1) = 1;
-//		        coeff(2,2) = 1;
-////		        coeff(3,3) = 1;
-//		    }
-//		    
-//		    // Set the source of the momentum equation to zero
-//		    source[blockRowI](0,0) = 0;  
-//		    source[blockRowI](1,0) = 0;
-//		    source[blockRowI](2,0) = 0;
-////		    source[blockRowI](3,0) = 0;
-//		}		           
-//    }          
-//}
-
-
-// void Foam::sparseMatrixExtendedTools::addFixedDofToSource
-// (
-//     vectorField& source,
-//     const boolList& fixedDofs,
-//     const symmTensorField& fixedDofDirections,
-//     const scalar fixedDofScale
-// )
-// {
-//     forAll(fixedDofs, pointI)
-//     {
-//         // For now, we will only allow the full vector to be set
-//         // To-do: allow fixed components
-//         if (fixedDofs[pointI])
-//         {
-//             // Set the source to zero as the correction to the displacement
-//             // is zero
-//             source[pointI] = ((I - fixedDofDirections[pointI]) & source[pointI]);
-//         }
-//     }
-// }
-
-
-// void Foam::sparseMatrixExtendedTools::addFixedDofToMatrix
-// (
-//     sparseMatrix& matrix,
-//     const boolList& fixedDofs,
-//     const symmTensorField& fixedDofDirections,
-//     const scalar fixedDofScale
-// )
-// {
-//     // Loop though the matrix and overwrite the coefficients for fixed DOFs
-//     // To enforce the value we will set the diagonal to the identity
-//     // The preconditioner will be able to improve the conditioning for
-//     // iterative solvers
-//     sparseMatrixExtendedData& data = matrix.data();
-
-//     for (auto iter = data.begin(); iter != data.end(); ++iter)
-//     {
-//         const label blockRowI = iter.key()[0];
-
-//         if (fixedDofs[blockRowI])
-//         {
-//             const label blockColI = iter.key()[1];
-//             tensor& coeff = iter();
-
-//             if (blockRowI == blockColI)
-//             {
-//                 // Set the block diagonal to the identity matrix with scaling
-//                 // coeff = -fixedDofScale*tensor(I);
-//                 // Eliminate the fixed directions
-//                 coeff = ((I - fixedDofDirections[blockRowI]) & coeff);
-//                 // Set the fixed directions with scaling
-//                 coeff = coeff - fixedDofScale*fixedDofDirections[blockRowI];
-//             }
-//             else
-//             {
-//                 // Eliminate the off-diagonals
-//                 // coeff = tensor::zero;
-//                 // Eliminate the fixed directions
-//                 coeff = ((I - fixedDofDirections[blockRowI]) & coeff);
-//             }
-//         }
-//     }
-// }
 
 // ************************************************************************* //

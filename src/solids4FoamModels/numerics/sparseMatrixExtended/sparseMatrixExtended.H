@@ -27,12 +27,6 @@ Description
 
     Used in coupled solid mechanics solvers in solids4foam.
 
-    Example usage:
-
-        sparseMatrixExtended mat;
-        mat(1, 0) = tensor(1,2,3,4,5,6,7,8,9);
-        mat(0, 2) += 3*I;
-
 Author
 	Philip Cardiff,UCD.
     Federico Mazzanti, UCD.
@@ -58,11 +52,13 @@ namespace Foam
 
     typedef HashTable
     <
-        RectangularMatrix<scalar>, FixedList<label, 2>, FixedList<label, 2>::Hash<>
+        RectangularMatrix<scalar>, 
+        FixedList<label, 2>, 
+        FixedList<label, 2>::Hash<>
     > sparseMatrixExtendedData;
 
 /*---------------------------------------------------------------------------*\
-                       Class sparseMatrixExtended Declaration
+                     Class sparseMatrixExtended Declaration
 \*---------------------------------------------------------------------------*/
 
 class sparseMatrixExtended
@@ -135,7 +131,11 @@ public:
 
             //- Non-const access to a value entry. If the entry does not exist
             //  then create it and initialise it to zero
-            RectangularMatrix<scalar>& operator()(const label rowI, const label colI);
+            RectangularMatrix<scalar>& operator()
+            (
+                const label rowI, 
+                const label colI
+            );
 };
 
 
