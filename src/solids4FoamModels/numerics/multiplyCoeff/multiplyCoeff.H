@@ -35,6 +35,7 @@ Author
 #define multiplyCoeff_H
 
 #include "fieldTypes.H"
+#include "RectangularMatrix.H"
 #ifdef OPENFOAM_NOT_EXTEND
     #include "scalarMatrices.H"
 #else
@@ -48,8 +49,8 @@ namespace Foam
 
     // This function multiplies a vector by a 4th order tensor by a third
     // order tensor as encountered in the assembling of block coefficients
-    // in a finite volume solid mechanics procedure. The result is placed
-    // in the coeff variable.
+    // in a finite volume small-strain solid mechanics procedure. 
+    // The result is placed in the coeff variable.
     // The 4th order material tangent matrix is represented by a 6x6 matrix.
     // The multiplication evaluates the following in index notation:
     //     coeff_ij = Sf_m C_mikl g_k delta_lj
@@ -59,6 +60,37 @@ namespace Foam
         tensor& coeff,
         const vector& Sf,
         const scalarSquareMatrix& C,
+        const vector& g
+    );
+
+    // This function multiplies a vector by a 4th order tensor by a third
+    // order tensor as encountered in the assembling of block coefficients
+    // in a finite volume small-strain solid mechanics procedure. The result 
+    // is placed in the coeff variable.
+    // The 4th order material tangent matrix is represented by a 6x9 matrix.
+    // The multiplication evaluates the following in index notation:
+    //     coeff_ij = Sf_m C_mikl g_k delta_lj
+    // where delta is kronecker delta
+    void multiplyCoeff
+    (
+        tensor& coeff,
+        const vector& Sf,
+        const RectangularMatrix<scalar>& C,
+        const vector& g
+    );
+
+    // The multiplication evaluates the following in index notation:
+    //     coeff_ij = (Sf_m C_mikl + G_mkl sigma_mi)*g_k delta_lj
+    // where delta is kronecker delta.
+    // The 4th order material tangent matrix is represented by a 6x9 matrix and
+    // the geometric stiffness matrix is represented by a 3x9 matrix
+    void multiplyCoeff
+    (
+        tensor& coeff,
+        const vector& Sf,
+        const RectangularMatrix<scalar>& C,
+        const RectangularMatrix<scalar>& G,
+        const symmTensor& sigma,
         const vector& g
     );
 

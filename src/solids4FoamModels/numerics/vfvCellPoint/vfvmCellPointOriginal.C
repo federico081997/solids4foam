@@ -18,7 +18,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "vfvmCellPointOriginal.H"
-#include "multiplyCoeffRectMat.H"
+#include "multiplyCoeff.H"
 #include "sparseMatrixTools.H"
 #include "RectangularMatrix.H"
 
@@ -113,7 +113,7 @@ void Foam::vfvm::divSigmaOriginal
 
             // Calculate the coefficient for this point coming from dualFaceI
             tensor coeff;
-            multiplyCoeffRectMat(coeff, curDualSf, materialTangent, lsVec);
+            multiplyCoeff(coeff, curDualSf, materialTangent, lsVec);
 
             // Add the coefficient to the ownPointID equation coming from
             // pointID
@@ -133,7 +133,7 @@ void Foam::vfvm::divSigmaOriginal
 
         // Compact edge direction coefficient
         tensor edgeDirCoeff;
-        multiplyCoeffRectMat
+        multiplyCoeff
         (
             edgeDirCoeff, curDualSf, materialTangent, eOverLength
         );

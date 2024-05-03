@@ -18,8 +18,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "vfvmCellPointExtended.H"
-#include "multiplyCoeffExtended.H"
-#include "multiplyCoeffRectMat.H"
+#include "multiplyCoeff.H"
 #include "sparseMatrixTools.H"
 #include "sparseMatrixExtendedTools.H"
 #include "RectangularMatrix.H"
@@ -154,7 +153,7 @@ void Foam::vfvm::divSigma
 
             // Calculate the coefficient for this point coming from dualFaceI
             tensor coeff;
-            multiplyCoeffExtended
+            multiplyCoeff
             (
                 coeff,
                 curDualSfDef,
@@ -187,7 +186,7 @@ void Foam::vfvm::divSigma
 
         // Compact edge direction coefficient
         tensor edgeDirCoeff;
-        multiplyCoeffExtended
+        multiplyCoeff
         (
             edgeDirCoeff,
             curDualSfDef,
@@ -344,7 +343,7 @@ void Foam::vfvm::divSigma
             // Calculate the displacement coefficient for this point coming
             // from dualFaceI
             tensor coeff;
-            multiplyCoeffExtended
+            multiplyCoeff
             (
                 coeff,
                 curDualSfDef,
@@ -406,7 +405,7 @@ void Foam::vfvm::divSigma
 
         // Compact edge direction displacement coefficient
         tensor edgeDirCoeff;
-        multiplyCoeffExtended
+        multiplyCoeff
         (
             edgeDirCoeff,
             curDualSfDef,
@@ -601,7 +600,7 @@ void Foam::vfvm::divSigma
             // Calculate the displacement coefficient for this point coming
             // from dualFaceI
             tensor coeff;
-            multiplyCoeffRectMat
+            multiplyCoeff
             (
                 coeff,
                 curDualSf,
@@ -661,7 +660,7 @@ void Foam::vfvm::divSigma
 
         // Compact edge direction displacement coefficient
         tensor edgeDirCoeff;
-        multiplyCoeffRectMat
+        multiplyCoeff
         (
             edgeDirCoeff,
             curDualSf,
