@@ -78,9 +78,6 @@ class neoHookeanElastic
         // Bulk modulus
         dimensionedScalar K_;
         
-        //- Flag to solve Laplacian pressure equation
-        const Switch solvePressureEquation_;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct

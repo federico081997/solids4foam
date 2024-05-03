@@ -118,9 +118,15 @@ class mechanicalLaw
         //- Relative deformation gradient surfaceField
         autoPtr<surfaceTensorField> relFfPtr_;
 
-        //- Switch to enable solution of pressure Laplacian equation
-        //  This can help quell oscillations in the hydrostatic stress
+        //- Switch to enable solution of pressure Laplacian equation for the 
+        //  cell-centred approach. This can help quell oscillations in the 
+        //  hydrostatic stress
         const Switch solvePressureEqn_;
+
+        //- Switch to enable solution of pressure Laplacian equation for the
+        //  vertex-centred approach. This can help quell oscillations in the 
+        //  hydrostatic stress
+        const Switch solveVertexCentredPressureEqn_;
 
         //- Optional: it is possible to scale the amount of smoothing in the
         //  pressure equation with this coefficient
@@ -202,6 +208,12 @@ protected:
         const Switch& solvePressureEqn() const
         {
             return solvePressureEqn_;
+        }
+
+        //- Return const access to solveVertexCentredPressureEqn switch
+        const Switch& solveVertexCentredPressureEqn() const
+        {
+            return solveVertexCentredPressureEqn_;
         }
 
         //- Return the base mesh region name

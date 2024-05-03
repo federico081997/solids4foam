@@ -60,7 +60,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class linearElastic Declaration
+                  Class linearElasticMisesPlastic Declaration
 \*---------------------------------------------------------------------------*/
 
 class linearElasticMisesPlastic
@@ -162,9 +162,6 @@ class linearElasticMisesPlastic
         //  function of plastic strain
         const bool nonLinearPlasticity_;
 
-        //- Solve pressure equation
-        const bool solvePressureEquation_;
-
         //- Linear plastic modulus. It is only used if plasticity is linear,
         //  defined by two points on the stress-plastic strain curve
         scalar Hp_;
@@ -211,7 +208,7 @@ class linearElasticMisesPlastic
         //- Return the current yield stress
         scalar curYieldStress
         (
-            const scalar curEpsilonPEq    // Current equivalent plastic strain
+            const scalar curEpsilonPEq     // Current equivalent plastic strain
         ) const;
 
         //- Evaulate current value of the yield function
@@ -220,7 +217,7 @@ class linearElasticMisesPlastic
             const scalar epsilonPEqOld,    // Old equivalent plastic strain
             const scalar magSTrial,        // Deviatoric trial stress magnitude
             const scalar DLambda,          // Plastic multiplier
-            const scalar muBar            // Scaled shear modulus
+            const scalar muBar             // Scaled shear modulus
         ) const;
 
         //- Iteratively calculate plastic multiplier increment (DLambda)
@@ -263,9 +260,6 @@ public:
     //- Runtime type information
     TypeName("linearElasticMisesPlastic");
 
-    // Static data members
-
-
     // Constructors
 
         //- Construct from dictionary
@@ -277,12 +271,12 @@ public:
             const nonLinearGeometry::nonLinearType& nonLinGeom
         );
 
-        //- Calculate stress at the points
-                void calculatePStress
-                (
-                        pointSymmTensorField& pSigma,
-                        const pointTensorField& pGradD
-                ) const;
+        //- Calculate stress at the primary points
+        void calculatePStress
+        (
+            pointSymmTensorField& pSigma,
+            const pointTensorField& pGradD
+        ) const;
 
 
     // Destructor
@@ -292,16 +286,14 @@ public:
 
     // Member Functions
 
-        //- Return bulk modulus
-        // virtual tmp<volScalarField> bulkModulus() const;
-
         //- Return the implicit stiffness
         //  This is the diffusivity for the Laplacian term
         virtual tmp<volScalarField> impK() const;
 
 #ifdef OPENFOAM_NOT_EXTEND
         //- Material tangent for Newton Raphson loop
-        virtual tmp<Field<RectangularMatrix<scalar>>> materialTangentField() const;
+        virtual tmp<Field<RectangularMatrix<scalar>>> 
+        materialTangentField() const;
 #endif
 
         //- Return the implicit stiffness as a diagTensor
@@ -309,10 +301,10 @@ public:
         virtual tmp<volDiagTensorField> impKdiagTensor() const;
 #endif
 
-        //- Update the stress
+        //- Update the volField stress
         virtual void correct(volSymmTensorField& sigma);
 
-        //- Update the stress surface field
+        //- Update the surfaceField stress
         virtual void correct(surfaceSymmTensorField& sigma);
 
         //- Return material residual i.e. a measured of how convergence of

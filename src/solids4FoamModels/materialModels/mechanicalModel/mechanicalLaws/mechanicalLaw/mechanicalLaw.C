@@ -1486,6 +1486,14 @@ Foam::mechanicalLaw::mechanicalLaw
     (
         dict_.lookupOrAddDefault<Switch>("solvePressureEqn", false)
     ),
+    solveVertexCentredPressureEqn_
+    (
+        dict_.lookupOrAddDefault<Switch>
+        (
+            "solveVertexCentredPressureEqn", 
+            false
+        )
+    ),
     pressureSmoothingScaleFactor_
     (
         dict_.lookupOrAddDefault<scalar>("pressureSmoothingScaleFactor", 100.0)
@@ -1519,7 +1527,7 @@ Foam::mechanicalLaw::mechanicalLaw
         ) << "solid region name not found" << abort(FatalError);
     }
 
-    if (solvePressureEqn_)
+    if (solvePressureEqn_ || solveVertexCentredPressureEqn_)
     {
         Info<< "    Laplacian equation will be solved for pressure" << nl
             << "    pressureSmoothingScaleFactor: "

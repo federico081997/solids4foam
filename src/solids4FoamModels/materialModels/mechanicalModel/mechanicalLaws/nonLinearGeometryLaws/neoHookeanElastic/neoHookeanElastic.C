@@ -54,7 +54,7 @@ void Foam::neoHookeanElastic::calculateStress
     const surfaceSymmTensorField s = mu_*dev(bEbar);
     
     // Calculate the Cauchy stress
-    if (solvePressureEquation_)
+    if (solveVertexCentredPressureEqn())
     {
         sigma = (1.0/J)*s - p*I;
     }
@@ -78,15 +78,7 @@ Foam::neoHookeanElastic::neoHookeanElastic
 :
     mechanicalLaw(name, mesh, dict, nonLinGeom),
     mu_("mu", dimPressure, 0.0),
-    K_("K", dimPressure, 0.0),
-    solvePressureEquation_
-    (
-        dict.lookupOrDefault<Switch>
-        (
-            "solvePressureEquation",
-            false
-        )
-    )
+    K_("K", dimPressure, 0.0)
 {
     // Read mechanical properties
     if
@@ -211,25 +203,22 @@ Foam::neoHookeanElastic::materialTangentField() const
             mesh().lookupObject<surfaceTensorField>("grad(D)f");
 
         // Prepare the pressure field
-        tmp<surfaceScalarField> pRef
+        surfaceScalarField pRef
         (
-            surfaceScalarField
+            IOobject
             (
-                IOobject
-                (
-                    "pRef",
-                    mesh().time().timeName(),
-                    sigmaRef.mesh(),
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                "pRef",
+                mesh().time().timeName(),
                 sigmaRef.mesh(),
-                dimensionedScalar("zero", dimPressure, 0)
-            )
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            sigmaRef.mesh(),
+            dimensionedScalar("zero", dimPressure, 0)
         );
 
         // Take a reference to the current pressure field
-        if (solvePressureEquation_)
+        if (solveVertexCentredPressureEqn())
         {
             pRef = mesh().lookupObject<surfaceScalarField>("pf");
         }
@@ -475,21 +464,18 @@ void Foam::neoHookeanElastic::correct(volSymmTensorField& sigma)
     }
 
     // Prepare the pressure field
-    tmp<volScalarField> p
+    volScalarField p
     (
-        volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "pTmp",
-                mesh().time().timeName(),
-                sigma.mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "p",
+            mesh().time().timeName(),
             sigma.mesh(),
-            dimensionedScalar("zero", dimPressure, 0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        sigma.mesh(),
+        dimensionedScalar("zero", dimPressure, 0)
     );
 
     // Calculate the Jacobian of the deformation gradient
@@ -510,7 +496,7 @@ void Foam::neoHookeanElastic::correct(volSymmTensorField& sigma)
     );
 
     // Update the Cauchy stress
-    if (solvePressureEquation_)
+    if (solveVertexCentredPressureEqn())
     {
         p = mesh().lookupObject<volScalarField>("p");
         sigma = (1.0/J)*s - p*I;
@@ -533,21 +519,18 @@ void Foam::neoHookeanElastic::correct(surfaceSymmTensorField& sigma)
     }
 
     // Prepare the pressure field
-    tmp<surfaceScalarField> pf
+    surfaceScalarField pf
     (
-        surfaceScalarField
+        IOobject
         (
-            IOobject
-            (
-                "pfTmp",
-                mesh().time().timeName(),
-                sigma.mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "pf",
+            mesh().time().timeName(),
             sigma.mesh(),
-            dimensionedScalar("zero", dimPressure, 0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        sigma.mesh(),
+        dimensionedScalar("zero", dimPressure, 0)
     );
 
     // Calculate the Jacobian of the deformation gradient
@@ -560,7 +543,7 @@ void Foam::neoHookeanElastic::correct(surfaceSymmTensorField& sigma)
     // Calculate deviatoric stress
     const surfaceSymmTensorField s = mu_*dev(bEbar);
 
-    if (solvePressureEquation_)
+    if (solveVertexCentredPressureEqn())
     {
         pf = mesh().lookupObject<surfaceScalarField>("pf");
         sigma = (1.0/J)*s - pf*I;
