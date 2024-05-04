@@ -165,8 +165,8 @@ void vertexCentredLaplacian::setFixedDofs
                         )   << "Point " << pointID << " "
                             << pointT.mesh().mesh().points()[pointID]
                             << " has a prescribed value from more than one "
-                            << "patch: the value from the patch with the lowest"
-                            << " index will be used." << endl;
+                            << "patch: the value from the patch with the "
+                            << "lowest index will be used." << endl;
                     }
                 }
                 else
@@ -281,8 +281,7 @@ vertexCentredLaplacian::vertexCentredLaplacian
             IOobject::AUTO_WRITE
         ),
         mesh(),
-        dimensionedVector("zero", pointT_.dimensions()/dimLength, vector::zero) //,
-        //"zeroGradient"
+        dimensionedVector("zero", pointT_.dimensions()/dimLength, vector::zero)
     ),
     dualGradTf_
     (
@@ -370,7 +369,11 @@ bool vertexCentredLaplacian::evolve()
     // Lookup flag to indicate compact or large Laplacian stencil
     const Switch compactImplicitStencil
     (
-        solidModelDict().lookupOrDefault<Switch>("compactImplicitStencil", true)
+        solidModelDict().lookupOrDefault<Switch>
+        (
+            "compactImplicitStencil", 
+            true
+        )
     );
     if (debug)
     {
@@ -470,21 +473,6 @@ bool vertexCentredLaplacian::evolve()
             "sparseMatrixTools::solveLinearSystemPETSc(...scalar...) "
             "to be implemented!"
         );
-        // fileName optionsFile(solidModelDict().lookup("optionsFile"));
-        // solverPerf = sparseMatrixTools::solveLinearSystemPETSc
-        // (
-        //     matrix,
-        //     source,
-        //     pointDcorr,
-        //     twoD_,
-        //     optionsFile,
-        //     mesh().points(),
-        //     ownedByThisProc,
-        //     localToGlobalPointMap,
-        //     globalPointIndices_.stencilSizeOwned(),
-        //     globalPointIndices_.stencilSizeNotOwned(),
-        //     solidModelDict().lookupOrDefault<bool>("debugPETSc", false)
-        // );
 #else
         FatalErrorIn("vertexCentredLaplacian::evolve()")
             << "PETSc not available. Please set the PETSC_DIR environment "

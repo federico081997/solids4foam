@@ -22,8 +22,9 @@ Description
     Vertex-centred solver for the Laplace equation.
 
     Discretisation is performed using a vertex-centred finite volume approach
-    where the governing equations are integrated over a dual mesh. The dual mesh
-    is automatically constructed from the primary mesh using the meshDualiser.
+    where the governing equations are integrated over a dual mesh. The dual 
+    mesh is automatically constructed from the primary mesh using the 
+    meshDualiser.
 
 Author
     Philip Cardiff, UCD.  All rights reserved.
@@ -87,8 +88,8 @@ class vertexCentredLaplacian
         //  The size of this list is equal to the number of points
         scalarField fixedDofValues_;
 
-        //- Scale factor for the fixed degree of freedom equations to improve the
-        //  matrix conditioning
+        //- Scale factor for the fixed degree of freedom equations to improve 
+        //  the matrix conditioning
         const scalar fixedDofScale_;
 
         //- Point volume field
