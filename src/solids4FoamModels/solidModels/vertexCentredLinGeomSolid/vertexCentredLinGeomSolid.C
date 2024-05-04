@@ -21,7 +21,6 @@ License
 #include "linearElasticMisesPlastic.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sparseMatrix.H"
-#include "symmTensor4thOrder.H"
 #include "vfvcCellPoint.H"
 #include "vfvmCellPoint.H"
 #include "fvcDiv.H"
@@ -120,11 +119,9 @@ void vertexCentredLinGeomSolid::updateSource
     }
 
     // Calculate divergence of stress for the dual cells
-    // const vectorField dualDivSigma = fvc::div(dualMesh().Sf() & dualSigmaf_);
     const vectorField dualDivSigma = fvc::div(dualTraction*dualMesh().magSf());
 
     // Map dual cell field to primary mesh point field
-    //vectorField pointDivSigma(mesh().nPoints(), vector::zero);
     vectorField& pointDivSigma = pointDivSigma_;
     pointDivSigma = vector::zero;
     forAll(dualDivSigma, dualCellI)
@@ -221,7 +218,8 @@ void vertexCentredLinGeomSolid::updatePointDivSigma
         }
     }
 
-    // Calculate divergence of stress (force per unit volume) for the dual cells
+    // Calculate divergence of stress (force per unit volume) for the dual 
+    // cells
     const vectorField dualDivSigma = fvc::div(dualTraction*dualMesh().magSf());
 
     // Calculate absolute divergence of stress (force)
@@ -282,16 +280,6 @@ void vertexCentredLinGeomSolid::setFixedDofs
             )
         )
         {
-            // const uniformFixedValuePointPatchVectorField& dispPatch =
-            //     refCast<const uniformFixedValuePointPatchVectorField>
-            // const fixedValuePointPatchVectorField& dispPatch =
-            //     refCast<const fixedValuePointPatchVectorField>
-            //     (
-            //         pointD.boundaryField()[patchI]
-            //     );
-
-            // const vector& disp = dispPatch.uniformValue();
-
             const labelList& meshPoints =
                 pointD.mesh().mesh().boundaryMesh()[patchI].meshPoints();
 
@@ -398,8 +386,8 @@ void vertexCentredLinGeomSolid::setFixedDofs
                             << abort(FatalError);
                     }
 
-                    // If the point is not fully fixed then make sure the normal
-                    // direction is fixed
+                    // If the point is not fully fixed then make sure the 
+                    // normal direction is fixed
                     if (mag(fixedDofDirections[pointID] - symmTensor(I)) > 0)
                     {
                         // If the directions are orthogonal we can add them
@@ -409,7 +397,8 @@ void vertexCentredLinGeomSolid::setFixedDofs
                             FatalError
                                 << "Point " << pointID << " is fixed in two "
                                 << "directions: this is only implemented for "
-                                << "Cartesian axis directions" << abort(FatalError);
+                                << "Cartesian axis directions" 
+                                << abort(FatalError);
                         }
 
                         fixedDofDirections[pointID] += curDir;
@@ -478,8 +467,8 @@ void vertexCentredLinGeomSolid::enforceTractionBoundaries
             // the average of all the points that map to it
             scalarField nPointsPerDualFace(dualFaceTraction.size(), 0.0);
 
-            // Map from primary mesh point field to second mesh face field using
-            // the pointToDualFaces map
+            // Map from primary mesh point field to second mesh face field 
+            // using the pointToDualFaces map
             forAll(totalTraction, pI)
             {
                 const label pointID = meshPoints[pI];
@@ -719,7 +708,7 @@ scalar vertexCentredLinGeomSolid::calculateLineSearchFactor
         {
             // Interpolate/extrapolate to find new eta
             // Limit it to be less than 10
-            //eta = min(-1/(r - 1), 10);
+            // eta = min(-1/(r - 1), 10);
 
             if (r < 0)
             {
@@ -1170,7 +1159,8 @@ bool vertexCentredLinGeomSolid::evolveImplicitCoupled()
 
 #ifdef OPENFOAM_COM
     // Interpolate pointD to D
-    // This is useful for visualisation but it is also needed when using preCICE
+    // This is useful for visualisation but it is also needed when using 
+    // preCICE
     pointVolInterp_.interpolate(pointD(), D());
 #endif
 
@@ -1194,11 +1184,16 @@ bool vertexCentredLinGeomSolid::evolveImplicitSegregated()
     // Lookup flag to indicate compact or large Laplacian stencil
     const Switch compactImplicitStencil
     (
-        solidModelDict().lookupOrDefault<Switch>("compactImplicitStencil", true)
+        solidModelDict().lookupOrDefault<Switch>
+        (
+            "compactImplicitStencil", 
+            true
+        )
     );
     Info<< "compactImplicitStencil: " << compactImplicitStencil << endl;
 
-    // Create scalar Laplacian discretisation matrix without boundary conditions
+    // Create scalar Laplacian discretisation matrix without boundary 
+    // conditions
     vfvm::laplacian
     (
         matrixNoBCs,
@@ -1319,7 +1314,11 @@ bool vertexCentredLinGeomSolid::evolveImplicitSegregated()
                 // Use Eigen SparseLU direct solver
                 sparseMatrixTools::solveLinearSystemEigen
                 (
-                    matrixDirI, sourceDirI, pointDcorr, writeMatlabMatrix, debug
+                    matrixDirI, 
+                    sourceDirI, 
+                    pointDcorr, 
+                    writeMatlabMatrix, 
+                    debug
                 );
             }
 
@@ -1453,7 +1452,8 @@ bool vertexCentredLinGeomSolid::evolveImplicitSegregated()
 
 #ifdef OPENFOAM_COM
     // Interpolate pointD to D
-    // This is useful for visualisation but it is also needed when using preCICE
+    // This is useful for visualisation but it is also needed when using 
+    // preCICE
     pointVolInterp_.interpolate(pointD(), D());
 #endif
 
@@ -1751,8 +1751,8 @@ void vertexCentredLinGeomSolid::setDeltaT(Time& runTime)
         // time-step. This means that we use 1/(2*d) == 0.5*deltaCoeff when
         // calculating the required stable time-step
         // i.e. deltaT = (1.0/(0.5*deltaCoeff)/waveSpeed
-        // For safety, we should use a time-step smaller than this e.g. Abaqus uses
-        // stableTimeStep/sqrt(2): we will default to this value
+        // For safety, we should use a time-step smaller than this e.g. 
+        // Abaqus uses stableTimeStep/sqrt(2): we will default to this value
         const scalar requiredDeltaT =
             1.0/
             gMax
@@ -1962,48 +1962,13 @@ void vertexCentredLinGeomSolid::writeFields(const Time& runTime)
 
     // Acces the linearElasticMisesPlastic mechanical law
     const PtrList<mechanicalLaw>& mechLaws = mechanical();
-    const linearElasticMisesPlastic& mech = refCast<const linearElasticMisesPlastic>(mechLaws[0]);
+    const linearElasticMisesPlastic& mech = 
+        refCast<const linearElasticMisesPlastic>(mechLaws[0]);
 
     // Calculate the stress at the points
     mech.calculatePStress(pSigma, pGradD);
 
     pSigma.write();
-
-//    // Equivalent stress at the points
-//    pointScalarField pSigmaEq
-//    (
-//        IOobject
-//        (
-//            "pSigmaEq",
-//            runTime.timeName(),
-//            runTime,
-//            IOobject::NO_READ,
-//            IOobject::AUTO_WRITE
-//        ),
-//        pMesh(),
-//        dimensionedScalar("0", dimPressure, 0.0)
-//    );
-
-//    pSigmaEq.primitiveFieldRef() =
-//        sqrt(0.5*((pSigma.component(symmTensor::XX) - pSigma.component(symmTensor::YY))^2 +
-//        (pSigma.component(symmTensor::YY) - pSigma.component(symmTensor::ZZ))^2 +
-//        (pSigma.component(symmTensor::ZZ) - component(symmTensor::XX))^2) +
-//        3*(pSigma.component(symmTensor::XY)^2 + pSigma.component(symmTensor::YZ)^2 + pSigma.component(symmTensor::XZ)^2));
-
-//#ifdef FOAMEXTEND
-//    pSigmaEq.internalField() =
-//        sqrt(0.5*((pSigma.XX().internalField() - pSigma.internalField().YY())^2 +
-//        (pSigma.internalField().YY() - pSigma.internalField().ZZ())^2 +
-//        (pSigma.internalField().ZZ() - pSigma.internalField().XX())^2) +
-//        3*(pSigma.internalField().XY()^2 + pSigma.internalField().YZ()^2 + pSigma.internalField().XZ()^2));
-//#else
-//    pSigmaEq.primitiveFieldRef() =
-//        sqrt(0.5*((pSigma.component(symmTensor::XX).internalField() - pSigma.internalField().YY())^2 +
-//        (pSigma.internalField().YY() - pSigma.internalField().ZZ())^2 +
-//        (pSigma.internalField().ZZ() - pSigma.internalField().XX())^2) +
-//        3*(pSigma.internalField().XY()^2 + pSigma.internalField().YZ()^2 + pSigma.internalField().XZ()^2));
-//#endif
-//    pSigmaEq.write();
 
     solidModel::writeFields(runTime);
 }
