@@ -19,10 +19,7 @@ License
 
 #include "explicitVertexCentredLinGeomSolid.H"
 #include "addToRunTimeSelectionTable.H"
-#include "sparseMatrix.H"
-//#include "symmTensor4thOrder.H"
 #include "vfvcCellPoint.H"
-#include "vfvmCellPoint.H"
 #include "fvcDiv.H"
 #include "fixedValuePointPatchFields.H"
 #include "solidTractionPointPatchVectorField.H"
@@ -44,7 +41,12 @@ namespace solidModels
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(explicitVertexCentredLinGeomSolid, 0);
-addToRunTimeSelectionTable(solidModel, explicitVertexCentredLinGeomSolid, dictionary);
+addToRunTimeSelectionTable
+(
+    solidModel, 
+    explicitVertexCentredLinGeomSolid, 
+    dictionary
+);
 
 
 // * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * * * //
@@ -104,7 +106,8 @@ void explicitVertexCentredLinGeomSolid::updatePointDivSigma
         }
     }
 
-    // Calculate divergence of stress (force per unit volume) for the dual cells
+    // Calculate divergence of stress (force per unit volume) for the 
+    // dual cells
     const vectorField dualDivSigma = fvc::div(dualTraction*dualMesh().magSf());
 
     // Calculate absolute divergence of stress (force)
@@ -115,7 +118,7 @@ void explicitVertexCentredLinGeomSolid::updatePointDivSigma
     // We temporarily use the pointDivSigma field to hold absolute forces
     // but convert them back to force per unit volume below
     vectorField& pointDivSigmaI = pointDivSigma;
-    const labelList& dualCellToPoint = dualMeshMap().dualCellToPoint();
+    const labelList& dualCellToPoint = dualMeshMap().dualCellToPoint();    
     forAll(dualDivSigmaAbs, dualCellI)
     {
         const label pointID = dualCellToPoint[dualCellI];
@@ -195,8 +198,8 @@ void explicitVertexCentredLinGeomSolid::enforceTractionBoundaries
             // the average of all the points that map to it
             scalarField nPointsPerDualFace(dualFaceTraction.size(), 0.0);
 
-            // Map from primary mesh point field to second mesh face field using
-            // the pointToDualFaces map
+            // Map from primary mesh point field to second mesh face field 
+            // using the pointToDualFaces map
             forAll(totalTraction, pI)
             {
                 const label pointID = meshPoints[pI];
@@ -652,64 +655,10 @@ void explicitVertexCentredLinGeomSolid::writeFields(const Time& runTime)
 
 #ifdef OPENFOAM_COM
     // Interpolate pointD to D
-    // This is useful for visualisation but it is also needed when using preCICE
+    // This is useful for visualisation but it is also needed when 
+    // using preCICE
     pointVolInterp_.interpolate(pointD(), D());
 #endif
-
-//     // Calculate gradD at the primary points using least squares: this should
-//     // be second-order accurate (... I think).
-//     const pointTensorField pGradD(vfvc::pGrad(pointD(), mesh()));
-
-//     // Calculate strain at the primary points based on pGradD
-//     // Note: the symm operator is not defined for pointTensorFields so we will
-//     // do it manually
-//     // const pointSymmTensorField pEpsilon("pEpsilon", symm(pGradD));
-//     pointSymmTensorField pEpsilon
-//     (
-//         IOobject
-//         (
-//             "pEpsilon",
-//             runTime.timeName(),
-//             runTime,
-//             IOobject::NO_READ,
-//             IOobject::AUTO_WRITE
-//         ),
-//         pMesh(),
-//         dimensionedSymmTensor("0", dimless, symmTensor::zero)
-//     );
-
-// #ifdef FOAMEXTEND
-//     pEpsilon.internalField() = symm(pGradD.internalField());
-// #else
-//     pEpsilon.primitiveFieldRef() = symm(pGradD.internalField());
-// #endif
-//     pEpsilon.write();
-
-//     // Equivalent strain at the points
-//     pointScalarField pEpsilonEq
-//     (
-//         IOobject
-//         (
-//             "pEpsilonEq",
-//             runTime.timeName(),
-//             runTime,
-//             IOobject::NO_READ,
-//             IOobject::AUTO_WRITE
-//         ),
-//         pMesh(),
-//         dimensionedScalar("0", dimless, 0.0)
-//     );
-
-// #ifdef FOAMEXTEND
-//     pEpsilonEq.internalField() =
-//         sqrt((2.0/3.0)*magSqr(dev(pEpsilon.internalField())));
-// #else
-//     pEpsilonEq.primitiveFieldRef() =
-//         sqrt((2.0/3.0)*magSqr(dev(pEpsilon.internalField())));
-// #endif
-//     pEpsilonEq.write();
-
-//     Info<< "Max pEpsilonEq = " << gMax(pEpsilonEq) << nl << endl;
 
     solidModel::writeFields(runTime);
 }

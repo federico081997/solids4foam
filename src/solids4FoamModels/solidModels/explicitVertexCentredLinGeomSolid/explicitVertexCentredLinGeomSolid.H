@@ -24,8 +24,9 @@ Description
     unknown.
 
     Discretisation is performed using a vertex-centred finite volume approach
-    where the governing equations are integrated over a dual mesh. The dual mesh
-    is automatically constructed from the primary mesh using the meshDualiser.
+    where the governing equations are integrated over a dual mesh. The dual 
+    mesh is automatically constructed from the primary mesh using the 
+    meshDualiser.
 
     An explicit solution algorithm is employed in contrast to the implicit
     solution algorithm used in vertexCentredLinGeomSolid.
@@ -65,7 +66,7 @@ namespace solidModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class explicitVertexCentredLinGeomSolid Declaration
+              Class explicitVertexCentredLinGeomSolid Declaration
 \*---------------------------------------------------------------------------*/
 
 class explicitVertexCentredLinGeomSolid
@@ -74,8 +75,8 @@ class explicitVertexCentredLinGeomSolid
 {
     // Private Data
 
-        //- Store stiffness field: only used by pointSolidContact boundaries for
-        //  calculating the penalty factor
+        //- Store stiffness field: only used by pointSolidContact boundaries 
+        //  for calculating the penalty factor
         const volScalarField impK_;
 
         //- Compact edge gradient factor
@@ -141,12 +142,15 @@ class explicitVertexCentredLinGeomSolid
         (
             const pointVectorField& pointD,
             surfaceVectorField& dualTraction,
-            const fvMesh& mesh, // corresponding to pointD mesh
+            const fvMesh& mesh, // Corresponding to pointD mesh
             const labelListList& pointToDualFaces
         ) const;
 
         //- Disallow default bitwise copy construct
-        explicitVertexCentredLinGeomSolid(const explicitVertexCentredLinGeomSolid&);
+        explicitVertexCentredLinGeomSolid
+        (
+            const explicitVertexCentredLinGeomSolid&
+        );
 
         //- Disallow default bitwise assignment
         void operator=(const explicitVertexCentredLinGeomSolid&);
