@@ -19,12 +19,14 @@ Class
     explicitVertexCentredNonLinGeomTotalLagSolid
 
 Description
-    Mathematical model where nonnlinear geometry is assumed using a total
-    Lagrangian formulation. The point total displacement is the primary unknown.
+    Mathematical model where nonlinear geometry is assumed using a total
+    Lagrangian formulation. The point total displacement is the primary 
+    unknown.
 
     Discretisation is performed using a vertex-centred finite volume approach
-    where the governing equations are integrated over a dual mesh. The dual mesh
-    is automatically constructed from the primary mesh using the meshDualiser.
+    where the governing equations are integrated over a dual mesh. The dual 
+    mesh is automatically constructed from the primary mesh using the 
+    meshDualiser.
 
     An explicit solution algorithm is employed in contrast to the implicit
     solution algorithm used in vertexCentredLinGeomSolid.
@@ -72,8 +74,8 @@ class explicitVertexCentredNonLinGeomTotalLagSolid
 {
     // Private Data
 
-        //- Store stiffness field: only used by pointSolidContact boundaries for
-        //  calculating the penalty factor
+        //- Store stiffness field: only used by pointSolidContact boundaries 
+        //  for calculating the penalty factor
         const volScalarField impK_;
 
         //- Use artificial compressibility approach to calculate the pressure
@@ -132,8 +134,8 @@ class explicitVertexCentredNonLinGeomTotalLagSolid
         surfaceSymmTensorField dualSigmaf_;
 
         //- Number of processors which share this point
-        // Interior points will be 1, but points on processor boundaries will be
-        //  at least 2
+        // Interior points will be 1, but points on processor boundaries will 
+        // be at least 2
         pointScalarField nProcPerPoint_;
 
         //- Local-to-global point map and owner list
@@ -171,7 +173,10 @@ class explicitVertexCentredNonLinGeomTotalLagSolid
         ) const;
 
         //- Disallow default bitwise copy construct
-        explicitVertexCentredNonLinGeomTotalLagSolid(const explicitVertexCentredNonLinGeomTotalLagSolid&);
+        explicitVertexCentredNonLinGeomTotalLagSolid
+        (
+            const explicitVertexCentredNonLinGeomTotalLagSolid&
+        );
 
         //- Disallow default bitwise assignment
         void operator=(const explicitVertexCentredNonLinGeomTotalLagSolid&);

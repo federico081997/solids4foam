@@ -19,10 +19,7 @@ License
 
 #include "explicitVertexCentredNonLinGeomTotalLagSolid.H"
 #include "addToRunTimeSelectionTable.H"
-#include "sparseMatrix.H"
-#include "symmTensor4thOrder.H"
 #include "vfvcCellPoint.H"
-#include "vfvmCellPoint.H"
 #include "fvcDiv.H"
 #include "fixedValuePointPatchFields.H"
 #include "solidTractionPointPatchVectorField.H"
@@ -48,7 +45,12 @@ namespace solidModels
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(explicitVertexCentredNonLinGeomTotalLagSolid, 0);
-addToRunTimeSelectionTable(solidModel, explicitVertexCentredNonLinGeomTotalLagSolid, dictionary);
+addToRunTimeSelectionTable
+(
+    solidModel, 
+    explicitVertexCentredNonLinGeomTotalLagSolid, 
+    dictionary
+);
 
 
 // * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * * * //
@@ -117,7 +119,10 @@ void explicitVertexCentredNonLinGeomTotalLagSolid::updatePointDivSigma
     }
 
     // Calculate the deformed unit normals
-    const surfaceVectorField deformedSf(dualJf*dualFinvf.T() & dualMesh().Sf());
+    const surfaceVectorField deformedSf
+    (
+        dualJf*dualFinvf.T() & dualMesh().Sf()
+    );
     const surfaceScalarField deformedMagSf(mag(deformedSf));
     const surfaceVectorField deformedN(deformedSf/deformedMagSf);
 
@@ -148,7 +153,8 @@ void explicitVertexCentredNonLinGeomTotalLagSolid::updatePointDivSigma
         }
     }
 
-    // Calculate divergence of stress (force per unit volume) for the dual cells
+    // Calculate divergence of stress (force per unit volume) for the dual 
+    // cells
     const vectorField dualDivSigma = fvc::div(dualTraction*deformedMagSf);
 
     // Calculate absolute divergence of stress (force)
@@ -769,7 +775,10 @@ void explicitVertexCentredNonLinGeomTotalLagSolid::setTraction
 }
 
 
-void explicitVertexCentredNonLinGeomTotalLagSolid::writeFields(const Time& runTime)
+void explicitVertexCentredNonLinGeomTotalLagSolid::writeFields
+(
+    const Time& runTime
+)
 {
     Info<< nl << "Writing fields to " << runTime.timeName() << endl;
 
@@ -806,7 +815,10 @@ void explicitVertexCentredNonLinGeomTotalLagSolid::writeFields(const Time& runTi
     dualFf_.write();
     dualFinvf_.write();
     dualFf_.write();
-    const surfaceVectorField deformedSf(dualJf_*dualFinvf_.T() & dualMesh().Sf());
+    const surfaceVectorField deformedSf
+    (
+        dualJf_*dualFinvf_.T() & dualMesh().Sf()
+    );
     const surfaceScalarField deformedMagSf(mag(deformedSf));
     const surfaceVectorField dualDeformedNormals(deformedSf/deformedMagSf);
     pointVectorField pointN
@@ -891,64 +903,10 @@ void explicitVertexCentredNonLinGeomTotalLagSolid::writeFields(const Time& runTi
 
 #ifdef OPENFOAM_COM
     // Interpolate pointD to D
-    // This is useful for visualisation but it is also needed when using preCICE
+    // This is useful for visualisation but it is also needed when using 
+    // preCICE
     pointVolInterp_.interpolate(pointD(), D());
 #endif
-
-//     // Calculate gradD at the primary points using least squares: this should
-//     // be second-order accurate (... I think).
-//     const pointTensorField pGradD(vfvc::pGrad(pointD(), mesh()));
-
-//     // Calculate strain at the primary points based on pGradD
-//     // Note: the symm operator is not defined for pointTensorFields so we will
-//     // do it manually
-//     // const pointSymmTensorField pEpsilon("pEpsilon", symm(pGradD));
-//     pointSymmTensorField pEpsilon
-//     (
-//         IOobject
-//         (
-//             "pEpsilon",
-//             runTime.timeName(),
-//             runTime,
-//             IOobject::NO_READ,
-//             IOobject::AUTO_WRITE
-//         ),
-//         pMesh(),
-//         dimensionedSymmTensor("0", dimless, symmTensor::zero)
-//     );
-
-// #ifdef FOAMEXTEND
-//     pEpsilon.internalField() = symm(pGradD.internalField());
-// #else
-//     pEpsilon.primitiveFieldRef() = symm(pGradD.internalField());
-// #endif
-//     pEpsilon.write();
-
-//     // Equivalent strain at the points
-//     pointScalarField pEpsilonEq
-//     (
-//         IOobject
-//         (
-//             "pEpsilonEq",
-//             runTime.timeName(),
-//             runTime,
-//             IOobject::NO_READ,
-//             IOobject::AUTO_WRITE
-//         ),
-//         pMesh(),
-//         dimensionedScalar("0", dimless, 0.0)
-//     );
-
-// #ifdef FOAMEXTEND
-//     pEpsilonEq.internalField() =
-//         sqrt((2.0/3.0)*magSqr(dev(pEpsilon.internalField())));
-// #else
-//     pEpsilonEq.primitiveFieldRef() =
-//         sqrt((2.0/3.0)*magSqr(dev(pEpsilon.internalField())));
-// #endif
-//     pEpsilonEq.write();
-
-//     Info<< "Max pEpsilonEq = " << gMax(pEpsilonEq) << nl << endl;
 
     solidModel::writeFields(runTime);
 
