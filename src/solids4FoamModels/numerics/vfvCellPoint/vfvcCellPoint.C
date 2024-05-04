@@ -70,7 +70,6 @@ tmp<volVectorField> grad
 #endif
 
     // Take references for clarity and efficiency
-
     vectorField& resultI = result;
     const labelListList& cellPoints = mesh.cellPoints();
     const scalarField& pointTI = pointT.internalField();
@@ -143,7 +142,6 @@ tmp<volTensorField> grad
 #endif
 
     // Take references for clarity and efficiency
-
     tensorField& resultI = result;
     const labelListList& cellPoints = mesh.cellPoints();
     const vectorField& pointDI = pointD.internalField();
@@ -173,8 +171,6 @@ tmp<volTensorField> grad
 
             // Add least squares contribution to the cell gradient
             cellGrad += lsVec*pointDI[pointID];
-
-            //Info << "GradD for cell " << cellI << " and point " << pointID << ": " << cellGrad << endl;
         }
     }
 
@@ -221,7 +217,6 @@ tmp<pointTensorField> pGrad
 #endif
 
     // Take references for clarity and efficiency
-
     tensorField& resultI = result;
     const labelListList& pointPoints = mesh.pointPoints();
     const vectorField& pointDI = pointD.internalField();
@@ -267,7 +262,7 @@ tmp<pointTensorField> pGrad
 
 tmp<surfaceVectorField> fGrad
 (
-    const pointScalarField& pointT,
+    const pointScalarField& pointP,
     const fvMesh& mesh,
     const fvMesh& dualMesh,
     const labelList& dualFaceToCell,
@@ -288,7 +283,7 @@ tmp<surfaceVectorField> fGrad
         (
             IOobject
             (
-                "fGrad(" + pointT.name() + ")",
+                "fGrad(" + pointP.name() + ")",
                 dualMesh.time().timeName(),
                 dualMesh,
                 IOobject::NO_READ,
@@ -297,7 +292,7 @@ tmp<surfaceVectorField> fGrad
             dualMesh,
             dimensionedVector
             (
-                "zero", pointT.dimensions()/dimLength, vector::zero
+                "zero", pointP.dimensions()/dimLength, vector::zero
             )
         )
     );
@@ -309,19 +304,19 @@ tmp<surfaceVectorField> fGrad
 
     // Take references for clarity and efficiency
     vectorField& resultI = result;
-    const scalarField& pointTI = pointT.internalField();
+    const scalarField& pointPI = pointP.internalField();
     const pointField& points = mesh.points();
     const labelList& dualOwn = dualMesh.faceOwner();
     const labelList& dualNei = dualMesh.faceNeighbour();
 
     // Approach
     // Step 1: Calculate constant gradient in each primary mesh cell
-    // Step 2: Set dual face gradient to primary mesh constant cell gradient and
-    //         replace the component in the edge direction
+    // Step 2: Set dual face gradient to primary mesh constant cell gradient 
+    //         and replace the component in the edge direction
 
     // Calculate constant gradient in each primary mesh cell
-    const volVectorField gradT(vfvc::grad(pointT, mesh));
-    const vectorField& gradTI = gradT.internalField();
+    const volVectorField gradP(vfvc::grad(pointP, mesh));
+    const vectorField& gradPI = gradP.internalField();
 
     // Set dual face gradient to primary mesh constant cell gradient and
     // replace the component in the edge direction
@@ -359,11 +354,11 @@ tmp<surfaceVectorField> fGrad
             resultI[dualFaceI] =
                 zeta*edgeDir
                *(
-                   pointTI[neiPointID] - pointTI[ownPointID]
+                   pointPI[neiPointID] - pointPI[ownPointID]
                )/edgeLength
-              + ((I - zeta*sqr(edgeDir)) & gradTI[cellID]);
+              + ((I - zeta*sqr(edgeDir)) & gradPI[cellID]);
         }
-        else // boundary face
+        else // Boundary face
         {
             // Dual patch which this dual face resides on
             const label dualPatchID =
@@ -383,10 +378,10 @@ tmp<surfaceVectorField> fGrad
                 // Is this an issue?
 #ifdef OPENFOAM_NOT_EXTEND
                 result.boundaryFieldRef()[dualPatchID][localDualFaceID] =
-                    gradTI[cellID];
+                    gradPI[cellID];
 #else
                 result.boundaryField()[dualPatchID][localDualFaceID] =
-                    gradTI[cellID];
+                    gradPI[cellID];
 #endif
             }
         }
@@ -452,8 +447,8 @@ tmp<surfaceTensorField> fGrad
 
     // Approach
     // Step 1: Calculate constant gradient in each primary mesh cell
-    // Step 2: Set dual face gradient to primary mesh constant cell gradient and
-    //         replace the component in the edge direction
+    // Step 2: Set dual face gradient to primary mesh constant cell gradient 
+    //         and replace the component in the edge direction
 
     // Calculate constant gradient in each primary mesh cell
     const volTensorField gradD(vfvc::grad(pointD, mesh));
@@ -493,15 +488,13 @@ tmp<surfaceTensorField> fGrad
             // central-differencing and use the primary mesh cell value for the
             // tangential directions
             resultI[dualFaceI] =
-              //   edgeDir*(pointDI[neiPointID] - pointDI[ownPointID])/edgeLength
-              // + ((I - sqr(edgeDir)) & gradDI[cellID]);
                 zeta*edgeDir
                *(
                    pointDI[neiPointID] - pointDI[ownPointID]
                )/edgeLength
               + ((I - zeta*sqr(edgeDir)) & gradDI[cellID]);
         }
-        else // boundary face
+        else // Boundary face
         {
             // Dual patch which this dual face resides on
             const label dualPatchID =
@@ -519,7 +512,8 @@ tmp<surfaceTensorField> fGrad
                 if (cellID > -1)
                 {
                     // Use the gradient in the adjacent primary cell-centre
-                    // This will result in inconsistent values at processor patches
+                    // This will result in inconsistent values at processor 
+                    // patches
                     // Is this an issue?
 #ifdef OPENFOAM_NOT_EXTEND
                     result.boundaryFieldRef()[dualPatchID][localDualFaceID] =
@@ -545,12 +539,12 @@ tmp<surfaceTensorField> fGrad
 tmp<vectorField> d2dt2
 (
     ITstream& d2dt2Scheme,
-    const pointVectorField& pointD, // displacement
-    const pointVectorField& pointU, // velocity
-    const pointVectorField& pointA, // acceleration
-    const scalarField& pointRho,    // density
-    const scalarField& pointVol,    // volumes
-    const int debug // debug switch
+    const pointVectorField& pointD, // Displacement
+    const pointVectorField& pointU, // Velocity
+    const pointVectorField& pointA, // Acceleration
+    const scalarField& pointRho,    // Density
+    const scalarField& pointVol,    // Volumes
+    const int debug                 // Debug switch
 )
 {
     // Take a reference to the internal field
@@ -791,14 +785,12 @@ tmp<pointScalarField> laplacian
     pointScalarField& result = tresult();
 #endif
 
-        // Take reference for clarity and efficiency
-    //const labelListList& cellPoints = mesh.cellPoints();
-    //const pointField& points = mesh.points();
+    // Take reference for clarity and efficiency
     const labelList& dualOwn = dualMesh.owner();
     const labelList& dualNei = dualMesh.neighbour();
     const vectorField& dualSf = dualMesh.faceAreas();
 
-    //Calculate the gradient of P for each dual face
+    // Calculate the gradient of P for each dual face
     const surfaceVectorField dualGradPField
     (
         fGrad
@@ -816,9 +808,6 @@ tmp<pointScalarField> laplacian
     // Loop over all internal faces of the dual mesh
     forAll(dualOwn, dualFaceI)
     {
-        // Primary mesh cell in which dualFaceI resides
-        //const label cellID = dualFaceToCell[dualFaceI];
-
         // Dual cell owner of dualFaceI
         const label dualOwnCellID = dualOwn[dualFaceI];
 
@@ -922,15 +911,9 @@ tmp<surfaceScalarField> interpolate
     const fvMesh& mesh,
     const fvMesh& dualMesh,
     const labelList& dualFaceToCell,
-    const labelList& dualCellToPoint,
-    const bool debug
+    const labelList& dualCellToPoint
 )
 {
-    if (debug)
-    {
-        Info<< "surfaceScalarField interpolate(...): start" << endl;
-    }
-
     // Prepare the result field
     tmp<surfaceScalarField> tresult
     (
@@ -959,55 +942,30 @@ tmp<surfaceScalarField> interpolate
 
     // Take references for clarity and efficiency
     scalarField& resultI = result;
-    const pointField& points = mesh.points();
     const labelList& dualOwn = dualMesh.faceOwner();
-    const labelList& dualNei = dualMesh.faceNeighbour();
 
     // Approach
     // Step 1: Calculate the average pressure in each primary mesh cell
-    // Step 2: Set dual face pressure to primary mesh pressure and
-    //         replace the component in the edge direction
+    // Step 2: Set dual face pressure to primary mesh pressure
 
     // Calculate constant gradient in each primary mesh cell
     const volScalarField volP(vfvc::interpolate(pointP, mesh));
     const scalarField& volPI = volP.internalField();
 
-    // Set dual face pressure to primary mesh pressure and
-    // replace the component in the edge direction
-    // We only replace the edge component for internal dual faces
+    // Set dual face pressure to primary mesh pressure
 
     // For all faces - internal and boundary
     forAll(dualOwn, dualFaceI)
     {
-        // Only calculate the pressure for internal faces
         if (dualMesh.isInternalFace(dualFaceI))
         {
             // Primary mesh cell in which dualFaceI resides
             const label cellID = dualFaceToCell[dualFaceI];
 
-    //        // Dual cell owner of dualFaceI
-            //const label dualOwnCellID = dualOwn[dualFaceI];
-
-            //// Dual cell neighbour of dualFaceI
-            //const label dualNeiCellID = dualNei[dualFaceI];
-
-            //// Primary mesh point at the centre of dualOwnCellID
-            //const label ownPointID = dualCellToPoint[dualOwnCellID];
-
-            //// Primary mesh point at the centre of dualNeiCellID
-            //const label neiPointID = dualCellToPoint[dualNeiCellID];
-
-            //// Unit edge vector from the own point to the nei point
-            //vector edgeDir = points[neiPointID] - points[ownPointID];
-            //const scalar edgeLength = mag(edgeDir);
-            //edgeDir /= edgeLength;
-
-            // Calculate the gradient component in the edge direction using
-            // central-differencing and use the primary mesh cell value for the
-            // tangential directions
+            // Set the dual face pressure to the primary mesh pressure
             resultI[dualFaceI] = volPI[cellID];
         }
-        else // boundary face
+        else // Boundary face
         {
             // Dual patch which this dual face resides on
             const label dualPatchID =
@@ -1021,24 +979,17 @@ tmp<surfaceScalarField> interpolate
 
                 // Primary mesh cell in which dualFaceI resides
                 const label cellID = dualFaceToCell[dualFaceI];
-		            
-				// Use the gradient in the adjacent primary cell-centre    
-				// This will result in inconsistent values at processor patches
-				// Is this an issue?
+                    
+                // Set dual face pressure to primary mesh pressure
 #ifdef OPENFOAM_NOT_EXTEND
-				result.boundaryFieldRef()[dualPatchID][localDualFaceID] =
-					volPI[cellID];
+                result.boundaryFieldRef()[dualPatchID][localDualFaceID] =
+                    volPI[cellID];
 #else
-				result.boundaryField()[dualPatchID][localDualFaceID] =
-					volPI[cellID];
+                result.boundaryField()[dualPatchID][localDualFaceID] =
+                    volPI[cellID];
 #endif
             }
         }
-    }
-    
-    if (debug)
-    {
-        Info<< "surfaceScalarField interpolate(...): end" << endl;
     }
 
     return tresult;

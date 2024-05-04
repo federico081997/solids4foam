@@ -19,17 +19,12 @@ Description
     Explicit functions for vertex-centred finite volume calculations: Vertex
     Finite Volume Calculus (vfvc).
 
-    Calculate the grad volTensorField given a dual mesh cell field, where the
-    dual mesh cells corresponds to the primary mesh points.
-
-    Calculate the divergence a dual mesh using a volSymmTensorField defined on
-    the primary mesh.
-
 SourceFiles
     vfvcCellPoint.C
 
 Author
     Philip Cardiff, UCD.
+    Federico Mazzanti, UCD.
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,24 +47,24 @@ namespace vfvc
     // Returns volVectorField on primary mesh
     tmp<volVectorField> grad
     (
-        const pointScalarField& pointT, // primary mesh point field
-        const fvMesh& mesh              // primary mesh
+        const pointScalarField& pointT, // Primary mesh point field
+        const fvMesh& mesh              // Primary mesh
     );
 
     // Gradient field
     // Returns volTensorField on primary mesh
     tmp<volTensorField> grad
     (
-        const pointVectorField& pointD, // primary mesh point displacement
-        const fvMesh& mesh              // primary mesh
+        const pointVectorField& pointD, // Primary mesh point displacement
+        const fvMesh& mesh              // Primary mesh
     );
 
     // Gradient field
     // Returns pointTensorField on primary mesh
     tmp<pointTensorField> pGrad
     (
-        const pointVectorField& pointD, // primary mesh point displacement
-        const fvMesh& mesh              // primary mesh
+        const pointVectorField& pointD, // Primary mesh point displacement
+        const fvMesh& mesh              // Primary mesh
     );
 
     // Gradient field
@@ -77,12 +72,12 @@ namespace vfvc
     // Only calculates the gradient for internal faces
     tmp<surfaceVectorField> fGrad
     (
-        const pointScalarField& pointT, // primary mesh point field
-        const fvMesh& mesh,             // primary mesh
-        const fvMesh& dualMesh,         // dual mesh
+        const pointScalarField& pointP, // Primary mesh point pressure
+        const fvMesh& mesh,             // Primary mesh
+        const fvMesh& dualMesh,         // Dual mesh
         const labelList& dualFaceToCell,
         const labelList& dualCellToPoint,
-        const scalar zeta, // fraction of compact edge direction component used
+        const scalar zeta, // Fraction of compact edge direction component used
         const bool debug = false
     );
 
@@ -91,12 +86,12 @@ namespace vfvc
     // Only calculates the gradient for internal faces
     tmp<surfaceTensorField> fGrad
     (
-        const pointVectorField& pointD, // primary mesh point displacement
-        const fvMesh& mesh,             // primary mesh
-        const fvMesh& dualMesh,         // dual mesh
+        const pointVectorField& pointD, // Primary mesh point displacement
+        const fvMesh& mesh,             // Primary mesh
+        const fvMesh& dualMesh,         // Dual mesh
         const labelList& dualFaceToCell,
         const labelList& dualCellToPoint,
-        const scalar zeta, // fraction of compact edge direction component used
+        const scalar zeta, // Fraction of compact edge direction component used
         const bool debug = false
     );
 
@@ -104,53 +99,52 @@ namespace vfvc
     tmp<vectorField> d2dt2
     (
         ITstream& d2dt2Scheme,
-        const pointVectorField& pointD, // displacement
-        const pointVectorField& pointU, // velocity
-        const pointVectorField& pointA, // acceleration
-        const scalarField& pointRho,    // density
-        const scalarField& pointVol,    // volumes
-        const int debug // debug switch
+        const pointVectorField& pointD, // Displacement
+        const pointVectorField& pointU, // Velocity
+        const pointVectorField& pointA, // Acceleration
+        const scalarField& pointRho,    // Density
+        const scalarField& pointVol,    // Volumes
+        const int debug                 // Debug switch
     );
 
-    // First time derivative pointVectorField pointP
+    // First time derivative pointVectorField pointD
     tmp<vectorField> ddt
     (
         ITstream& ddtScheme,
         ITstream& d2dt2Scheme,
-        const pointVectorField& pointP // displacement
+        const pointVectorField& pointP // Displacement
     );
 
     // Returns the laplacian of a scalar field on the dual mesh
     tmp<pointScalarField> laplacian
     (
-		const pointScalarField& pointP,
-		const fvMesh& mesh,
-		const fvMesh& dualMesh,
-		const labelList& dualFaceToCell,
-		const labelList& dualCellToPoint,
-		const scalar& zeta,
-		const bool debug
+        const pointScalarField& pointP,   // Pressure
+        const fvMesh& mesh,               // Primary mesh
+        const fvMesh& dualMesh,           // Dual mesh
+        const labelList& dualFaceToCell,
+        const labelList& dualCellToPoint,
+        const scalar& zeta, // Fraction of compact edge direction used
+        const bool debug
     );
 
     // Interpolate a pointScalarField to a volScalarField
     tmp<volScalarField> interpolate
-	(
-		const pointScalarField& pointP,
-		const fvMesh& mesh
-	);
+    (
+        const pointScalarField& pointP,
+        const fvMesh& mesh
+    );
 
-	// Interpolate a pointScalarField to a surfaceScalarField
-	// at the dual mesh faces
-	tmp<surfaceScalarField> interpolate
-	(
-		const pointScalarField& pointP,
-		const fvMesh& mesh,
-		const fvMesh& dualMesh,
-		const labelList& dualFaceToCell,
-		const labelList& dualCellToPoint,
-		const bool debug
-	);
-	
+    // Interpolate a pointScalarField to a surfaceScalarField
+    // at the dual mesh faces
+    tmp<surfaceScalarField> interpolate
+    (
+        const pointScalarField& pointP,
+        const fvMesh& mesh,
+        const fvMesh& dualMesh,
+        const labelList& dualFaceToCell,
+        const labelList& dualCellToPoint
+    );
+    
 } // End namespace vfvc
 
 } // End namespace Foam
