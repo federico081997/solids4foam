@@ -20,7 +20,6 @@ License
 #include "vertexCentredSegregatedLinGeomSolid.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sparseMatrix.H"
-#include "symmTensor4thOrder.H"
 #include "vfvcCellPoint.H"
 #include "vfvmCellPoint.H"
 #include "fvcDiv.H"
@@ -101,7 +100,6 @@ void vertexCentredSegregatedLinGeomSolid::updateSource
     }
 
     // Calculate divergence of stress for the dual cells
-    // const vectorField dualDivSigma = fvc::div(dualMesh().Sf() & dualSigmaf_);
     const vectorField dualDivSigma = fvc::div(dualTraction*dualMesh().magSf());
 
     // Map dual cell field to primary mesh point field
@@ -118,21 +116,8 @@ void vertexCentredSegregatedLinGeomSolid::updateSource
     // Add gravity body forces
     source -= pointRhoI*g().value()*pointVolI;
 
-//     // Add transient term
-//     source += vfvc::d2dt2
-//     (
-// #ifdef OPENFOAM_NOT_EXTEND
-//         mesh().d2dt2Scheme("d2dt2(pointD)"),
-// #else
-//         mesh().schemesDict().d2dt2Scheme("d2dt2(pointD)"),
-// #endif
-//         pointD(),
-//         pointU_,
-//         pointA_,
-//         pointRho_,
-//         pointVol_,
-//         int(bool(debug))
-//     );
+    // Add transient term
+
 }
 
 
@@ -157,16 +142,6 @@ void vertexCentredSegregatedLinGeomSolid::setFixedDofs
             )
         )
         {
-            // const uniformFixedValuePointPatchVectorField& dispPatch =
-            //     refCast<const uniformFixedValuePointPatchVectorField>
-            // const fixedValuePointPatchVectorField& dispPatch =
-            //     refCast<const fixedValuePointPatchVectorField>
-            //     (
-            //         pointD.boundaryField()[patchI]
-            //     );
-
-            // const vector& disp = dispPatch.uniformValue();
-
             const labelList& meshPoints =
                 pointD.mesh().mesh().boundaryMesh()[patchI].meshPoints();
 
@@ -273,8 +248,8 @@ void vertexCentredSegregatedLinGeomSolid::setFixedDofs
                             << abort(FatalError);
                     }
 
-                    // If the point is not fully fixed then make sure the normal
-                    // direction is fixed
+                    // If the point is not fully fixed then make sure the 
+                    // normal direction is fixed
                     if (mag(fixedDofDirections[pointID] - symmTensor(I)) > 0)
                     {
                         // If the directions are orthogonal we can add them
@@ -284,7 +259,8 @@ void vertexCentredSegregatedLinGeomSolid::setFixedDofs
                             FatalError
                                 << "Point " << pointID << " is fixed in two "
                                 << "directions: this is only implemented for "
-                                << "Cartesian axis directions" << abort(FatalError);
+                                << "Cartesian axis directions" 
+                                << abort(FatalError);
                         }
 
                         fixedDofDirections[pointID] += curDir;
@@ -353,8 +329,8 @@ void vertexCentredSegregatedLinGeomSolid::enforceTractionBoundaries
             // the average of all the points that map to it
             scalarField nPointsPerDualFace(dualFaceTraction.size(), 0.0);
 
-            // Map from primary mesh point field to second mesh face field using
-            // the pointToDualFaces map
+            // Map from primary mesh point field to second mesh face field 
+            // using the pointToDualFaces map
             forAll(totalTraction, pI)
             {
                 const label pointID = meshPoints[pI];
@@ -430,6 +406,7 @@ void vertexCentredSegregatedLinGeomSolid::enforceTractionBoundaries
         }
     }
 }
+
 
 bool vertexCentredSegregatedLinGeomSolid::
 vertexCentredSegregatedLinGeomSolid::converged
@@ -692,11 +669,16 @@ bool vertexCentredSegregatedLinGeomSolid::evolve()
     // Lookup flag to indicate compact or large Laplacian stencil
     const Switch compactImplicitStencil
     (
-        solidModelDict().lookupOrDefault<Switch>("compactImplicitStencil", true)
+        solidModelDict().lookupOrDefault<Switch>
+        (
+            "compactImplicitStencil", 
+            true
+        )
     );
     Info<< "compactImplicitStencil: " << compactImplicitStencil << endl;
 
-    // Create scalar Laplacian discretisation matrix without boundary conditions
+    // Create scalar Laplacian discretisation matrix without boundary 
+    // conditions
     vfvm::laplacian
     (
         matrixNoBCs,
@@ -817,7 +799,11 @@ bool vertexCentredSegregatedLinGeomSolid::evolve()
                 // Use Eigen SparseLU direct solver
                 sparseMatrixTools::solveLinearSystemEigen
                 (
-                    matrixDirI, sourceDirI, pointDcorr, writeMatlabMatrix, debug
+                    matrixDirI, 
+                    sourceDirI, 
+                    pointDcorr, 
+                    writeMatlabMatrix, 
+                    debug
                 );
             }
 
@@ -835,44 +821,6 @@ bool vertexCentredSegregatedLinGeomSolid::evolve()
 
             pointD().correctBoundaryConditions();
         }
-
-//         // Update point accelerations
-//         // Note: for NewmarkBeta, this needs to come before the pointU update
-// #ifdef OPENFOAM_NOT_EXTEND
-//         pointA_.primitiveFieldRef() =
-//             vfvc::ddt
-//             (
-//                 mesh().ddtScheme("ddt(pointU)"),
-//                 mesh().d2dt2Scheme("d2dt2(pointD)"),
-//                 pointU_
-//             );
-
-//         // Update point velocities
-//         pointU_.primitiveFieldRef() =
-//             vfvc::ddt
-//             (
-//                 mesh().ddtScheme("ddt(pointD)"),
-//                 mesh().d2dt2Scheme("d2dt2(pointD)"),
-//                 pointD()
-//             );
-// #else
-//         pointA_.internalField() =
-//             vfvc::ddt
-//             (
-//                 mesh().schemesDict().ddtScheme("ddt(pointU)"),
-//                 mesh().schemesDict().d2dt2Scheme("d2dt2(pointD)"),
-//                 pointU_
-//             );
-
-//         // Update point velocities
-//         pointU_.internalField() =
-//             vfvc::ddt
-//             (
-//                 mesh().schemesDict().ddtScheme("ddt(pointD)"),
-//                 mesh().schemesDict().d2dt2Scheme("d2dt2(pointD)"),
-//                 pointD()
-//             );
-// #endif
 
         if (twoD_)
         {
@@ -951,12 +899,14 @@ bool vertexCentredSegregatedLinGeomSolid::evolve()
 
 #ifdef OPENFOAM_COM
     // Interpolate pointD to D
-    // This is useful for visualisation but it is also needed when using preCICE
+    // This is useful for visualisation but it is also needed when using 
+    // preCICE
     pointVolInterp_.interpolate(pointD(), D());
 #endif
 
     return true;
 }
+
 
 void vertexCentredSegregatedLinGeomSolid::setTraction
 (

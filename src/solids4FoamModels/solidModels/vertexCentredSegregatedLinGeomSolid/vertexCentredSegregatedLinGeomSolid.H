@@ -24,11 +24,12 @@ Description
     unknown.
 
     Discretisation is performed using a vertex-centred finite volume approach
-    where the governing equations are integrated over a dual mesh. The dual mesh
-    is automatically constructed from the primary mesh using the meshDualiser.
+    where the governing equations are integrated over a dual mesh. The dual 
+    mesh is automatically constructed from the primary mesh using the 
+    meshDualiser.
 
-    In contrast to vertexCentredLinGeomSolid, where a coupled solution algorithm
-    is used, here a segregated solution algorithm is used.
+    In contrast to vertexCentredLinGeomSolid, where a coupled solution 
+    algorithm is used, here a segregated solution algorithm is used.
 
 Author
     Philip Cardiff, UCD.  All rights reserved.
@@ -66,7 +67,7 @@ namespace solidModels
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class vertexCentredSegregatedLinGeomSolid Declaration
+             Class vertexCentredSegregatedLinGeomSolid Declaration
 \*---------------------------------------------------------------------------*/
 
 class vertexCentredSegregatedLinGeomSolid
@@ -107,8 +108,8 @@ class vertexCentredSegregatedLinGeomSolid
         //  fixed
         symmTensorField fixedDofDirections_;
 
-        //- Scale factor for the fixed degree of freedom equations to improve the
-        //  matrix conditioning
+        //- Scale factor for the fixed degree of freedom equations to improve 
+        //  the matrix conditioning
         const scalar fixedDofScale_;
 
         //- Point velocity
@@ -162,7 +163,7 @@ class vertexCentredSegregatedLinGeomSolid
         (
             const pointVectorField& pointD,
             surfaceVectorField& dualTraction,
-            const fvMesh& mesh, // corresponding to pointD mesh
+            const fvMesh& mesh, // Corresponding to pointD mesh
             const labelListList& pointToDualFaces
         ) const;
 
@@ -178,7 +179,10 @@ class vertexCentredSegregatedLinGeomSolid
         ) const;
 
         //- Disallow default bitwise copy construct
-        vertexCentredSegregatedLinGeomSolid(const vertexCentredSegregatedLinGeomSolid&);
+        vertexCentredSegregatedLinGeomSolid
+        (
+            const vertexCentredSegregatedLinGeomSolid&
+        );
 
         //- Disallow default bitwise assignment
         void operator=(const vertexCentredSegregatedLinGeomSolid&);
