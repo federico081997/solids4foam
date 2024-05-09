@@ -574,6 +574,28 @@ Foam::tmp<Foam::volScalarField> Foam::mechanicalModel::bulkModulus() const
 }
 
 
+Foam::tmp<Foam::pointScalarField> Foam::mechanicalModel::pBulkModulus() const
+{
+    const PtrList<mechanicalLaw>& laws = *this;
+
+    if (laws.size() == 1)
+    {
+        return laws[0].pBulkModulus();
+    }
+    else
+    {
+        notImplemented
+        (
+            "Foam::mechanicalModel::pBulkModulus() not implemented "
+            "for multiple materials"
+        );
+
+        // Keep the compiler happy
+        return laws[0].pBulkModulus();
+    }
+}
+
+
 void Foam::mechanicalModel::correct(volSymmTensorField& sigma)
 {
     PtrList<mechanicalLaw>& laws = *this;
