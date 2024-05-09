@@ -45,13 +45,11 @@ SourceFiles
 #include "surfaceFields.H"
 #include "pointFields.H"
 #include "uniformDimensionedFields.H"
-#include "sparseMatrix.H"
 #include "GeometricField.H"
 #include "dualMechanicalModel.H"
 #include "globalPointIndices.H"
 #include "pointFieldFunctions.H"
 #include "sparseMatrixExtended.H"
-#include "mechanicalLaw.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

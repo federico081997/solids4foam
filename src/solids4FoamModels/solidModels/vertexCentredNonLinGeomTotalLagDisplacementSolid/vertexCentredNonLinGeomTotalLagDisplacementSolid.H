@@ -19,15 +19,17 @@ Class
     vertexCentredNonLinGeomTotalLagDisplacementSolid
 
 Description
-    Mathematical model where where non linear geometry is modelled i.e. large strains
-    and the total displacement is the primary unknown.
+    Mathematical model where where non linear geometry is modelled i.e. large 
+    strains and the total displacement is the primary unknown.
 
     Discretisation is performed using a vertex-centred finite volume approach
-    where the governing equations are integrated over a dual mesh. The dual mesh
-    is automatically constructed from the primary mesh using the meshDualiser.
+    where the governing equations are integrated over a dual mesh. The dual 
+    mesh is automatically constructed from the primary mesh using the 
+    meshDualiser.
 
 Author
     Philip Cardiff, UCD.  All rights reserved.
+    Federico Mazzanti, UCD. All rights reserved.
 
 SourceFiles
     vertexCentredNonLinGeomTotalLagDisplacementSolid.C
@@ -98,12 +100,9 @@ class vertexCentredNonLinGeomTotalLagDisplacementSolid
         //  fixed
         symmTensorField fixedDofDirections_;
 
-        //- Scale factor for the fixed degree of freedom equations to improve the
-        //  matrix conditioning
+        //- Scale factor for the fixed degree of freedom equations to improve 
+        //  the matrix conditioning
         const scalar fixedDofScale_;
-
-        //- Point pressure
-        //pointScalarField pointP_;
 
         //- Point velocity
         pointVectorField pointU_;
@@ -133,12 +132,6 @@ class vertexCentredNonLinGeomTotalLagDisplacementSolid
         //- Jacobian of the deformation gradient field at the dual mesh faces
         surfaceScalarField dualJf_;
 
-        //- Pressure at the dual mesh faces
-        //surfaceScalarField dualPf_;
-
-        //- Cell pressure
-        //volScalarField volP_;
-
         //- Local-to-global point map and owner list
         globalPointIndices globalPointIndices_;
 
@@ -166,7 +159,7 @@ class vertexCentredNonLinGeomTotalLagDisplacementSolid
         (
             const pointVectorField& pointD,
             surfaceVectorField& dualTraction,
-            const fvMesh& mesh, // corresponding to pointD mesh
+            const fvMesh& mesh, // Corresponding to pointD mesh
             const labelListList& pointToDualFaces
         ) const;
 
@@ -202,14 +195,17 @@ class vertexCentredNonLinGeomTotalLagDisplacementSolid
         );
 
         Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
-		geometricStiffnessField
-		(
-			const surfaceVectorField SfUndef, //Undeformed surface area vector field
-			const surfaceTensorField gradDRef //Reference gradD
-		) const;
+        geometricStiffnessField
+        (
+            const surfaceVectorField SfUndef, // Undeformed surface area
+            const surfaceTensorField gradDRef // gradD at the dual faces
+        ) const;
 
         //- Disallow default bitwise copy construct
-        vertexCentredNonLinGeomTotalLagDisplacementSolid(const vertexCentredNonLinGeomTotalLagDisplacementSolid&);
+        vertexCentredNonLinGeomTotalLagDisplacementSolid
+        (
+            const vertexCentredNonLinGeomTotalLagDisplacementSolid&
+        );
 
         //- Disallow default bitwise assignment
         void operator=(const vertexCentredNonLinGeomTotalLagDisplacementSolid&);

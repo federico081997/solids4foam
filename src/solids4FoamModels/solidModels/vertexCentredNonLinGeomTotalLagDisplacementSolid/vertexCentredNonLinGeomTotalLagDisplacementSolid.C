@@ -44,7 +44,12 @@ namespace solidModels
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(vertexCentredNonLinGeomTotalLagDisplacementSolid, 0);
-addToRunTimeSelectionTable(solidModel, vertexCentredNonLinGeomTotalLagDisplacementSolid, dictionary);
+addToRunTimeSelectionTable
+(
+    solidModel, 
+    vertexCentredNonLinGeomTotalLagDisplacementSolid, 
+    dictionary
+);
 
 
 // * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * * * //
@@ -164,23 +169,12 @@ void vertexCentredNonLinGeomTotalLagDisplacementSolid::setFixedDofs
     {
         if
         (
-            // isA<uniformFixedValuePointPatchVectorField>
             isA<fixedValuePointPatchVectorField>
             (
                 pointD.boundaryField()[patchI]
             )
         )
         {
-            // const uniformFixedValuePointPatchVectorField& dispPatch =
-            //     refCast<const uniformFixedValuePointPatchVectorField>
-            // const fixedValuePointPatchVectorField& dispPatch =
-            //     refCast<const fixedValuePointPatchVectorField>
-            //     (
-            //         pointD.boundaryField()[patchI]
-            //     );
-
-            // const vector& disp = dispPatch.uniformValue();
-
             const labelList& meshPoints =
                 pointD.mesh().mesh().boundaryMesh()[patchI].meshPoints();
 
@@ -369,8 +363,8 @@ void vertexCentredNonLinGeomTotalLagDisplacementSolid::enforceTractionBoundaries
             // the average of all the points that map to it
             scalarField nPointsPerDualFace(dualFaceTraction.size(), 0.0);
 
-            // Map from primary mesh point field to second mesh face field using
-            // the pointToDualFaces map
+            // Map from primary mesh point field to second mesh face field 
+            // using the pointToDualFaces map
             forAll(totalTraction, pI)
             {
                 const label pointID = meshPoints[pI];
@@ -450,7 +444,8 @@ void vertexCentredNonLinGeomTotalLagDisplacementSolid::enforceTractionBoundaries
     }
 }
 
-bool vertexCentredNonLinGeomTotalLagDisplacementSolid::vertexCentredNonLinGeomTotalLagDisplacementSolid::converged
+bool vertexCentredNonLinGeomTotalLagDisplacementSolid::
+vertexCentredNonLinGeomTotalLagDisplacementSolid::converged
 (
     const label iCorr,
     scalar& initResidual,
@@ -614,7 +609,7 @@ scalar vertexCentredNonLinGeomTotalLagDisplacementSolid::calculateLineSearchFact
         {
             // Interpolate/extrapolate to find new eta
             // Limit it to be less than 10
-            //eta = min(-1/(r - 1), 10);
+            // eta = min(-1/(r - 1), 10);
 
             if (r < 0)
             {
@@ -649,14 +644,18 @@ scalar vertexCentredNonLinGeomTotalLagDisplacementSolid::calculateLineSearchFact
 Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
 vertexCentredNonLinGeomTotalLagDisplacementSolid::geometricStiffnessField
 (
-    const surfaceVectorField SfUndef, //Undeformed surface area vector field
-    const surfaceTensorField gradDRef //Reference gradD
+    const surfaceVectorField SfUndef, // Undeformed surface area vector field
+    const surfaceTensorField gradDRef // gradD at the dual faces
 ) const
 {
     // Prepare tmp field
     tmp<Field<Foam::RectangularMatrix<Foam::scalar>>> tresult
     (
-        new Field<Foam::RectangularMatrix<Foam::scalar>>(dualMesh().nFaces(), Foam::RectangularMatrix<scalar>(3,9,0))
+        new Field<Foam::RectangularMatrix<Foam::scalar>>
+        (
+            dualMesh().nFaces(), 
+            Foam::RectangularMatrix<scalar>(3,9,0)
+        )
     );
 #ifdef OPENFOAM_NOT_EXTEND
     Field<Foam::RectangularMatrix<Foam::scalar>>& result = tresult.ref();
@@ -664,7 +663,7 @@ vertexCentredNonLinGeomTotalLagDisplacementSolid::geometricStiffnessField
     Field<Foam::RectangularMatrix<Foam::scalar>>& result = tresult();
 #endif
 
-    //For small strain the geometric stiffness is zero
+    // Don't include the geometric stiffness
     if (!geometricStiffness_)
     {
         return tresult;
@@ -689,13 +688,15 @@ vertexCentredNonLinGeomTotalLagDisplacementSolid::geometricStiffnessField
     surfaceTensorField gradDPerturb("gradDPerturb", gradDRef);
 
     // Small number used for perturbations
-    const scalar eps(solidModelDict().lookupOrDefault<scalar>("tangentEps", 1e-10));
+    const scalar eps
+    (
+        solidModelDict().lookupOrDefault<scalar>("tangentEps", 1e-10)
+    );
 
     // For each component of gradD, sequentially apply a perturbation and
     // then calculate the resulting sigma
     for (label cmptI = 0; cmptI < tensor::nComponents; cmptI++)
     {
-
         // Reset gradDPerturb and multiply by 1.0 to avoid it being removed
         // from the object registry
         gradDPerturb = 1.0*gradDRef;
@@ -703,12 +704,13 @@ vertexCentredNonLinGeomTotalLagDisplacementSolid::geometricStiffnessField
         // Perturb this component of gradD and calculate SfPerturb
         gradDPerturb.replace(cmptI, gradDRef.component(cmptI) + eps);
 
-        //Info << gradDPerturb[0] - gradDRef[0] << endl;
-
         const surfaceTensorField FPerturb(I + gradDPerturb.T());
         const surfaceTensorField invFPerturb(inv(FPerturb));
         const surfaceScalarField JPerturb(det(FPerturb));
-        const surfaceVectorField SfPerturb((JPerturb*invFPerturb.T()) & SfUndef);
+        const surfaceVectorField SfPerturb
+        (
+            (JPerturb*invFPerturb.T()) & SfUndef
+        );
 
         // Calculate each component
         const surfaceVectorField tangCmpt((SfPerturb - SfRef)/eps);
@@ -842,13 +844,13 @@ vertexCentredNonLinGeomTotalLagDisplacementSolid::geometricStiffnessField
     }
 
     return tresult;
-
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-vertexCentredNonLinGeomTotalLagDisplacementSolid::vertexCentredNonLinGeomTotalLagDisplacementSolid
+vertexCentredNonLinGeomTotalLagDisplacementSolid::
+vertexCentredNonLinGeomTotalLagDisplacementSolid
 (
     Time& runTime,
     const word& region
@@ -884,19 +886,6 @@ vertexCentredNonLinGeomTotalLagDisplacementSolid::vertexCentredNonLinGeomTotalLa
             ).value()
         )
     ),
-    //pointP_
-    //(
-        //IOobject
-        //(
-            //"pointP",
-            //runTime.timeName(),
-            //mesh(),
-            //IOobject::READ_IF_PRESENT,
-            //IOobject::AUTO_WRITE
-        //),
-        //pMesh(),
-        //dimensionedScalar("0", dimPressure, 0.0)
-    //),
     pointU_
     (
         IOobject
@@ -1019,34 +1008,6 @@ vertexCentredNonLinGeomTotalLagDisplacementSolid::vertexCentredNonLinGeomTotalLa
         dimensionedScalar("zero", dimless, 1.0),
         "calculated"
     ),
-    //dualPf_
-    //(
-        //IOobject
-        //(
-            //"pf",
-            //runTime.timeName(),
-            //dualMesh(),
-            //IOobject::NO_READ,
-            //IOobject::NO_WRITE
-        //),
-        //dualMesh(),
-        //dimensionedScalar("zero", dimPressure, 0.0),
-        //"calculated"
-    //),
-	//volP_
-	//(
-		//IOobject
-		//(
-			//"volP",
-            //runTime.timeName(),
-            //mesh(),
-            //IOobject::NO_READ,
-            //IOobject::NO_WRITE
-		//),
-		//mesh(),
-        //dimensionedScalar("zero", dimPressure, 0.0),
-        //"calculated"
-	//),
     globalPointIndices_(mesh())
 {
     // Create dual mesh and set write option
@@ -1065,7 +1026,6 @@ vertexCentredNonLinGeomTotalLagDisplacementSolid::vertexCentredNonLinGeomTotalLa
     // Map dualMesh cell volumes to the primary mesh points
 #ifdef OPENFOAM_NOT_EXTEND
     scalarField& pointVolI = pointVol_;
-    // scalarField& pointVolI = pointVol_.primitiveFieldRef();
 #else
     scalarField& pointVolI = pointVol_.internalField();
 #endif
@@ -1100,7 +1060,8 @@ vertexCentredNonLinGeomTotalLagDisplacementSolid::vertexCentredNonLinGeomTotalLa
 
 // * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
 
-vertexCentredNonLinGeomTotalLagDisplacementSolid::~vertexCentredNonLinGeomTotalLagDisplacementSolid()
+vertexCentredNonLinGeomTotalLagDisplacementSolid::
+~vertexCentredNonLinGeomTotalLagDisplacementSolid()
 {
 #ifdef USE_PETSC
     if (Switch(solidModelDict().lookup("usePETSc")))
@@ -1115,8 +1076,6 @@ vertexCentredNonLinGeomTotalLagDisplacementSolid::~vertexCentredNonLinGeomTotalL
 bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
 {
     Info<< "Evolving solid solver" << endl;
-            
-    ////// Prepare fields at the beginning of each time step //////
 
     // Lookup compact edge gradient factor
     const scalar zeta(solidModelDict().lookupOrDefault<scalar>("zeta", 0.2));
@@ -1156,8 +1115,6 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
 
     if (!fullNewton_)
     {
-        // Obtain sigmaField at the dual faces
-
         // Assemble matrix once per time-step
         Info<< "    Assembling the matrix" << endl;
 
@@ -1194,20 +1151,20 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
         );
 
         // Add d2dt2 coefficients
-       // vfvm::d2dt2Extended
-        //(
-//#ifdef OPENFOAM_NOT_EXTEND
-            //mesh().d2dt2Scheme("d2dt2(pointD)"),
-//#else
-            //mesh().schemesDict().d2dt2Scheme("d2dt2(pointD)"),
-//#endif
-            //runTime().deltaTValue(),
-            //pointD().name(),
-            //matrix,
-            //pointRho_.internalField(),
-            //pointVol_.internalField(),
-            //int(bool(debug))
-        //);
+        vfvm::d2dt2
+        (
+#ifdef OPENFOAM_NOT_EXTEND
+            mesh().d2dt2Scheme("d2dt2(pointD)"),
+#else
+            mesh().schemesDict().d2dt2Scheme("d2dt2(pointD)"),
+#endif
+            runTime().deltaTValue(),
+            pointD().name(),
+            matrix,
+            pointRho_.internalField(),
+            pointVol_.internalField(),
+            int(bool(debug))
+        );
     }
 
     // Solution field: point displacement correction
@@ -1222,9 +1179,7 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
     BlockSolverPerformance<vector> solverPerf;
 #endif
     do
-    {
-    	////// Update fields at the beginning of each outer iteration //////
-    	
+    {   
         // Calculate gradD at dual faces
         dualGradDf_ = vfvc::fGrad
         (
@@ -1251,20 +1206,16 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
 
         // Update the source vector
         vectorField source(mesh().nPoints(), vector::zero);
-        pointD().correctBoundaryConditions();
-        
-        ////// Assemble the source //////
-        
         updateSource
         (
-        	source, 
-        	dualMeshMap().dualCellToPoint()
+            source, 
+            dualMeshMap().dualCellToPoint()
         );
+
+        pointD().correctBoundaryConditions();
 
         if (fullNewton_)
         {
-            ////// Assemble the matrix //////
-
             // Assemble the matrix once per outer iteration
             matrix.clear();
 
@@ -1275,7 +1226,8 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
             surfaceVectorField SfUndef = dualMesh().Sf();
 
             // Calculate geometric stiffness field for dual mesh faces
-            Foam::Field<Foam::RectangularMatrix<Foam::scalar>> geometricStiffness
+            Foam::Field<Foam::RectangularMatrix<Foam::scalar>> 
+            geometricStiffness
             (
                 geometricStiffnessField
                 (
@@ -1284,6 +1236,7 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
                 )
             );
 
+            // Add div(sigma) coefficients 
             vfvm::divSigma
             (
                 matrix,
@@ -1300,32 +1253,27 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
             );
 
             // Add d2dt2 coefficients
-           // vfvm::d2dt2Extended
-            //(
-//#ifdef OPENFOAM_NOT_EXTEND
-                //mesh().d2dt2Scheme("d2dt2(pointD)"),
-//#else
-                //mesh().schemesDict().d2dt2Scheme("d2dt2(pointD)"),
-//#endif
-                //runTime().deltaTValue(),
-                //pointD().name(),
-                //matrix,
-                //pointRho_.internalField(),
-                //pointVol_.internalField(),
-                //int(bool(debug))
-            //);
+            vfvm::d2dt2
+            (
+#ifdef OPENFOAM_NOT_EXTEND
+                mesh().d2dt2Scheme("d2dt2(pointD)"),
+#else
+                mesh().schemesDict().d2dt2Scheme("d2dt2(pointD)"),
+#endif
+                runTime().deltaTValue(),
+                pointD().name(),
+                matrix,
+                pointRho_.internalField(),
+                pointVol_.internalField(),
+                int(bool(debug))
+            );
         }
-        
-//	    Info << endl << "Before enforcing DOFs: " << endl << endl;
-//	    matrix.print();
-//	    Info << endl << "Print out the source: " << endl << endl;
 
-//	    for (int i = 0; i < source.size(); i++)
-//	    {
-//              Info << "(" << i << ", 0) : " << source[i] << endl;
-
-//	    }
-//	    Info << endl;
+        if (debug > 1)
+        {
+            Info<< "Matrix before enforcing DOFs: " << endl << endl;
+            matrix.print();
+        }
 
         // Enforce fixed DOF on the linear system
         sparseMatrixTools::enforceFixedDof
@@ -1338,19 +1286,13 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
             fixedDofScale_
         );
         
-//	    Info << endl << "After enforcing DOFs: " << endl << endl;
-//	    matrix.print();
-//	    Info << endl << "Print out the source: " << endl << endl;
+        if (debug > 1)
+        {
+            Info<< "Matrix after enforcing DOFs: " << endl << endl;
+            matrix.print();
+        }
 
-//	    for (int i = 0; i < source.size(); i++)
-//	    {
-//                  Info << "(" << i << ", 0) : " << source[i] << endl;
-
-//	    }
-//	    Info << endl;
-
-        ////// Solve the linear system //////
-        
+        // Solve the linear sistem
         if (debug)
         {
             Info<< "bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve(): "
@@ -1519,9 +1461,7 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
         ) && ++iCorr
     );
     
-    ////// Update fields at the end of each time step //////
-
-    // Calculate gradD at dual faces
+    // Update gradD at dual faces
     dualGradDf_ = vfvc::fGrad
     (
         pointD(),
@@ -1619,7 +1559,10 @@ void vertexCentredNonLinGeomTotalLagDisplacementSolid::setTraction
     }
 }
 
-void vertexCentredNonLinGeomTotalLagDisplacementSolid::writeFields(const Time& runTime)
+void vertexCentredNonLinGeomTotalLagDisplacementSolid::writeFields
+(
+    const Time& runTime
+)
 {
     // Calculate gradD at the primary points using least squares: this should
     // be second-order accurate (... I think).
@@ -1628,7 +1571,6 @@ void vertexCentredNonLinGeomTotalLagDisplacementSolid::writeFields(const Time& r
     // Calculate strain at the primary points based on pGradD
     // Note: the symm operator is not defined for pointTensorFields so we will
     // do it manually
-    // const pointSymmTensorField pEpsilon("pEpsilon", symm(pGradD));
     pointSymmTensorField pEpsilon
     (
         IOobject
