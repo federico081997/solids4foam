@@ -27,7 +27,7 @@ License
     #include <petscksp.h>
 #endif
 
-// * * * * * * * * * * * * * * * * * Functions  * * * * * * * * * * * * * * *//
+// * * * * * * * * * * * * * * * * *  Functions  * * * * * * * * * * * * * * //
 
 bool Foam::sparseMatrixExtendedTools::checkTwoD(const polyMesh& mesh)
 {
@@ -79,8 +79,7 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
     FatalErrorIn
     (
         "void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen(...)"
-    )
-        << "This function cannot be called as the S4F_NO_USE_EIGEN variable "
+    )   << "This function cannot be called as the S4F_NO_USE_EIGEN variable "
         << " is set.  If you would like to use this option then unset the "
         << "S4F_NO_USE_EIGEN variable and re-run the top-level Allwmake script"
         << abort(FatalError);
@@ -118,6 +117,8 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
             const label rowI = 3*iter.key()[0];
             const label colI = 3*iter.key()[1];
 
+            // Note: for 2-D, we drop the 3rd row and column, but keep the 4th,
+            // which corresponds to the pressure equation
             coefficients.push_back
             (
                 Eigen::Triplet<scalar>(rowI, colI, coeff(0,0))
@@ -128,7 +129,7 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
             );
             coefficients.push_back
             (
-                Eigen::Triplet<scalar>(rowI, colI+2, coeff(0,2))
+                Eigen::Triplet<scalar>(rowI, colI+2, coeff(0,3))
             );
 
             coefficients.push_back
@@ -141,20 +142,21 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
             );
             coefficients.push_back
             (
-                Eigen::Triplet<scalar>(rowI+1, colI+2, coeff(1,2))
+                Eigen::Triplet<scalar>(rowI+1, colI+2, coeff(1,3))
             );
-            
+
+            // Pressure equation
             coefficients.push_back
             (
-                Eigen::Triplet<scalar>(rowI+2, colI, coeff(2,0))
-            );
-            coefficients.push_back
-            (
-                Eigen::Triplet<scalar>(rowI+2, colI+1, coeff(2,1))
+                Eigen::Triplet<scalar>(rowI+2, colI, coeff(3,0))
             );
             coefficients.push_back
             (
-                Eigen::Triplet<scalar>(rowI+2, colI+2, coeff(2,2))
+                Eigen::Triplet<scalar>(rowI+2, colI+1, coeff(3,1))
+            );
+            coefficients.push_back
+            (
+                Eigen::Triplet<scalar>(rowI+2, colI+2, coeff(3,3))
             );
         }
         else // 3-D
@@ -249,12 +251,14 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
         {
             b(index++) = source[i](0,0);
             b(index++) = source[i](1,0);
-            b(index++) = source[i](2,0);
 
             if (!twoD)
             {
-                b(index++) = source[i](3,0);
+                // Momentum z is included for 3-D
+                b(index++) = source[i](2,0);
             }
+
+            b(index++) = source[i](3,0);
         }
     }
 
@@ -289,7 +293,7 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
     const Eigen::Matrix<scalar, Eigen::Dynamic, 1> initResidual = A*x - b;
 
     // Exit early if the initial residual is small
-    if (initResidual.squaredNorm() < 1e-12)
+    if (initResidual.squaredNorm() < VSMALL)
     {
         Info<< "    Linear solver initial residual is "
             << initResidual.squaredNorm() << ": exiting" << endl;
@@ -307,12 +311,13 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
         {
             solution[i](0,0) = x(index++);
             solution[i](1,0) = x(index++);
-            solution[i](2,0) = x(index++);
 
             if (!twoD)
             {
-                solution[i](3,0) = x(index++);
+                solution[i](2,0) = x(index++);
             }
+
+            solution[i](3,0) = x(index++);
         }
     }
 #endif
@@ -529,11 +534,13 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
         if (twoD)
         {
             // Prepare values
+            // Note: pressure is stored in row 3
+            // In 2-D, we keep the 1st, 2nd and 4th rows and columns
             const PetscScalar values[9] =
             {
-                coeff(0,0), coeff(0,1), coeff(0,2),
-                coeff(1,0), coeff(1,1), coeff(1,2),
-                coeff(2,0), coeff(2,1), coeff(2,2)
+                coeff(0,0), coeff(0,1), coeff(0,3),
+                coeff(1,0), coeff(1,1), coeff(1,3),
+                coeff(3,0), coeff(3,1), coeff(3,3)
             };
 
             // Insert tensor coefficient
@@ -640,11 +647,10 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
             if (twoD)
             {
                 // Prepare values
-                const PetscScalar values[3] = 
+                // Note: pressure is in row 3
+                const PetscScalar values[3] =
                 {
-                    sourceI(0,0), 
-                    sourceI(1,0), 
-                    sourceI(2,0)
+                    sourceI(0,0), sourceI(1,0), sourceI(3,0)
                 };
 
                 // Insert values
@@ -766,7 +772,7 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
                 }
             }
 
-            ierr = PCSetCoordinates(pc, sdim, n, petscPoints.data());
+            ierr = PCSetCoordinates(pc, sdim, blockn, petscPoints.data());
             checkErr(ierr);
         }
     }
@@ -802,9 +808,10 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
             {
                 if (twoD)
                 {
+                    // Put pressure in row 3
                     solution[i](0,0) = xArr[index++];
                     solution[i](1,0) = xArr[index++];
-                    solution[i](2,0) = xArr[index++];
+                    solution[i](3,0) = xArr[index++];
                 }
                 else
                 {
@@ -840,10 +847,11 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
             {
                 indices[index++] = blockSize*localToGlobalPointMap[pI];
                 indices[index++] = blockSize*localToGlobalPointMap[pI] + 1;
+                indices[index++] = blockSize*localToGlobalPointMap[pI] + 2;
 
                 if (!twoD)
                 {
-                    indices[index++] = blockSize*localToGlobalPointMap[pI] + 2;
+                    indices[index++] = blockSize*localToGlobalPointMap[pI] + 3;
                 }
             }
         }
@@ -901,9 +909,10 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
                 {
                     if (twoD)
                     {
+                        // Put pressure in row 3
                         solution[i](0,0) = xNotOwnedArr[index++];
                         solution[i](1,0) = xNotOwnedArr[index++];
-                        solution[i](2,0) = xNotOwnedArr[index++];
+                        solution[i](3,0) = xNotOwnedArr[index++];
                     }
                     else
                     {
@@ -954,18 +963,10 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     //     (double)norm,
     //     its
     // );
-    // Pout<< "    Error norm: " << norm << ", nIters = " << its << endl;
 
     // Free work space.  All PETSc objects should be destroyed when they
     // are no longer needed.
-    // Pout<< "        Freeing memory" << endl;
-    // ierr = VecDestroy(&x);CHKERRQ(ierr); ierr = VecDestroy(&u);
-    // CHKERRQ(ierr);
-    // ierr = VecDestroy(&b);CHKERRQ(ierr); ierr = MatDestroy(&A);
-    // CHKERRQ(ierr);
-    // ierr = KSPDestroy(&ksp);CHKERRQ(ierr);
     ierr = VecDestroy(&x); checkErr(ierr);
-    //ierr = VecDestroy(&u);
     ierr = VecDestroy(&b); checkErr(ierr);
     ierr = MatDestroy(&A); checkErr(ierr);
     ierr = KSPDestroy(&ksp); checkErr(ierr);
