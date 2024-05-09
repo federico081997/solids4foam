@@ -466,13 +466,13 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
     optionsFile.expand();
     // static char help[] = "Solves a linear system with KSP.\n\n";
     PetscErrorCode ierr;
-    // ierr = PetscInitialize(&argc, &args, optionsFile.c_str(), help); 
+    // ierr = PetscInitialize(&argc, &args, optionsFile.c_str(), help);
     // checkErr(ierr);
     if (debug)
     {
         Pout<< "PetscInitialize: start" << endl;
     }
-    ierr = PetscInitialize(NULL, NULL, optionsFile.c_str(), NULL); 
+    ierr = PetscInitialize(NULL, NULL, optionsFile.c_str(), NULL);
     checkErr(ierr);
     if (debug)
     {
@@ -513,9 +513,9 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
     // Pre-allocate matrix memory: this is critical for performance
 
     // Set on-core (d_nnz) and off-core (o_nnz) non-zeros per row
-    // o_nnz is currently not set correctly, as it distinguishes between 
-    // on-core and off-core instead of owned (all on-core) vs not-owned 
-    // (on-core and off-core). For now, we will just use the max on-core 
+    // o_nnz is currently not set correctly, as it distinguishes between
+    // on-core and off-core instead of owned (all on-core) vs not-owned
+    // (on-core and off-core). For now, we will just use the max on-core
     // non-zeros to initialise not-owned values
 
     int* d_nnz = (int*)malloc(n*sizeof(int));
@@ -549,18 +549,18 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
 
     // Parallel matrix
     ierr = MatMPIAIJSetPreallocation(A, 0, d_nnz, 0, o_nnz); checkErr(ierr);
-    //ierr = MatMPIAIJSetPreallocation(A, 0, d_nnz, d_nz, NULL); 
+    //ierr = MatMPIAIJSetPreallocation(A, 0, d_nnz, d_nz, NULL);
     //checkErr(ierr);
     // or conservatively as
     // ierr = MatMPIAIJSetPreallocation(A, d_nz, NULL, o_nz, NULL);
-    // ierr = MatMPIAIJSetPreallocation(A, d_nz, NULL, d_nz, NULL); 
+    // ierr = MatMPIAIJSetPreallocation(A, d_nz, NULL, d_nz, NULL);
     // checkErr(ierr);
     // const label nz = 81; // way too much in 2-D!
     // ierr = MatMPIAIJSetPreallocation(A, nz, NULL, nz, NULL);
 
     // Optional: no error if additional memory allocation is required
     // If false, then an error is thrown for additional allocations
-    // If preallocation was correct (or conservative) then an error should 
+    // If preallocation was correct (or conservative) then an error should
     // never be thrown
     // For now, we will disable this check in debug mode so we can see how many
     // mallocs were made
@@ -757,7 +757,7 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
     {
         Pout<< "        Creating the linear solver" << endl;
     }
-    KSP            ksp;          // Linear solver context 
+    KSP            ksp;          // Linear solver context
     ierr = KSPCreate(PETSC_COMM_WORLD, &ksp); checkErr(ierr);
 
 
@@ -950,19 +950,19 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
         checkErr(ierr);
         ierr = VecScatterBegin
         (
-            ctx, 
-            x, 
-            xNotOwned, 
-            INSERT_VALUES, 
+            ctx,
+            x,
+            xNotOwned,
+            INSERT_VALUES,
             SCATTER_FORWARD
         );
         checkErr(ierr);
         ierr = VecScatterEnd
         (
-            ctx, 
-            x, 
-            xNotOwned, 
-            INSERT_VALUES, 
+            ctx,
+            x,
+            xNotOwned,
+            INSERT_VALUES,
             SCATTER_FORWARD
         );
         checkErr(ierr);
@@ -1019,7 +1019,7 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
     //ierr = PetscPrintf
     //(
     //    PETSC_COMM_WORLD,
-    //    "Norm of error %g, 
+    //    "Norm of error %g,
     //    Iterations %D\n",
     //    (double)norm,
     //    its
@@ -1029,9 +1029,9 @@ Foam::sparseMatrixTools::solveLinearSystemPETSc
     // Free work space.  All PETSc objects should be destroyed when they
     // are no longer needed.
     // Pout<< "        Freeing memory" << endl;
-    // ierr = VecDestroy(&x);CHKERRQ(ierr); 
+    // ierr = VecDestroy(&x);CHKERRQ(ierr);
     // ierr = VecDestroy(&u);CHKERRQ(ierr);
-    // ierr = VecDestroy(&b);CHKERRQ(ierr); 
+    // ierr = VecDestroy(&b);CHKERRQ(ierr);
     // ierr = MatDestroy(&A);CHKERRQ(ierr);
     // ierr = KSPDestroy(&ksp);CHKERRQ(ierr);
     ierr = VecDestroy(&x); checkErr(ierr);
@@ -1215,9 +1215,9 @@ void Foam::sparseMatrixTools::enforceFixedDof
                 Info<< "    coeff after: " << coeff << nl << endl;
             }
         }
-        else if 
+        else if
         (
-            fixedDofs[blockColI] 
+            fixedDofs[blockColI]
          && mag(fixedDofDirections[blockRowI]) > 0
         )
         {
@@ -1302,7 +1302,7 @@ void Foam::sparseMatrixTools::enforceFixedDof
                 // Fixed direction
                 const tensor& fixedDir = fixedDofDirections[blockRowI];
 
-                // Set the fixed direction diagonal to enforce a zero 
+                // Set the fixed direction diagonal to enforce a zero
                 // correction
                 coeff -= tensor(fixedDofScale*fixedDir);
             }

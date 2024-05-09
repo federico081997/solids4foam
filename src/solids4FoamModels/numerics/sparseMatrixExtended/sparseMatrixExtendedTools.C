@@ -214,7 +214,7 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
             (
                 Eigen::Triplet<scalar>(rowI+2, colI+3, coeff(2,3))
             );
-            
+
             coefficients.push_back
             (
                 Eigen::Triplet<scalar>(rowI+3, colI, coeff(3,0))
@@ -350,7 +350,7 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     if (debug)
     {
         Info<< "BlockSolverPerformance<vector> "
-            << "sparseMatrixExtendedTools::solveLinearSystemPETSc: start" 
+            << "sparseMatrixExtendedTools::solveLinearSystemPETSc: start"
             << endl;
     }
 
@@ -407,7 +407,7 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     optionsFile.expand();
     // static char help[] = "Solves a linear system with KSP.\n\n";
     PetscErrorCode ierr;
-    // ierr = PetscInitialize(&argc, &args, optionsFile.c_str(), help); 
+    // ierr = PetscInitialize(&argc, &args, optionsFile.c_str(), help);
     // checkErr(ierr);
     if (debug)
     {
@@ -455,9 +455,9 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     // Pre-allocate matrix memory: this is critical for performance
 
     // Set on-core (d_nnz) and off-core (o_nnz) non-zeros per row
-    // o_nnz is currently not set correctly, as it distinguishes between 
-    // on-core and off-core instead of owned (all on-core) vs not-owned 
-    // (on-core and off-core). For now, we will just use the max on-core 
+    // o_nnz is currently not set correctly, as it distinguishes between
+    // on-core and off-core instead of owned (all on-core) vs not-owned
+    // (on-core and off-core). For now, we will just use the max on-core
     // non-zeros to initialise not-owned values
 
     int* d_nnz = (int*)malloc(n*sizeof(int));
@@ -491,18 +491,18 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
 
     // Parallel matrix
     ierr = MatMPIAIJSetPreallocation(A, 0, d_nnz, 0, o_nnz); checkErr(ierr);
-    //ierr = MatMPIAIJSetPreallocation(A, 0, d_nnz, d_nz, NULL); 
+    //ierr = MatMPIAIJSetPreallocation(A, 0, d_nnz, d_nz, NULL);
     //checkErr(ierr);
     // or conservatively as
     // ierr = MatMPIAIJSetPreallocation(A, d_nz, NULL, o_nz, NULL);
-    // ierr = MatMPIAIJSetPreallocation(A, d_nz, NULL, d_nz, NULL); 
+    // ierr = MatMPIAIJSetPreallocation(A, d_nz, NULL, d_nz, NULL);
     // checkErr(ierr);
     // const label nz = 81; // way too much in 2-D!
     // ierr = MatMPIAIJSetPreallocation(A, nz, NULL, nz, NULL);
 
     // Optional: no error if additional memory allocation is required
     // If false, then an error is thrown for additional allocations
-    // If preallocation was correct (or conservative) then an error should 
+    // If preallocation was correct (or conservative) then an error should
     // never be thrown
     // For now, we will disable this check in debug mode so we can see how many
     // mallocs were made
@@ -664,9 +664,9 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
                 // Prepare values
                 const PetscScalar values[4] =
                 {
-                    sourceI(0,0), 
-                    sourceI(1,0), 
-                    sourceI(2,0), 
+                    sourceI(0,0),
+                    sourceI(1,0),
+                    sourceI(2,0),
                     sourceI(3,0)
                 };
 
@@ -880,19 +880,19 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
         checkErr(ierr);
         ierr = VecScatterBegin
         (
-            ctx, 
-            x, 
-            xNotOwned, 
-            INSERT_VALUES, 
+            ctx,
+            x,
+            xNotOwned,
+            INSERT_VALUES,
             SCATTER_FORWARD
         );
         checkErr(ierr);
         ierr = VecScatterEnd
         (
-            ctx, 
-            x, 
-            xNotOwned, 
-            INSERT_VALUES, 
+            ctx,
+            x,
+            xNotOwned,
+            INSERT_VALUES,
             SCATTER_FORWARD
         );
         checkErr(ierr);
@@ -944,7 +944,7 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     // ierr = PetscPrintf
     // (
     //     PETSC_COMM_WORLD,
-    //     "Norm of error %g, 
+    //     "Norm of error %g,
     //     Iterations %D\n",
     //     (double)norm,
     //     its
@@ -958,7 +958,7 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     // ierr = PetscPrintf
     // (
     //     PETSC_COMM_WORLD,
-    //     "Norm of error %g, 
+    //     "Norm of error %g,
     //     Iterations %D\n",
     //     (double)norm,
     //     its
@@ -981,7 +981,7 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     if (debug)
     {
         Pout<< "BlockSolverPerformance<vector> "
-            << "sparseMatrixExtendedTools::solveLinearSystemPETSc: end" 
+            << "sparseMatrixExtendedTools::solveLinearSystemPETSc: end"
             << endl;
     }
 
@@ -1162,7 +1162,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 momentumEqnPressCoeff.y() = coeff(1,3);
                 momentumEqnPressCoeff.z() = coeff(2,3);
             }
-            
+
             // Extract the displacement coefficients of the pressure equation
             vector pressureEqnDispCoeff(vector::zero);
 
@@ -1198,11 +1198,11 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 Info<< "blockRow fixed: " << blockRowI << nl
                     << "    row,col: " << blockRowI << "," << blockColI << nl
                     << "    fixedDir: " << fixedDofDirections[blockRowI] << nl
-                    << "    Displacement coeff of momentum equation before: " 
-                    << momentumEqnDispCoeff << nl 
-                    << "    Displacement coeff of pressure equation before: " 
+                    << "    Displacement coeff of momentum equation before: "
+                    << momentumEqnDispCoeff << nl
+                    << "    Displacement coeff of pressure equation before: "
                     << pressureEqnDispCoeff << nl
-                    << "    Pressure coeff of momentum equation before: " 
+                    << "    Pressure coeff of momentum equation before: "
                     << momentumEqnPressCoeff << nl
                     << "    Source before: " << sourceTerms << endl;
             }
@@ -1217,18 +1217,18 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             // Eliminate the fixed directions from the coeffs
             momentumEqnDispCoeff = (freeDir & momentumEqnDispCoeff);
             momentumEqnPressCoeff = (freeDir & momentumEqnPressCoeff);
-            
+
             if (blockRowI == blockColI)
             {
                 // Remove the fixed component from the free component equation
-                momentumEqnDispCoeff = 
+                momentumEqnDispCoeff =
                     freeDir & momentumEqnDispCoeff & freeDir;
                 pressureEqnDispCoeff = freeDir & pressureEqnDispCoeff;
 
                 // Fixed direction
                 const tensor& fixedDir = fixedDofDirections[blockRowI];
 
-                // Set the fixed direction diagonal to enforce a zero 
+                // Set the fixed direction diagonal to enforce a zero
                 // correction
                 momentumEqnDispCoeff -= tensor(fixedDofScale*fixedDir);
             }
@@ -1254,8 +1254,8 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 coeff(2,1) = momentumEqnDispCoeff.zy();
                 coeff(2,2) = momentumEqnDispCoeff.zz();
             }
-            
-            // Insert the changed pressure coefficients of the momentum 
+
+            // Insert the changed pressure coefficients of the momentum
             // equation back into the matrix
             if (twoD)
             {
@@ -1267,9 +1267,9 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 coeff(0,3) = momentumEqnPressCoeff.x();
                 coeff(1,3) = momentumEqnPressCoeff.y();
                 coeff(2,3) = momentumEqnPressCoeff.z();
-            }   
-            
-            // Insert the changed pressure coefficients of the pressure 
+            }
+
+            // Insert the changed pressure coefficients of the pressure
             // equation back into the matrix
             if (twoD)
             {
@@ -1281,8 +1281,8 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 coeff(3,0) = pressureEqnDispCoeff.x();
                 coeff(3,1) = pressureEqnDispCoeff.y();
                 coeff(3,2) = pressureEqnDispCoeff.z();
-            }   
-                   
+            }
+
             // Insert the changed source terms back into the source
             if (twoD)
             {
@@ -1298,11 +1298,11 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
 
             if (debug)
             {
-                Info<< "    Displacement coeff of momentum equation after: " 
-                    << momentumEqnDispCoeff << nl 
-                    << "    Displacement coeff of pressure equation after: " 
+                Info<< "    Displacement coeff of momentum equation after: "
+                    << momentumEqnDispCoeff << nl
+                    << "    Displacement coeff of pressure equation after: "
                     << pressureEqnDispCoeff << nl
-                    << "    Pressure coeff of momentum equation after: " 
+                    << "    Pressure coeff of momentum equation after: "
                     << momentumEqnPressCoeff << nl
                     << "    Source before: " << sourceTerms << endl;
             }
@@ -1337,7 +1337,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 momentumEqnDispCoeff.zy() = coeff(2,1);
                 momentumEqnDispCoeff.zz() = coeff(2,2);
             }
-            
+
             // Extract the displacement coefficients of the pressure equation
             vector pressureEqnDispCoeff(vector::zero);
 
@@ -1352,15 +1352,15 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 pressureEqnDispCoeff.y() = coeff(3,1);
                 pressureEqnDispCoeff.z() = coeff(3,2);
             }
-            
+
             if (debug)
             {
                 Info<< "blockCol fixed: " << blockColI << nl
                     << "    row,col: " << blockRowI << "," << blockColI << nl
                     << "    fixedDir: " << fixedDofDirections[blockColI] << nl
-                    << "    Displacement coeff of momentum equation before: " 
+                    << "    Displacement coeff of momentum equation before: "
                     << momentumEqnDispCoeff << nl
-                    << "    Displacement coeff of pressure equation before: " 
+                    << "    Displacement coeff of pressure equation before: "
                     << pressureEqnDispCoeff << endl;
             }
 
@@ -1405,13 +1405,13 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
                 coeff(3,0) = pressureEqnDispCoeff.x();
                 coeff(3,1) = pressureEqnDispCoeff.y();
                 coeff(3,2) = pressureEqnDispCoeff.z();
-            }  
-            
+            }
+
             if (debug)
             {
-                Info<< "    Displacement coeff of momentum equation after: " 
+                Info<< "    Displacement coeff of momentum equation after: "
                     << momentumEqnDispCoeff << nl
-                    << "    Displacement coeff of pressure equation after: " 
+                    << "    Displacement coeff of pressure equation after: "
                     << pressureEqnDispCoeff << endl;
             }
         }
@@ -1449,8 +1449,8 @@ void Foam::sparseMatrixExtendedTools::enforceFixedPressureDof
         if (fixedDofs[blockRowI])
         {
             RectangularMatrix<scalar>& coeff = iter();
-            
-            // Set the displacement coefficients of the pressure equation to 
+
+            // Set the displacement coefficients of the pressure equation to
             // zero
             coeff(3,0) = 0;
             coeff(3,1) = 0;
@@ -1461,23 +1461,23 @@ void Foam::sparseMatrixExtendedTools::enforceFixedPressureDof
                 // Set the pressure coefficient to the identity
                 coeff(3,3) = 1;
             }
-            
-            source[blockRowI](3,0) = 0;              
-        } 
+
+            source[blockRowI](3,0) = 0;
+        }
         else if (fixedDofs[blockColI])
         {
             RectangularMatrix<scalar>& coeff = iter();
-            
-            // Set the displacement coefficients of the momentum equation to 
+
+            // Set the displacement coefficients of the momentum equation to
             // zero
-            coeff(0,3) = 0; 
-            coeff(1,3) = 0; 
-            coeff(2,3) = 0;  
-            
+            coeff(0,3) = 0;
+            coeff(1,3) = 0;
+            coeff(2,3) = 0;
+
             // Set the pressure coefficient of the pressure equation to zero
-            coeff(3,3) = 0;           
-        }     
-    }          
+            coeff(3,3) = 0;
+        }
+    }
 }
 
 

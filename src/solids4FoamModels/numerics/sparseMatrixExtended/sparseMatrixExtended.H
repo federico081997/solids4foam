@@ -52,8 +52,8 @@ namespace Foam
 
     typedef HashTable
     <
-        RectangularMatrix<scalar>, 
-        FixedList<label, 2>, 
+        RectangularMatrix<scalar>,
+        FixedList<label, 2>,
         FixedList<label, 2>::Hash<>
     > sparseMatrixExtendedData;
 
@@ -133,7 +133,7 @@ public:
             //  then create it and initialise it to zero
             RectangularMatrix<scalar>& operator()
             (
-                const label rowI, 
+                const label rowI,
                 const label colI
             );
 };

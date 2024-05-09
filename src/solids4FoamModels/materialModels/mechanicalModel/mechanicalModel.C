@@ -118,7 +118,7 @@ void Foam::mechanicalModel::calcImpKfcorr() const
     if (laws.size() > 1)
     {
 #ifndef OPENFOAM_NOT_EXTEND
-        // To disable Rhie-Chow correction on bi-material interface, we will 
+        // To disable Rhie-Chow correction on bi-material interface, we will
         // set impKfcorr to zero on bi-material interface faces
 
         surfaceScalarField& impKfcorr = impKfcorrPtr_();
@@ -237,7 +237,7 @@ Foam::mechanicalModel::mechanicalModel
     PtrList<mechanicalLaw>& laws = *this;
     laws.setSize(lawEntries.size());
 
-    // Create the list of cellZones names: they are used during the 
+    // Create the list of cellZones names: they are used during the
     // construction of the subMeshes
     cellZoneNames_.setSize(laws.size());
     forAll(laws, lawI)
@@ -378,13 +378,13 @@ const Foam::fvMesh& Foam::mechanicalModel::mesh() const
 
 
 #ifdef OPENFOAM_NOT_EXTEND
-const Foam::enhancedVolPointInterpolation& 
+const Foam::enhancedVolPointInterpolation&
 Foam::mechanicalModel::volToPoint() const
 {
     return enhancedVolPointInterpolation::New(mesh_);
 }
 #else
-const Foam::newLeastSquaresVolPointInterpolation& 
+const Foam::newLeastSquaresVolPointInterpolation&
 Foam::mechanicalModel::volToPoint() const
 {
     return newLeastSquaresVolPointInterpolation::New(mesh_);
@@ -998,7 +998,7 @@ Foam::tmp<Foam::volVectorField> Foam::mechanicalModel::RhieChowCorrection
         // displacement, as it may become large of we base it on the total
         // displacement
         // Issue: The increment field "D - D.oldTime()" will be incorrect on
-        // non-orthogonal meshes as the grad(D - D.oldTime()) field would not 
+        // non-orthogonal meshes as the grad(D - D.oldTime()) field would not
         // be stored (to be fixed)
         return
         (
@@ -1093,9 +1093,9 @@ void Foam::mechanicalModel::setRestart()
 
 void Foam::mechanicalModel::writeDict()
 {
-    // This has to be done, because law dicts can only be read as IStream and 
-    // so they are not references to the entries in the 'mechanicalProperties' 
-    // but separate entry object and dictionary objects. Because of this they 
+    // This has to be done, because law dicts can only be read as IStream and
+    // so they are not references to the entries in the 'mechanicalProperties'
+    // but separate entry object and dictionary objects. Because of this they
     // have to be added back to 'mechanicalProperties' before writing to disk.
     PtrList<mechanicalLaw>& laws = *this;
 

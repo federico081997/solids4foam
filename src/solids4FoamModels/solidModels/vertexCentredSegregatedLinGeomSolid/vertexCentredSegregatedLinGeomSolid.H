@@ -24,11 +24,11 @@ Description
     unknown.
 
     Discretisation is performed using a vertex-centred finite volume approach
-    where the governing equations are integrated over a dual mesh. The dual 
-    mesh is automatically constructed from the primary mesh using the 
+    where the governing equations are integrated over a dual mesh. The dual
+    mesh is automatically constructed from the primary mesh using the
     meshDualiser.
 
-    In contrast to vertexCentredLinGeomSolid, where a coupled solution 
+    In contrast to vertexCentredLinGeomSolid, where a coupled solution
     algorithm is used, here a segregated solution algorithm is used.
 
 Author
@@ -108,7 +108,7 @@ class vertexCentredSegregatedLinGeomSolid
         //  fixed
         symmTensorField fixedDofDirections_;
 
-        //- Scale factor for the fixed degree of freedom equations to improve 
+        //- Scale factor for the fixed degree of freedom equations to improve
         //  the matrix conditioning
         const scalar fixedDofScale_;
 

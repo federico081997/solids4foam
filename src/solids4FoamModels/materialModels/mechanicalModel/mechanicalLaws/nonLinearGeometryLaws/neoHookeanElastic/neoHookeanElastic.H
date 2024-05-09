@@ -77,7 +77,7 @@ class neoHookeanElastic
 
         // Bulk modulus
         dimensionedScalar K_;
-        
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct

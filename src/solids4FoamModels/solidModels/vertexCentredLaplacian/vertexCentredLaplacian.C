@@ -371,7 +371,7 @@ bool vertexCentredLaplacian::evolve()
     (
         solidModelDict().lookupOrDefault<Switch>
         (
-            "compactImplicitStencil", 
+            "compactImplicitStencil",
             true
         )
     );

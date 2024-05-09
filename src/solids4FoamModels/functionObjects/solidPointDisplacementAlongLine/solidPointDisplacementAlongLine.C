@@ -220,10 +220,10 @@ Foam::solidPointDisplacementAlongLine::solidPointDisplacementAlongLine
         }
 
         // Sort point coordinates
-        if 
+        if
         (
-            mag(pointCoord_[0].component(vector::Y)) == 
-            mag(pointCoord_[1].component(vector::Y)) 
+            mag(pointCoord_[0].component(vector::Y)) ==
+            mag(pointCoord_[1].component(vector::Y))
          && mag(pointCoord_[0].component(vector::Z)) ==
             mag(pointCoord_[1].component(vector::Z))
         )
@@ -231,10 +231,10 @@ Foam::solidPointDisplacementAlongLine::solidPointDisplacementAlongLine
             // Sort point coordinates by x-coordinates
             sortByComp(pointCoord_, pointID_, vector::X);
         }
-        else if 
-        (   
-            mag(pointCoord_[0].component(vector::X)) == 
-            mag(pointCoord_[1].component(vector::X)) 
+        else if
+        (
+            mag(pointCoord_[0].component(vector::X)) ==
+            mag(pointCoord_[1].component(vector::X))
          && mag(pointCoord_[0].component(vector::Z)) ==
             mag(pointCoord_[1].component(vector::Z))
         )
@@ -242,10 +242,10 @@ Foam::solidPointDisplacementAlongLine::solidPointDisplacementAlongLine
             // Sort point coordinates by y-coordinates
             sortByComp(pointCoord_, pointID_, vector::Y);
         }
-        else if 
+        else if
         (
-            mag(pointCoord_[0].component(vector::X)) == 
-            mag(pointCoord_[1].component(vector::X)) 
+            mag(pointCoord_[0].component(vector::X)) ==
+            mag(pointCoord_[1].component(vector::X))
          && mag(pointCoord_[0].component(vector::Y)) ==
             mag(pointCoord_[1].component(vector::Y))
         )
@@ -286,7 +286,7 @@ Foam::solidPointDisplacementAlongLine::solidPointDisplacementAlongLine
             (
                 new OFstream
                 (
-                    historyDir/"solidPointDisplacementAlongLine_" + name 
+                    historyDir/"solidPointDisplacementAlongLine_" + name
                     + ".dat"
                 )
             );

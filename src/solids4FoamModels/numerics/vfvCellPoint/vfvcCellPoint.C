@@ -311,7 +311,7 @@ tmp<surfaceVectorField> fGrad
 
     // Approach
     // Step 1: Calculate constant gradient in each primary mesh cell
-    // Step 2: Set dual face gradient to primary mesh constant cell gradient 
+    // Step 2: Set dual face gradient to primary mesh constant cell gradient
     //         and replace the component in the edge direction
 
     // Calculate constant gradient in each primary mesh cell
@@ -447,7 +447,7 @@ tmp<surfaceTensorField> fGrad
 
     // Approach
     // Step 1: Calculate constant gradient in each primary mesh cell
-    // Step 2: Set dual face gradient to primary mesh constant cell gradient 
+    // Step 2: Set dual face gradient to primary mesh constant cell gradient
     //         and replace the component in the edge direction
 
     // Calculate constant gradient in each primary mesh cell
@@ -512,7 +512,7 @@ tmp<surfaceTensorField> fGrad
                 if (cellID > -1)
                 {
                     // Use the gradient in the adjacent primary cell-centre
-                    // This will result in inconsistent values at processor 
+                    // This will result in inconsistent values at processor
                     // patches
                     // Is this an issue?
 #ifdef OPENFOAM_NOT_EXTEND
@@ -894,7 +894,7 @@ tmp<volScalarField> interpolate
 
             // Calculate pointP average
             pointPAvg += pointPI[pointID]/nPoints;
-        } 
+        }
 
         result[cellI] = pointPAvg;
     }
@@ -979,7 +979,7 @@ tmp<surfaceScalarField> interpolate
 
                 // Primary mesh cell in which dualFaceI resides
                 const label cellID = dualFaceToCell[dualFaceI];
-                    
+
                 // Set dual face pressure to primary mesh pressure
 #ifdef OPENFOAM_NOT_EXTEND
                 result.boundaryFieldRef()[dualPatchID][localDualFaceID] =

@@ -86,10 +86,10 @@ class vertexCentredLinGeomPressureDisplacementSolid
 
         //- Pressure smoothing factor
         const scalar pressureSmoothing_;
-        
+
         //- zeta coefficient
         const scalar zeta_;
-        
+
         //- mu
         const surfaceScalarField mu_;
 
@@ -145,10 +145,10 @@ class vertexCentredLinGeomPressureDisplacementSolid
 
         //- Cell pressure
         volScalarField volP_;
-        
+
         //- Momentum equation residual
         pointVectorField residualD_;
-        
+
         //- Pressure equation residual
         pointScalarField residualP_;
 
@@ -223,19 +223,19 @@ class vertexCentredLinGeomPressureDisplacementSolid
 		(
 			const pointTensorField& pGradDRef
 		) const;
-		
+
 		tmp<vectorField> residualD
 		(
 			const pointVectorField& pointD,
 			const pointScalarField& pointP
 		) const;
-		
+
 		tmp<scalarField> residualP
 		(
 			const pointVectorField& pointD,
 			const pointScalarField& pointP
 		) const;
-		
+
 		void matrixCoefficients
 		(
 			sparseMatrixExtended& matrix,

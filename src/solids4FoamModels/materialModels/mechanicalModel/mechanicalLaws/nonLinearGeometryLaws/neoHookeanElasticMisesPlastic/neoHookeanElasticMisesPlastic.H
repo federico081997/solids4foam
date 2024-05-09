@@ -281,7 +281,7 @@ public:
         virtual tmp<volScalarField> impK() const;
 
         //- Material tangent for Newton Raphson loop
-        virtual tmp<Field<RectangularMatrix<scalar>>> 
+        virtual tmp<Field<RectangularMatrix<scalar>>>
         materialTangentField() const;
 
         //- Update the volField stress

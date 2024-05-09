@@ -144,7 +144,7 @@ namespace vfvc
         const labelList& dualFaceToCell,
         const labelList& dualCellToPoint
     );
-    
+
 } // End namespace vfvc
 
 } // End namespace Foam

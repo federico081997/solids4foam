@@ -49,7 +49,7 @@ namespace Foam
 
     // This function multiplies a vector by a 4th order tensor by a third
     // order tensor as encountered in the assembling of block coefficients
-    // in a finite volume small-strain solid mechanics procedure. 
+    // in a finite volume small-strain solid mechanics procedure.
     // The result is placed in the coeff variable.
     // The 4th order material tangent matrix is represented by a 6x6 matrix.
     // The multiplication evaluates the following in index notation:
@@ -65,7 +65,7 @@ namespace Foam
 
     // This function multiplies a vector by a 4th order tensor by a third
     // order tensor as encountered in the assembling of block coefficients
-    // in a finite volume small-strain solid mechanics procedure. The result 
+    // in a finite volume small-strain solid mechanics procedure. The result
     // is placed in the coeff variable.
     // The 4th order material tangent matrix is represented by a 6x9 matrix.
     // The multiplication evaluates the following in index notation:

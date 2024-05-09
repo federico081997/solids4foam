@@ -119,13 +119,13 @@ class mechanicalLaw
         //- Relative deformation gradient surfaceField
         autoPtr<surfaceTensorField> relFfPtr_;
 
-        //- Switch to enable solution of pressure Laplacian equation for the 
-        //  cell-centred approach. This can help quell oscillations in the 
+        //- Switch to enable solution of pressure Laplacian equation for the
+        //  cell-centred approach. This can help quell oscillations in the
         //  hydrostatic stress
         const Switch solvePressureEqn_;
 
         //- Switch to enable solution of pressure Laplacian equation for the
-        //  vertex-centred approach. This can help quell oscillations in the 
+        //  vertex-centred approach. This can help quell oscillations in the
         //  hydrostatic stress
         const Switch solveVertexCentredPressureEqn_;
 
@@ -339,7 +339,7 @@ protected:
 
         //- Update the deformation gradient
         //  The linearised shear and bulk modulii are used to enforce linear
-        //  elasticity in the case that the enforceLinear flag is tripped by 
+        //  elasticity in the case that the enforceLinear flag is tripped by
         //  the solid model. True is returned if enforceLinear is true (linear
         //  elasticity is enforced)
         bool updateF
@@ -375,9 +375,9 @@ protected:
             const surfaceScalarField& K
         );
 
-        //- Update the hydrostatic stress field by solving a diffusion 
-        //  equation. An explicit calculation of sigmaHyd is passed as an 
-        //  argument. Passing a zero will enforce incompressibility, although 
+        //- Update the hydrostatic stress field by solving a diffusion
+        //  equation. An explicit calculation of sigmaHyd is passed as an
+        //  argument. Passing a zero will enforce incompressibility, although
         //  for covergence it may be better to pass a penalty calculation of
         //  sigmaHyd
         void updateSigmaHyd
@@ -525,7 +525,7 @@ public:
 
         //- Material tangent field for Newton Raphson loop
         //  The size of this field should be mesh.nFaces()
-        virtual tmp<Field<RectangularMatrix<scalar>>> 
+        virtual tmp<Field<RectangularMatrix<scalar>>>
         materialTangentField() const;
 
         //- Return bulk modulus

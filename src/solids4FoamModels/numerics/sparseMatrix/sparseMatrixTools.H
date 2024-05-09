@@ -130,7 +130,7 @@ namespace sparseMatrixTools
         const bool debug
     );
 
-    //- Enforce fixed DOF contributions on the linear system where the unknown 
+    //- Enforce fixed DOF contributions on the linear system where the unknown
     //  is a vector
     void enforceFixedDof
     (

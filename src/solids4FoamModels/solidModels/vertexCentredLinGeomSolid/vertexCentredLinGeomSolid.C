@@ -218,7 +218,7 @@ void vertexCentredLinGeomSolid::updatePointDivSigma
         }
     }
 
-    // Calculate divergence of stress (force per unit volume) for the dual 
+    // Calculate divergence of stress (force per unit volume) for the dual
     // cells
     const vectorField dualDivSigma = fvc::div(dualTraction*dualMesh().magSf());
 
@@ -386,7 +386,7 @@ void vertexCentredLinGeomSolid::setFixedDofs
                             << abort(FatalError);
                     }
 
-                    // If the point is not fully fixed then make sure the 
+                    // If the point is not fully fixed then make sure the
                     // normal direction is fixed
                     if (mag(fixedDofDirections[pointID] - symmTensor(I)) > 0)
                     {
@@ -397,7 +397,7 @@ void vertexCentredLinGeomSolid::setFixedDofs
                             FatalError
                                 << "Point " << pointID << " is fixed in two "
                                 << "directions: this is only implemented for "
-                                << "Cartesian axis directions" 
+                                << "Cartesian axis directions"
                                 << abort(FatalError);
                         }
 
@@ -467,7 +467,7 @@ void vertexCentredLinGeomSolid::enforceTractionBoundaries
             // the average of all the points that map to it
             scalarField nPointsPerDualFace(dualFaceTraction.size(), 0.0);
 
-            // Map from primary mesh point field to second mesh face field 
+            // Map from primary mesh point field to second mesh face field
             // using the pointToDualFaces map
             forAll(totalTraction, pI)
             {
@@ -1159,7 +1159,7 @@ bool vertexCentredLinGeomSolid::evolveImplicitCoupled()
 
 #ifdef OPENFOAM_COM
     // Interpolate pointD to D
-    // This is useful for visualisation but it is also needed when using 
+    // This is useful for visualisation but it is also needed when using
     // preCICE
     pointVolInterp_.interpolate(pointD(), D());
 #endif
@@ -1186,13 +1186,13 @@ bool vertexCentredLinGeomSolid::evolveImplicitSegregated()
     (
         solidModelDict().lookupOrDefault<Switch>
         (
-            "compactImplicitStencil", 
+            "compactImplicitStencil",
             true
         )
     );
     Info<< "compactImplicitStencil: " << compactImplicitStencil << endl;
 
-    // Create scalar Laplacian discretisation matrix without boundary 
+    // Create scalar Laplacian discretisation matrix without boundary
     // conditions
     vfvm::laplacian
     (
@@ -1314,10 +1314,10 @@ bool vertexCentredLinGeomSolid::evolveImplicitSegregated()
                 // Use Eigen SparseLU direct solver
                 sparseMatrixTools::solveLinearSystemEigen
                 (
-                    matrixDirI, 
-                    sourceDirI, 
-                    pointDcorr, 
-                    writeMatlabMatrix, 
+                    matrixDirI,
+                    sourceDirI,
+                    pointDcorr,
+                    writeMatlabMatrix,
                     debug
                 );
             }
@@ -1452,7 +1452,7 @@ bool vertexCentredLinGeomSolid::evolveImplicitSegregated()
 
 #ifdef OPENFOAM_COM
     // Interpolate pointD to D
-    // This is useful for visualisation but it is also needed when using 
+    // This is useful for visualisation but it is also needed when using
     // preCICE
     pointVolInterp_.interpolate(pointD(), D());
 #endif
@@ -1751,7 +1751,7 @@ void vertexCentredLinGeomSolid::setDeltaT(Time& runTime)
         // time-step. This means that we use 1/(2*d) == 0.5*deltaCoeff when
         // calculating the required stable time-step
         // i.e. deltaT = (1.0/(0.5*deltaCoeff)/waveSpeed
-        // For safety, we should use a time-step smaller than this e.g. 
+        // For safety, we should use a time-step smaller than this e.g.
         // Abaqus uses stableTimeStep/sqrt(2): we will default to this value
         const scalar requiredDeltaT =
             1.0/
@@ -1962,7 +1962,7 @@ void vertexCentredLinGeomSolid::writeFields(const Time& runTime)
 
     // Acces the linearElasticMisesPlastic mechanical law
     const PtrList<mechanicalLaw>& mechLaws = mechanical();
-    const linearElasticMisesPlastic& mech = 
+    const linearElasticMisesPlastic& mech =
         refCast<const linearElasticMisesPlastic>(mechLaws[0]);
 
     // Calculate the stress at the points

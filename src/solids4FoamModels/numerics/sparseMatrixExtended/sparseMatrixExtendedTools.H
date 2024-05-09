@@ -119,7 +119,7 @@ namespace sparseMatrixExtendedTools
         const pointField& fixedDofValues,
         const scalar fixedDofScale
     );
-    
+
     //- Enforce fixed pressure DOF contributions on the linear system
     void enforceFixedPressureDof
     (

@@ -589,10 +589,10 @@ void Foam::neoHookeanElasticMisesPlastic::calculateStress
 
     // Normalise residual in Newton method with respect to mag(bE)
 #ifdef OPENFOAM_NOT_EXTEND
-    const scalar maxMagBE = 
+    const scalar maxMagBE =
         max(gMax(mag(bEbarTrialf_.primitiveField())), SMALL);
 #else
-    const scalar maxMagBE = 
+    const scalar maxMagBE =
         max(gMax(mag(bEbarTrialf_.internalField())), SMALL);
 #endif
 
@@ -616,7 +616,7 @@ void Foam::neoHookeanElasticMisesPlastic::calculateStress
     const scalarField& muBarI = muBar.primitiveField();
     const scalarField& JI = Jf().primitiveField();
     const scalarField& sigmaYI = sigmaYf_.primitiveField();
-    const scalarField& epsilonPEqOldI = 
+    const scalarField& epsilonPEqOldI =
         epsilonPEqf_.oldTime().primitiveField();
 #else
     const scalarField& fTrialI = fTrial.internalField();
@@ -651,7 +651,7 @@ void Foam::neoHookeanElasticMisesPlastic::calculateStress
         {
             if (nonLinearPlasticity_)
             {
-                // Total equivalent plastic strain where t is start of 
+                // Total equivalent plastic strain where t is start of
                 // time-step
                 scalar curSigmaY = 0.0; // Updated in loop below
 
@@ -754,7 +754,7 @@ void Foam::neoHookeanElasticMisesPlastic::calculateStress
                         DLambdaP[faceI] /= 1.0 + Hp_/(3.0*muBarP[faceI]);
 
                         // Update increment of yield stress
-                        DSigmaYP[faceI] = 
+                        DSigmaYP[faceI] =
                             sqrtTwoOverThree_*DLambdaP[faceI]*Hp_;
                     }
                 }
@@ -1233,7 +1233,7 @@ Foam::neoHookeanElasticMisesPlastic::materialTangentField() const
     (
         new Field<Foam::RectangularMatrix<Foam::scalar>>
         (
-            mesh().nFaces(), 
+            mesh().nFaces(),
             Foam::RectangularMatrix<scalar>(6,9,0)
         )
     );
@@ -1250,7 +1250,7 @@ Foam::neoHookeanElasticMisesPlastic::materialTangentField() const
         // Take a reference to the current stress
         const surfaceSymmTensorField& sigmaRef =
             mesh().lookupObject<surfaceSymmTensorField>("sigmaf");
-        
+
         // Take a reference to the current displacement gradient
         const surfaceTensorField& gradDRef =
             mesh().lookupObject<surfaceTensorField>("grad(D)f");
@@ -1287,7 +1287,7 @@ Foam::neoHookeanElasticMisesPlastic::materialTangentField() const
             "gradDPerturb",
             gradDRef
         );
-        
+
         // Small number used for perturbations
         const scalar eps(readScalar(dict().lookup("tangentEps")));
 
@@ -1305,8 +1305,8 @@ Foam::neoHookeanElasticMisesPlastic::materialTangentField() const
             // Calculate perturbed stress
             const_cast<neoHookeanElasticMisesPlastic&>(*this).calculateStress
             (
-                sigmaPerturb, 
-                gradDPerturb, 
+                sigmaPerturb,
+                gradDPerturb,
                 pRef
             );
 
@@ -1565,7 +1565,7 @@ void Foam::neoHookeanElasticMisesPlastic::correct
 
     // Normalise residual in Newton method with respect to mag(bE)
 #ifdef OPENFOAM_NOT_EXTEND
-    const scalar maxMagBE = 
+    const scalar maxMagBE =
         max(gMax(mag(bEbarTrial_.primitiveField())), SMALL);
 #else
     const scalar maxMagBE = max(gMax(mag(bEbarTrial_.internalField())), SMALL);
@@ -1622,7 +1622,7 @@ void Foam::neoHookeanElasticMisesPlastic::correct
         {
             if (nonLinearPlasticity_)
             {
-                // Total equivalent plastic strain where t is start of 
+                // Total equivalent plastic strain where t is start of
                 // time-step
                 scalar curSigmaY = 0.0; // Updated in loop below
 
@@ -1725,7 +1725,7 @@ void Foam::neoHookeanElasticMisesPlastic::correct
                         DLambdaP[faceI] /= 1.0 + Hp_/(3.0*muBarP[faceI]);
 
                         // Update increment of yield stress
-                        DSigmaYP[faceI] = 
+                        DSigmaYP[faceI] =
                             sqrtTwoOverThree_*DLambdaP[faceI]*Hp_;
                     }
                 }
@@ -1767,7 +1767,7 @@ void Foam::neoHookeanElasticMisesPlastic::correct
     }
     else
     {
-        sigma = (1.0/J())*(sigmaHyd()*I + s);   
+        sigma = (1.0/J())*(sigmaHyd()*I + s);
     }
 }
 
@@ -1829,7 +1829,7 @@ void Foam::neoHookeanElasticMisesPlastic::correct
 
     // Normalise residual in Newton method with respect to mag(bE)
 #ifdef OPENFOAM_NOT_EXTEND
-    const scalar maxMagBE = 
+    const scalar maxMagBE =
         max(gMax(mag(bEbarTrialf_.primitiveField())), SMALL);
 #else
     const scalar maxMagBE =
@@ -1856,7 +1856,7 @@ void Foam::neoHookeanElasticMisesPlastic::correct
     const scalarField& muBarI = muBar.primitiveField();
     const scalarField& JI = Jf().primitiveField();
     const scalarField& sigmaYI = sigmaYf_.primitiveField();
-    const scalarField& epsilonPEqOldI = 
+    const scalarField& epsilonPEqOldI =
         epsilonPEqf_.oldTime().primitiveField();
 #else
     const scalarField& fTrialI = fTrial.internalField();
@@ -1891,7 +1891,7 @@ void Foam::neoHookeanElasticMisesPlastic::correct
         {
             if (nonLinearPlasticity_)
             {
-                // Total equivalent plastic strain where t is start of 
+                // Total equivalent plastic strain where t is start of
                 // time-step
                 scalar curSigmaY = 0.0; // Updated in loop below
 
@@ -1994,7 +1994,7 @@ void Foam::neoHookeanElasticMisesPlastic::correct
                         DLambdaP[faceI] /= 1.0 + Hp_/(3.0*muBarP[faceI]);
 
                         // Update increment of yield stress
-                        DSigmaYP[faceI] = 
+                        DSigmaYP[faceI] =
                             sqrtTwoOverThree_*DLambdaP[faceI]*Hp_;
                     }
                 }
@@ -2184,8 +2184,8 @@ void Foam::neoHookeanElasticMisesPlastic::updateTotalFields()
 Foam::scalar Foam::neoHookeanElasticMisesPlastic::newDeltaT()
 {
     // In the calculation of the plastic strain increment, the return direction
-    // is kept constant for the time-step; we can approximate the error based 
-    // on the difference in the return direction from the start to the end of 
+    // is kept constant for the time-step; we can approximate the error based
+    // on the difference in the return direction from the start to the end of
     // the time-step, where the return direction is given normalised deviatoric
     // strain. The error approximation is obtained using the difference between
     // the trapezoidal rule and the EUler backward method, as described in:

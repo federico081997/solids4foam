@@ -19,7 +19,7 @@ Class
     solidPointDisplacementAlongLine
 
 Description
-    FunctionObject reports displacement value along a line specified by the 
+    FunctionObject reports displacement value along a line specified by the
     user.
 
     The displacement volField is interpolated to a pointField using the

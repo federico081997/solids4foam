@@ -51,7 +51,7 @@ void Foam::neoHookeanElastic::calculateStress
 
     // Calculate deviatoric stress
     const surfaceSymmTensorField s(mu_*dev(bEbar));
-    
+
     // Calculate the Cauchy stress
     if (solveVertexCentredPressureEqn())
     {
@@ -179,7 +179,7 @@ Foam::neoHookeanElastic::materialTangentField() const
     (
         new Field<Foam::RectangularMatrix<Foam::scalar>>
         (
-            mesh().nFaces(), 
+            mesh().nFaces(),
             Foam::RectangularMatrix<scalar>(6,9,0)
         )
     );
@@ -196,7 +196,7 @@ Foam::neoHookeanElastic::materialTangentField() const
         // Take a reference to the current stress
         const surfaceSymmTensorField& sigmaRef =
             mesh().lookupObject<surfaceSymmTensorField>("sigmaf");
-        
+
         // Take a reference to the current displacement gradient
         const surfaceTensorField& gradDRef =
             mesh().lookupObject<surfaceTensorField>("grad(D)f");
@@ -221,7 +221,7 @@ Foam::neoHookeanElastic::materialTangentField() const
         {
             pRef = mesh().lookupObject<surfaceScalarField>("pf");
         }
-               
+
         // Create fields to be used for perturbations
         surfaceSymmTensorField sigmaPerturb
         (
@@ -237,7 +237,7 @@ Foam::neoHookeanElastic::materialTangentField() const
         // Small number used for perturbations
         const scalar eps(readScalar(dict().lookup("tangentEps")));
 
-        // For each component of gradDRef, sequentially apply a perturbation 
+        // For each component of gradDRef, sequentially apply a perturbation
         // and then calculate the resulting sigma
         for (label cmptI = 0; cmptI < tensor::nComponents; cmptI++)
         {
@@ -251,14 +251,14 @@ Foam::neoHookeanElastic::materialTangentField() const
             // Calculate perturbed stress
             const_cast<neoHookeanElastic&>(*this).calculateStress
             (
-                sigmaPerturb, 
-                gradDPerturb, 
+                sigmaPerturb,
+                gradDPerturb,
                 pRef
             );
 
             // Calculate tangent component
-            const surfaceSymmTensorField tangCmpt 
-            ( 
+            const surfaceSymmTensorField tangCmpt
+            (
                 (sigmaPerturb - sigmaRef)/eps
             );
 
