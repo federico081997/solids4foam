@@ -21,7 +21,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "sparseMatrixExtended.H"
 #include "vfvcCellPoint.H"
-#include "vfvmCellPointExtended.H"
+#include "vfvmCellPoint.H"
 #include "fvcDiv.H"
 #include "fixedValuePointPatchFields.H"
 #include "solidTractionPointPatchVectorField.H"
@@ -138,6 +138,8 @@ void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::updateSource
             source[pointI](i,0) -= pointRhoI[pointI]*g().value().component(i)*pointVolI[pointI];
         }        
     }   
+    
+    residualD_.primitiveFieldRef() = pointDivSigmaI*pointVolI; 
 
     // The source vector for the pressure equation is -F, where:
     // F = p - gamma*laplacian(p) - pBar(D)
@@ -179,6 +181,8 @@ void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::updateSource
         // Add pBar term
         source[pointI](3,0) += pBar[pointI]*pointVolI[pointI];
     }
+    
+    residualP_.primitiveFieldRef() = pBar*pointVolI - pointP_*pointVolI;
 
     if (debug)
     {
@@ -188,7 +192,7 @@ void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::updateSource
 }
 
 
-void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::setFixedDofs
+void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::setFixedDisplacementDofs
 (
     const pointVectorField& pointD,
     boolList& fixedDofs,
@@ -518,7 +522,8 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::vertexCentredNonL
     }
     
     residualDAbs /= sqrt(residualDAbs/nPoints);
-    residualPAbs /= sqrt(residualPAbs/nPoints);
+    //residualPAbs /= sqrt(residualPAbs/nPoints);
+    residualPAbs = 0;
     
     // Store initial residual
     if (iCorr == 0)
@@ -539,7 +544,8 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::vertexCentredNonL
 
     // Define a normalised residual wrt the initial residual
     const scalar residualDNorm = residualDAbs/initResidualD;
-    const scalar residualPNorm = residualPAbs/initResidualP;
+    //const scalar residualPNorm = residualPAbs/initResidualP;
+    const scalar residualPNorm = 0;
 
     // Calculate the maximum displacement
 #ifdef OPENFOAM_NOT_EXTEND
@@ -1078,9 +1084,9 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::vertexCentredNonLinGeo
 //    K_(mechanical().bulkModulus()),
 //    Kf_(dualMechanicalPtr_().bulkModulus()),
     twoD_(sparseMatrixExtendedTools::checkTwoD(mesh())),
-    fixedDofs_(mesh().nPoints(), false),
-    fixedDofValues_(fixedDofs_.size(), vector::zero),
-    fixedDofDirections_(fixedDofs_.size(), symmTensor::zero),
+    fixedDisplacementDofs_(mesh().nPoints(), false),
+    fixedDofValues_(fixedDisplacementDofs_.size(), vector::zero),
+    fixedDofDirections_(fixedDisplacementDofs_.size(), symmTensor::zero),
     fixedDofScale_
     (
         solidModelDict().lookupOrDefault<scalar>
@@ -1273,7 +1279,7 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::vertexCentredNonLinGeo
     (
         IOobject
         (
-            "volP",
+            "p",
 			runTime.timeName(),
 			mesh(),
 			IOobject::NO_READ,
@@ -1281,6 +1287,34 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::vertexCentredNonLinGeo
         ),
         mesh(),
         dimensionedScalar("zero", dimPressure, 0.0),
+        "calculated"
+    ),
+    residualD_
+    (
+        IOobject
+        (
+            "residualD",
+			runTime.timeName(),
+			mesh(),
+			IOobject::NO_READ,
+			IOobject::AUTO_WRITE
+        ),
+        pMesh(),
+        dimensionedVector("zero", dimPressure, vector::zero),
+        "calculated"
+    ),
+    residualP_
+    (
+        IOobject
+        (
+            "residualP",
+			runTime.timeName(),
+			mesh(),
+			IOobject::NO_READ,
+			IOobject::AUTO_WRITE
+        ),
+        pMesh(),
+        dimensionedScalar("zero", dimPressure, 0),
         "calculated"
     ),
     globalPointIndices_(mesh())
@@ -1292,7 +1326,7 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::vertexCentredNonLinGeo
     pointDisRequired();
 
     // Set fixed degree of freedom list
-    setFixedDofs(pointD(), fixedDofs_, fixedDofValues_, fixedDofDirections_);
+    setFixedDisplacementDofs(pointD(), fixedDisplacementDofs_, fixedDofValues_, fixedDofDirections_);
 
     // Set point density field
     mechanical().volToPoint().interpolate(rho(), pointRho_);
@@ -1386,8 +1420,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         mesh(),
         dualMesh(),
         dualMeshMap().dualFaceToCell(),
-        dualMeshMap().dualCellToPoint(),
-        debug
+        dualMeshMap().dualCellToPoint()
     );  
     
     // Calculate gradD at the primary mesh points
@@ -1468,8 +1501,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             mesh(),
             dualMesh(),
             dualMeshMap().dualFaceToCell(),
-            dualMeshMap().dualCellToPoint(),
-            debug
+            dualMeshMap().dualCellToPoint()
         );
 
         // Update gradD at the primary mesh points
@@ -1562,29 +1594,27 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             geometricStiffness,
             dualSigmaf_,
             dualGradDf_,
-            fixedDofs_,
-            fixedDofDirections_,
-            fixedDofScale_,
             zeta,
             debug
         );
 
         // Add laplacian coefficient to the pressure equation
-        vfvm::laplacian
-        (
-            matrixExtended,
-            compactStencil_,
-            mesh(),
-            dualMesh(),
-            dualMeshMap().dualFaceToCell(),
-            dualMeshMap().dualCellToPoint(),
-            dualGradDf_,
-            pressureSmoothing_,
-            debug
-        );
+        //vfvm::laplacian
+        //(
+            //matrixExtended,
+            //compactStencil_,
+            //mesh(),
+            //dualMesh(),
+            //dualMeshMap().dualFaceToCell(),
+            //dualMeshMap().dualCellToPoint(),
+            //dualGradDf_,
+            //pressureSmoothing_,
+            //debug
+        //);
+
 
         // Add coefficients of pressure equation
-        vfvm::Sp
+        vfvm::addPbar
         (
             matrixExtended,
             mesh(),
@@ -1592,8 +1622,21 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             pointVol_,
             pBarSensitivity,
             debug
-        );           
-        
+        );
+
+        // Add source terms of pressure equation to the matrix
+        vfvm::Sp
+        (
+            matrixExtended,
+            pointVol_,
+            debug
+        );
+
+//        forAll (materialTangent, faceI) 
+//        {
+//        	Info << "materialTangent for face " << faceI << ": " << materialTangent[faceI] << endl;
+//        }          
+//        
 //		    Info << endl << "Before enforcing DOFs: " << endl << endl;
 //		    matrixExtended.print();
 //		    Info << endl << "Print out the source: " << endl << endl;
@@ -1607,16 +1650,66 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
 
         // Enforce fixed DOF on the linear system for
         // the displacement
-        sparseMatrixExtendedTools::enforceFixedDof
+        sparseMatrixExtendedTools::enforceFixedDisplacementDof
         (
             matrixExtended,
             sourceExtended,
-            twoD_,
-            fixedDofs_,
+            fixedDisplacementDofs_,
             fixedDofDirections_,
             fixedDofValues_,
             fixedDofScale_
         );
+        
+//        sparseMatrixExtendedTools::enforceFixedPressureDof
+//        (
+//            matrixExtended,
+//            sourceExtended,
+//            twoD_,
+//            fixedPressureDofs_,
+//            fixedDofDirections_
+//        );
+
+			//sparseMatrixExtendedTools::enforceKnownPressure
+			//(
+				//matrixExtended,
+				//sourceExtended
+			//);
+
+//			sparseMatrixExtendedTools::enforceKnownDisplacement
+//			(
+//		        matrixExtended,
+//		        sourceExtended
+//			);
+
+//			sparseMatrixExtendedTools::enforceKnownInternalAndTractionDisplacement
+//			(
+//		        matrixExtended,
+//		        sourceExtended
+//			);
+//			
+//			sparseMatrixExtendedTools::enforceKnownSymmBoundaryDisplacement
+//			(
+//		        matrixExtended,
+//		        sourceExtended
+//			);
+			
+		   // sparseMatrixExtendedTools::enforceAllBoundaryDisplacement
+			//(
+				//matrixExtended,
+				//sourceExtended
+		   // );
+			
+//			sparseMatrixExtendedTools::enforceFixedDisplacement
+//			(
+//		        matrixExtended,
+//		        sourceExtended
+//			);
+			
+//			sparseMatrixExtendedTools::enforceRelatedToFixedDOFs
+//			(
+//		        matrixExtended,
+//		        sourceExtended
+//			);
 
 //		    Info << endl << "After enforcing DOFs " << endl << endl;
 //		    matrixExtended.print();
@@ -1706,6 +1799,9 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
 #endif
             }
         }
+        
+//        Info << pointP_ << endl;
+//        Info << pointD() << endl;
 		
         pointD().correctBoundaryConditions();
         pointP_.correctBoundaryConditions();
@@ -1796,8 +1892,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         mesh(),
         dualMesh(),
         dualMeshMap().dualFaceToCell(),
-        dualMeshMap().dualCellToPoint(),
-        debug
+        dualMeshMap().dualCellToPoint()
     );    
 
     // Update gradD at the primary mesh points

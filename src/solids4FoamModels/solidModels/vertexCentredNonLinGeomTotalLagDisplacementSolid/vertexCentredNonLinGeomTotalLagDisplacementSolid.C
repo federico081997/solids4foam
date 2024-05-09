@@ -20,7 +20,7 @@ License
 #include "vertexCentredNonLinGeomTotalLagDisplacementSolid.H"
 #include "addToRunTimeSelectionTable.H"
 #include "vfvcCellPoint.H"
-#include "vfvmCellPointExtended.H"
+#include "vfvmCellPoint.H"
 #include "fvcDiv.H"
 #include "fixedValuePointPatchFields.H"
 #include "solidTractionPointPatchVectorField.H"
@@ -884,19 +884,19 @@ vertexCentredNonLinGeomTotalLagDisplacementSolid::vertexCentredNonLinGeomTotalLa
             ).value()
         )
     ),
-    pointP_
-    (
-        IOobject
-        (
-            "pointP",
-            runTime.timeName(),
-            mesh(),
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        pMesh(),
-        dimensionedScalar("0", dimPressure, 0.0)
-    ),
+    //pointP_
+    //(
+        //IOobject
+        //(
+            //"pointP",
+            //runTime.timeName(),
+            //mesh(),
+            //IOobject::READ_IF_PRESENT,
+            //IOobject::AUTO_WRITE
+        //),
+        //pMesh(),
+        //dimensionedScalar("0", dimPressure, 0.0)
+    //),
     pointU_
     (
         IOobject
@@ -1019,34 +1019,34 @@ vertexCentredNonLinGeomTotalLagDisplacementSolid::vertexCentredNonLinGeomTotalLa
         dimensionedScalar("zero", dimless, 1.0),
         "calculated"
     ),
-    dualPf_
-    (
-        IOobject
-        (
-            "pf",
-            runTime.timeName(),
-            dualMesh(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        dualMesh(),
-        dimensionedScalar("zero", dimPressure, 0.0),
-        "calculated"
-    ),
-	volP_
-	(
-		IOobject
-		(
-		    "volP",
-            runTime.timeName(),
-            mesh(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-		),
-		mesh(),
-        dimensionedScalar("zero", dimPressure, 0.0),
-        "calculated"
-	),
+    //dualPf_
+    //(
+        //IOobject
+        //(
+            //"pf",
+            //runTime.timeName(),
+            //dualMesh(),
+            //IOobject::NO_READ,
+            //IOobject::NO_WRITE
+        //),
+        //dualMesh(),
+        //dimensionedScalar("zero", dimPressure, 0.0),
+        //"calculated"
+    //),
+	//volP_
+	//(
+		//IOobject
+		//(
+			//"volP",
+            //runTime.timeName(),
+            //mesh(),
+            //IOobject::NO_READ,
+            //IOobject::NO_WRITE
+		//),
+		//mesh(),
+        //dimensionedScalar("zero", dimPressure, 0.0),
+        //"calculated"
+	//),
     globalPointIndices_(mesh())
 {
     // Create dual mesh and set write option
@@ -1189,28 +1189,25 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
             geometricStiffness,
             dualSigmaf_,
             dualGradDf_,
-            fixedDofs_,
-            fixedDofDirections_,
-            fixedDofScale_,
             zeta,
             debug
         );
 
         // Add d2dt2 coefficients
-        vfvm::d2dt2Extended
-        (
-#ifdef OPENFOAM_NOT_EXTEND
-            mesh().d2dt2Scheme("d2dt2(pointD)"),
-#else
-            mesh().schemesDict().d2dt2Scheme("d2dt2(pointD)"),
-#endif
-            runTime().deltaTValue(),
-            pointD().name(),
-            matrix,
-            pointRho_.internalField(),
-            pointVol_.internalField(),
-            int(bool(debug))
-        );
+       // vfvm::d2dt2Extended
+        //(
+//#ifdef OPENFOAM_NOT_EXTEND
+            //mesh().d2dt2Scheme("d2dt2(pointD)"),
+//#else
+            //mesh().schemesDict().d2dt2Scheme("d2dt2(pointD)"),
+//#endif
+            //runTime().deltaTValue(),
+            //pointD().name(),
+            //matrix,
+            //pointRho_.internalField(),
+            //pointVol_.internalField(),
+            //int(bool(debug))
+        //);
     }
 
     // Solution field: point displacement correction
@@ -1298,28 +1295,25 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
                 geometricStiffness,
                 dualSigmaf_,
                 dualGradDf_,
-                fixedDofs_,
-                fixedDofDirections_,
-                fixedDofScale_,
                 zeta,
                 debug
             );
 
             // Add d2dt2 coefficients
-            vfvm::d2dt2Extended
-            (
-#ifdef OPENFOAM_NOT_EXTEND
-                mesh().d2dt2Scheme("d2dt2(pointD)"),
-#else
-                mesh().schemesDict().d2dt2Scheme("d2dt2(pointD)"),
-#endif
-                runTime().deltaTValue(),
-                pointD().name(),
-                matrix,
-                pointRho_.internalField(),
-                pointVol_.internalField(),
-                int(bool(debug))
-            );
+           // vfvm::d2dt2Extended
+            //(
+//#ifdef OPENFOAM_NOT_EXTEND
+                //mesh().d2dt2Scheme("d2dt2(pointD)"),
+//#else
+                //mesh().schemesDict().d2dt2Scheme("d2dt2(pointD)"),
+//#endif
+                //runTime().deltaTValue(),
+                //pointD().name(),
+                //matrix,
+                //pointRho_.internalField(),
+                //pointVol_.internalField(),
+                //int(bool(debug))
+            //);
         }
         
 //	    Info << endl << "Before enforcing DOFs: " << endl << endl;

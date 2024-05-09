@@ -103,7 +103,7 @@ class vertexCentredNonLinGeomTotalLagDisplacementSolid
         const scalar fixedDofScale_;
 
         //- Point pressure
-        pointScalarField pointP_;
+        //pointScalarField pointP_;
 
         //- Point velocity
         pointVectorField pointU_;
@@ -134,10 +134,10 @@ class vertexCentredNonLinGeomTotalLagDisplacementSolid
         surfaceScalarField dualJf_;
 
         //- Pressure at the dual mesh faces
-        surfaceScalarField dualPf_;
+        //surfaceScalarField dualPf_;
 
         //- Cell pressure
-        volScalarField volP_;
+        //volScalarField volP_;
 
         //- Local-to-global point map and owner list
         globalPointIndices globalPointIndices_;

@@ -95,7 +95,7 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
         //- Field of flags indicating the degrees of freedom where the value is
         //  set
         //  Currently the size of this list is equal to the number of points
-        boolList fixedDofs_;
+        boolList fixedDisplacementDofs_;
 
         //- Values for fixed degrees of freedom
         //  Currently the size of this list is equal to the number of points
@@ -153,6 +153,12 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
 
         //- Cell pressure
         volScalarField volP_;
+        
+        //- Momentum equation residual
+        pointVectorField residualD_;
+        
+        //- Pressure equation residual
+        pointScalarField residualP_;
 
         //- Local-to-global point map and owner list
         globalPointIndices globalPointIndices_;
@@ -172,7 +178,7 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
 		);
 
         //- Set fixed degree of freedom lists
-        void setFixedDofs
+        void setFixedDisplacementDofs
         (
             const pointVectorField& pointD,
             boolList& fixedDofs,
