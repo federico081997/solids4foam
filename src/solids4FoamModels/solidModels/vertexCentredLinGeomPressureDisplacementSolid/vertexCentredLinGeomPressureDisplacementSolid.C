@@ -585,8 +585,7 @@ vertexCentredLinGeomPressureDisplacementSolid::residualP
     result += pointP*pointVolI;
 
     // Add gamma*laplacian(p)
-    result -= 
-        pressureSmoothingFactor_*laplacianP;
+    result -= pressureSmoothingFactor_*laplacianP;
 
     // Add pBar
     result -= pBar*pointVolI;
@@ -949,7 +948,8 @@ vertexCentredLinGeomPressureDisplacementSolid::vertexCentredLinGeomPressureDispl
 
 // * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
 
-vertexCentredLinGeomPressureDisplacementSolid::~vertexCentredLinGeomPressureDisplacementSolid()
+vertexCentredLinGeomPressureDisplacementSolid::
+~vertexCentredLinGeomPressureDisplacementSolid()
 {
 #ifdef USE_PETSC
     if (Switch(solidModelDict().lookup("usePETSc")))
@@ -964,14 +964,6 @@ vertexCentredLinGeomPressureDisplacementSolid::~vertexCentredLinGeomPressureDisp
 bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
 {
     Info<< "Evolving solid solver" << endl;
-
-    // Lookup compact edge gradient factor
-    const scalar zeta(solidModelDict().lookupOrDefault<scalar>("zeta", 0.2));
-    
-    if (debug)
-    {
-        Info<< "zeta: " << zeta << endl;
-    }
 
     // Print out the pressure smoothing coefficient
     Info<< "    Laplacian equation will be solved for pressure" << nl
@@ -1055,7 +1047,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
             dualMesh(),
             dualMeshMap().dualFaceToCell(),
             dualMeshMap().dualCellToPoint(),
-            zeta,
+            zeta_,
             debug
         );
 
@@ -1141,7 +1133,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
             dualMeshMap().dualFaceToCell(),
             dualMeshMap().dualCellToPoint(),
             materialTangent,
-            zeta,
+            zeta_,
             debug
         );
 
@@ -1313,7 +1305,6 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
 #endif
             }
         }
-
         pointD().correctBoundaryConditions();
         pointP_.correctBoundaryConditions();
 
@@ -1370,8 +1361,6 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         ) && ++iCorr
     );
 
-    // Update fields at the end of each time step
-
     // Update gradD at the dual faces
     dualGradDf_ = vfvc::fGrad
     (
@@ -1380,7 +1369,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         dualMesh(),
         dualMeshMap().dualFaceToCell(),
         dualMeshMap().dualCellToPoint(),
-        zeta,
+        zeta_,
         debug
     );
 

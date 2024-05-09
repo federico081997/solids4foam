@@ -127,6 +127,19 @@ namespace vfvc
         const bool debug
     );
 
+    // Returns the laplacian of a scalar field on the dual mesh
+    tmp<pointScalarField> laplacian
+    (
+        const pointScalarField& pointP,   // Pressure
+        const surfaceVectorField& deformedDualSf, // Deformed surface area
+        const fvMesh& mesh,               // Primary mesh
+        const fvMesh& dualMesh,           // Dual mesh
+        const labelList& dualFaceToCell,
+        const labelList& dualCellToPoint,
+        const scalar& zeta, // Fraction of compact edge direction used
+        const bool debug
+    );
+
     // Interpolate a pointScalarField to a volScalarField
     tmp<volScalarField> interpolate
     (

@@ -1225,6 +1225,29 @@ Foam::neoHookeanElasticMisesPlastic::impK() const
 }
 
 
+Foam::tmp<Foam::pointScalarField>
+Foam::neoHookeanElasticMisesPlastic::pBulkModulus() const
+{
+    return tmp<pointScalarField>
+    (
+        new pointScalarField
+        (
+            IOobject
+            (
+                "pBulkModulus",
+                mesh().time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            pointMesh::New(mesh()),
+            K_,
+            "calculated"
+        )
+    );
+}
+
+
 Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
 Foam::neoHookeanElasticMisesPlastic::materialTangentField() const
 {

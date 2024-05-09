@@ -34,6 +34,7 @@ SourceFiles
 
 Author
     Philip Cardiff, UCD.
+    Federico Mazzanti, UCD.
 
 \*---------------------------------------------------------------------------*/
 
@@ -166,7 +167,7 @@ namespace vfvm
         const labelList& dualFaceToCell,
         const labelList& dualCellToPoint,
         const tensorField& dualGradDField,
-        const scalarField& diffusivity,
+        const scalar& diffusivity,
         const bool debug
     );
 

@@ -758,7 +758,6 @@ tmp<pointScalarField> laplacian
     const bool debug
 )
 {
-
     // Get a reference to the pointMesh
     const pointMesh& pMesh = pointP.mesh();
 
@@ -832,6 +831,102 @@ tmp<pointScalarField> laplacian
 
         // Calculate the flux at the dual face
         const scalar& dualFluxP = dualGradP & curDualSf;
+
+        // Add the fluxes
+        result[ownPointID] += dualFluxP;
+        result[neiPointID] -= dualFluxP;
+    }
+
+    return tresult;
+}
+
+
+
+tmp<pointScalarField> laplacian
+(
+    const pointScalarField& pointP,
+    const surfaceVectorField& deformedDualSf,
+    const fvMesh& mesh,
+    const fvMesh& dualMesh,
+    const labelList& dualFaceToCell,
+    const labelList& dualCellToPoint,
+    const scalar& zeta,
+    const bool debug
+)
+{
+    // Get a reference to the pointMesh
+    const pointMesh& pMesh = pointP.mesh();
+
+    // Prepare the result field
+    tmp<pointScalarField> tresult
+    (
+        new pointScalarField
+        (
+            IOobject
+            (
+                "laplacian("+ pointP.name() +")",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            pMesh,
+            dimensionedScalar
+            (
+                "zero", pointP.dimensions()/dimLength, 0
+            ),
+            "calculated"
+        )
+    );
+#ifdef OPENFOAM_NOT_EXTEND
+    pointScalarField& result = tresult.ref();
+#else
+    pointScalarField& result = tresult();
+#endif
+
+    // Take reference for clarity and efficiency
+    const labelList& dualOwn = dualMesh.owner();
+    const labelList& dualNei = dualMesh.neighbour();
+    const vectorField& dualSf = deformedDualSf.internalField();
+
+    // Calculate the gradient of P for each dual face
+    const surfaceVectorField dualGradPField
+    (
+        fGrad
+        (
+            pointP,
+            mesh,
+            dualMesh,
+            dualFaceToCell,
+            dualCellToPoint,
+            zeta,
+            debug
+        )
+    );
+
+    // Loop over all internal faces of the dual mesh
+    forAll(dualOwn, dualFaceI)
+    {
+        // Dual cell owner of dualFaceI
+        const label dualOwnCellID = dualOwn[dualFaceI];
+
+        // Dual cell neighbour of dualFaceI
+        const label dualNeiCellID = dualNei[dualFaceI];
+
+        // Primary mesh point at the centre of dualOwnCellID
+        const label ownPointID = dualCellToPoint[dualOwnCellID];
+
+        // Primary mesh point at the centre of dualNeiCellID
+        const label neiPointID = dualCellToPoint[dualNeiCellID];
+
+        // dualFaceI area vector
+        const vector& curDeformedDualSf = dualSf[dualFaceI];
+
+        // gradP at the dual face
+        const vector& dualGradP = dualGradPField[dualFaceI];
+
+        // Calculate the flux at the dual face
+        const scalar& dualFluxP = dualGradP & curDeformedDualSf;
 
         // Add the fluxes
         result[ownPointID] += dualFluxP;
