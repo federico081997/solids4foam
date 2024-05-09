@@ -98,7 +98,7 @@ class mechanicalModel
         //  This field is zero on bi-material interfaces
         void calcImpKfcorr() const;
 
-        //- Return the implicit stiffness surface field for Rhie-Chow 
+        //- Return the implicit stiffness surface field for Rhie-Chow
         //  correction
         const surfaceScalarField& impKfcorr() const;
 
@@ -235,7 +235,7 @@ public:
                 const bool useVolFieldSigma = true
             );
 
-            //- Return explicit Rhie-Chow correction field to quell 
+            //- Return explicit Rhie-Chow correction field to quell
             //  oscillations
             tmp<volVectorField> RhieChowCorrection
             (
@@ -244,7 +244,7 @@ public:
                 const surfaceScalarField& gamma
             ) const;
 
-            //- Return explicit Rhie-Chow correction field to quell 
+            //- Return explicit Rhie-Chow correction field to quell
             //  oscillations
             tmp<volVectorField> RhieChowCorrection
             (

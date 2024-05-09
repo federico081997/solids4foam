@@ -47,8 +47,8 @@ namespace solidModels
 defineTypeNameAndDebug(explicitVertexCentredNonLinGeomTotalLagSolid, 0);
 addToRunTimeSelectionTable
 (
-    solidModel, 
-    explicitVertexCentredNonLinGeomTotalLagSolid, 
+    solidModel,
+    explicitVertexCentredNonLinGeomTotalLagSolid,
     dictionary
 );
 
@@ -153,7 +153,7 @@ void explicitVertexCentredNonLinGeomTotalLagSolid::updatePointDivSigma
         }
     }
 
-    // Calculate divergence of stress (force per unit volume) for the dual 
+    // Calculate divergence of stress (force per unit volume) for the dual
     // cells
     const vectorField dualDivSigma = fvc::div(dualTraction*deformedMagSf);
 
@@ -903,7 +903,7 @@ void explicitVertexCentredNonLinGeomTotalLagSolid::writeFields
 
 #ifdef OPENFOAM_COM
     // Interpolate pointD to D
-    // This is useful for visualisation but it is also needed when using 
+    // This is useful for visualisation but it is also needed when using
     // preCICE
     pointVolInterp_.interpolate(pointD(), D());
 #endif

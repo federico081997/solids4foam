@@ -248,7 +248,7 @@ void vertexCentredSegregatedLinGeomSolid::setFixedDofs
                             << abort(FatalError);
                     }
 
-                    // If the point is not fully fixed then make sure the 
+                    // If the point is not fully fixed then make sure the
                     // normal direction is fixed
                     if (mag(fixedDofDirections[pointID] - symmTensor(I)) > 0)
                     {
@@ -259,7 +259,7 @@ void vertexCentredSegregatedLinGeomSolid::setFixedDofs
                             FatalError
                                 << "Point " << pointID << " is fixed in two "
                                 << "directions: this is only implemented for "
-                                << "Cartesian axis directions" 
+                                << "Cartesian axis directions"
                                 << abort(FatalError);
                         }
 
@@ -329,7 +329,7 @@ void vertexCentredSegregatedLinGeomSolid::enforceTractionBoundaries
             // the average of all the points that map to it
             scalarField nPointsPerDualFace(dualFaceTraction.size(), 0.0);
 
-            // Map from primary mesh point field to second mesh face field 
+            // Map from primary mesh point field to second mesh face field
             // using the pointToDualFaces map
             forAll(totalTraction, pI)
             {
@@ -671,13 +671,13 @@ bool vertexCentredSegregatedLinGeomSolid::evolve()
     (
         solidModelDict().lookupOrDefault<Switch>
         (
-            "compactImplicitStencil", 
+            "compactImplicitStencil",
             true
         )
     );
     Info<< "compactImplicitStencil: " << compactImplicitStencil << endl;
 
-    // Create scalar Laplacian discretisation matrix without boundary 
+    // Create scalar Laplacian discretisation matrix without boundary
     // conditions
     vfvm::laplacian
     (
@@ -799,10 +799,10 @@ bool vertexCentredSegregatedLinGeomSolid::evolve()
                 // Use Eigen SparseLU direct solver
                 sparseMatrixTools::solveLinearSystemEigen
                 (
-                    matrixDirI, 
-                    sourceDirI, 
-                    pointDcorr, 
-                    writeMatlabMatrix, 
+                    matrixDirI,
+                    sourceDirI,
+                    pointDcorr,
+                    writeMatlabMatrix,
                     debug
                 );
             }
@@ -899,7 +899,7 @@ bool vertexCentredSegregatedLinGeomSolid::evolve()
 
 #ifdef OPENFOAM_COM
     // Interpolate pointD to D
-    // This is useful for visualisation but it is also needed when using 
+    // This is useful for visualisation but it is also needed when using
     // preCICE
     pointVolInterp_.interpolate(pointD(), D());
 #endif

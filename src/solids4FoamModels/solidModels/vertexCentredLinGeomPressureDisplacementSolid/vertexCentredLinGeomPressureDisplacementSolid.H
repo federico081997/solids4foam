@@ -143,7 +143,7 @@ class vertexCentredLinGeomPressureDisplacementSolid
 
         //- Cell pressure
         volScalarField volP_;
-        
+
         //- Local-to-global point map and owner list
         globalPointIndices globalPointIndices_;
 

@@ -20,12 +20,12 @@ Class
 
 Description
     Mathematical model where nonlinear geometry is assumed using a total
-    Lagrangian formulation. The point total displacement is the primary 
+    Lagrangian formulation. The point total displacement is the primary
     unknown.
 
     Discretisation is performed using a vertex-centred finite volume approach
-    where the governing equations are integrated over a dual mesh. The dual 
-    mesh is automatically constructed from the primary mesh using the 
+    where the governing equations are integrated over a dual mesh. The dual
+    mesh is automatically constructed from the primary mesh using the
     meshDualiser.
 
     An explicit solution algorithm is employed in contrast to the implicit
@@ -74,7 +74,7 @@ class explicitVertexCentredNonLinGeomTotalLagSolid
 {
     // Private Data
 
-        //- Store stiffness field: only used by pointSolidContact boundaries 
+        //- Store stiffness field: only used by pointSolidContact boundaries
         //  for calculating the penalty factor
         const volScalarField impK_;
 
@@ -134,7 +134,7 @@ class explicitVertexCentredNonLinGeomTotalLagSolid
         surfaceSymmTensorField dualSigmaf_;
 
         //- Number of processors which share this point
-        // Interior points will be 1, but points on processor boundaries will 
+        // Interior points will be 1, but points on processor boundaries will
         // be at least 2
         pointScalarField nProcPerPoint_;
 

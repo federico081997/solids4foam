@@ -336,7 +336,7 @@ void Foam::vfvm::divSigma
     {
         Info<< "void Foam::vfvm::divSigma(...): start" << endl;
     }
-    
+
     // Take reference for clarity and efficiency
     const labelListList& cellPoints = mesh.cellPoints();
     const pointField& points = mesh.points();
@@ -410,17 +410,17 @@ void Foam::vfvm::divSigma
                 materialTangent,
                 lsVec
             );
-            
+
             // Insert pressure coefficients of the momentum equation
             for (int i = 0; i < 3; i++)
             {
-                // Add the coefficient to the ownPointID equation 
-                matrix(ownPointID, pointID)(i,3) += 
+                // Add the coefficient to the ownPointID equation
+                matrix(ownPointID, pointID)(i,3) +=
                     -curDualSf.component(i)/curCellPoints.size();
-                
-                // Add the coefficient to the neiPointID equation coming from 
+
+                // Add the coefficient to the neiPointID equation coming from
                 // ownPointID
-                matrix(neiPointID, pointID)(i,3) -= 
+                matrix(neiPointID, pointID)(i,3) -=
                     -curDualSf.component(i)/curCellPoints.size();
             }
 
@@ -430,14 +430,14 @@ void Foam::vfvm::divSigma
             {
                 for (int k = 0; k < 3; k++)
                 {
-                    // Add the coefficient to the ownPointID equation coming 
+                    // Add the coefficient to the ownPointID equation coming
                     // from pointID
                     matrix(ownPointID, pointID)(i,k) += coeff.component(cmptI);
-                    
-                    // Add the coefficient to the neiPointID equation coming 
+
+                    // Add the coefficient to the neiPointID equation coming
                     // from pointID
                     matrix(neiPointID, pointID)(i,k) -= coeff.component(cmptI);
-                    
+
                     cmptI++;
                 }
             }
@@ -468,20 +468,20 @@ void Foam::vfvm::divSigma
             for (int k = 0; k < 3; k++)
             {
                 // Insert coefficients for the ownPoint
-                matrix(ownPointID, ownPointID)(i,k) -= 
+                matrix(ownPointID, ownPointID)(i,k) -=
                     edgeDirCoeff.component(cmptI);
-                matrix(ownPointID, neiPointID)(i,k) += 
+                matrix(ownPointID, neiPointID)(i,k) +=
                     edgeDirCoeff.component(cmptI);
-                
+
                 // Insert coefficients for the neiPoint
-                matrix(neiPointID, neiPointID)(i,k) -= 
+                matrix(neiPointID, neiPointID)(i,k) -=
                     edgeDirCoeff.component(cmptI);
                 matrix(neiPointID, ownPointID)(i,k) +=
                     edgeDirCoeff.component(cmptI);
-                
+
                 cmptI++;
             }
-        }        
+        }
     }
 
     if (debug)
@@ -608,17 +608,17 @@ void Foam::vfvm::divSigma
                 sigmaf,
                 lsVec
             );
-            
+
             // Insert pressure coefficients of the momentum equation
             for (int i = 0; i < 3; i++)
             {
-                // Add the coefficient to the ownPointID equation 
-                matrix(ownPointID, pointID)(i,3) += 
+                // Add the coefficient to the ownPointID equation
+                matrix(ownPointID, pointID)(i,3) +=
                     -curDualSfDef.component(i)/curCellPoints.size();
-                
-                // Add the coefficient to the neiPointID equation coming from 
+
+                // Add the coefficient to the neiPointID equation coming from
                 // ownPointID
-                matrix(neiPointID, pointID)(i,3) -= 
+                matrix(neiPointID, pointID)(i,3) -=
                     -curDualSfDef.component(i)/curCellPoints.size();
             }
 
@@ -628,14 +628,14 @@ void Foam::vfvm::divSigma
             {
                 for (int k = 0; k < 3; k++)
                 {
-                    // Add the coefficient to the ownPointID equation coming 
+                    // Add the coefficient to the ownPointID equation coming
                     // from pointID
                     matrix(ownPointID, pointID)(i,k) += coeff.component(cmptI);
 
-                    // Add the coefficient to the neiPointID equation coming 
+                    // Add the coefficient to the neiPointID equation coming
                     // from pointID
                     matrix(neiPointID, pointID)(i,k) -= coeff.component(cmptI);
-                    
+
                     cmptI++;
                 }
             }
@@ -669,20 +669,20 @@ void Foam::vfvm::divSigma
             for (int k = 0; k < 3; k++)
             {
                 // Insert coefficients for the ownPoint
-                matrix(ownPointID, ownPointID)(i,k) -= 
+                matrix(ownPointID, ownPointID)(i,k) -=
                     edgeDirCoeff.component(cmptI);
-                matrix(ownPointID, neiPointID)(i,k) += 
+                matrix(ownPointID, neiPointID)(i,k) +=
                     edgeDirCoeff.component(cmptI);
 
                 // Insert coefficients for the neiPoint
-                matrix(neiPointID, neiPointID)(i,k) -= 
+                matrix(neiPointID, neiPointID)(i,k) -=
                     edgeDirCoeff.component(cmptI);
-                matrix(neiPointID, ownPointID)(i,k) += 
+                matrix(neiPointID, ownPointID)(i,k) +=
                     edgeDirCoeff.component(cmptI);
-                
+
                 cmptI++;
             }
-        }        
+        }
     }
 
     if (debug)
@@ -788,7 +788,7 @@ void Foam::vfvm::laplacian
                 // cellID to pointI
                 const vector lsVec = curLeastSquaresVecs[cpI];
 
-                // Calculate the coefficient for this point coming from 
+                // Calculate the coefficient for this point coming from
                 // dualFaceI
                 const scalar coeff = diffCellID*curDualSf & lsVec;
 
@@ -903,7 +903,7 @@ void Foam::vfvm::laplacian
                 // cellID to pointI
                 const vector lsVec = curLeastSquaresVecs[cpI];
 
-                // Calculate the coefficient for this point coming from 
+                // Calculate the coefficient for this point coming from
                 // dualFaceI
                 const scalar coeff = (diffusivity*curDualSf) & lsVec;
 
@@ -1037,7 +1037,7 @@ void Foam::vfvm::laplacian
                 // cellID to pointI
                 const vector lsVec = curLeastSquaresVecs[cpI];
 
-                // Calculate the coefficient for this point coming from 
+                // Calculate the coefficient for this point coming from
                 // dualFaceI
                 const scalar coeff = diffCellID*curDualSfDef & lsVec;
 
@@ -1133,7 +1133,7 @@ void Foam::vfvm::Sp
 
     // Insert the pressure coefficient of the pressure equation
     forAll(pointVolI, pointI)
-    {       
+    {
         matrix(pointI, pointI)(3,3) += pointVolI[pointI];
     }
 
@@ -1170,7 +1170,7 @@ void Foam::vfvm::addPbar
     {
         // pBarSensitivity for pointI
         const tensor& pBarSensitivityI = pBarSensitivity[pointI];
-        
+
         // Point-point neighbours
         const labelList& curPointPoints = pointPoints[pointI];
 
@@ -1182,21 +1182,21 @@ void Foam::vfvm::addPbar
         forAll(curPointPoints, ppI)
         {
             const label pointPointID = curPointPoints[ppI];
-            
+
             // Least squares vector from the average point to this neighbour
             // point
             const vector& lsVec = curLeastSquaresVecs[ppI];
-            
+
             // Calculate the coefficient for this pointPoint
             const vector coeff = (pBarSensitivityI & lsVec)*pointVolI[pointI];
-            
+
             // Insert the displacement coefficients of pressure equation
             for (int i = 0; i < 3; i++)
-            {               
+            {
                 matrix(pointI, pointPointID)(3,i) -= coeff.component(i);
                 matrix(pointI, pointI)(3,i) += coeff.component(i);
-            }            
-        }                       
+            }
+        }
     }
 
     if (debug)

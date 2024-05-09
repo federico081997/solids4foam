@@ -24,8 +24,8 @@ Description
     unknown.
 
     Discretisation is performed using a vertex-centred finite volume approach
-    where the governing equations are integrated over a dual mesh. The dual 
-    mesh is automatically constructed from the primary mesh using the 
+    where the governing equations are integrated over a dual mesh. The dual
+    mesh is automatically constructed from the primary mesh using the
     meshDualiser.
 
     An explicit solution algorithm is employed in contrast to the implicit
@@ -75,7 +75,7 @@ class explicitVertexCentredLinGeomSolid
 {
     // Private Data
 
-        //- Store stiffness field: only used by pointSolidContact boundaries 
+        //- Store stiffness field: only used by pointSolidContact boundaries
         //  for calculating the penalty factor
         const volScalarField impK_;
 

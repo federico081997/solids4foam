@@ -125,7 +125,7 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
         //- Point volume field
         //  Dual mesh cell volumes associated with the primary mesh points
         pointScalarField pointVol_;
-        
+
         //- Point J field
         pointScalarField pointJ_;
 

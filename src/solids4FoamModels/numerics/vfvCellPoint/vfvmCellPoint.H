@@ -54,8 +54,8 @@ namespace Foam
 
 namespace vfvm
 {
-    // Add coefficients to the matrix for the divergence of stress in the 
-    // small-strain displacement formulation. Each coefficient in the matrix 
+    // Add coefficients to the matrix for the divergence of stress in the
+    // small-strain displacement formulation. Each coefficient in the matrix
     // is a 3x3 tensor.
     void divSigma
     (
@@ -69,8 +69,8 @@ namespace vfvm
         const bool debug = false
     );
 
-    // Add coefficients to the matrix for the divergence of stress in the 
-    // large-strain displacement formulation. Each coefficient in the matrix 
+    // Add coefficients to the matrix for the divergence of stress in the
+    // large-strain displacement formulation. Each coefficient in the matrix
     // is a 3x3 tensor.
     void divSigma
     (
@@ -87,9 +87,9 @@ namespace vfvm
         const bool debug = false
     );
 
-    
-    // Add coefficients to the matrix for the divergence of stress in the 
-    // small-strain displacement-pressure formulation. Each coefficient in the 
+
+    // Add coefficients to the matrix for the divergence of stress in the
+    // small-strain displacement-pressure formulation. Each coefficient in the
     // matrix is a 4x4 tensor.
     void divSigma
     (
@@ -104,8 +104,8 @@ namespace vfvm
     );
 
 
-    // Add coefficients to the matrix for the divergence of stress in the 
-    // large-strain displacement-pressure formulation. Each coefficient in the 
+    // Add coefficients to the matrix for the divergence of stress in the
+    // large-strain displacement-pressure formulation. Each coefficient in the
     // matrix is a 4x4 tensor.
     void divSigma
     (
@@ -152,7 +152,7 @@ namespace vfvm
         const scalar& diffusivity,
         const bool debug
     );
-  
+
 
     // Add coefficients to the matrix for the Laplacian of a scalar field with
     // a scalar diffusivity in the large-strain pressure-displacement 
@@ -171,7 +171,7 @@ namespace vfvm
     );
 
 
-    // Add coefficients to the matrix for the second time derivative. Each 
+    // Add coefficients to the matrix for the second time derivative. Each
     // coefficient in the matrix is a 3x3 tensor.
     void d2dt2
     (
@@ -185,7 +185,7 @@ namespace vfvm
     );
 
 
-    // Add source coefficients to the matrix diagonal of the pressure 
+    // Add source coefficients to the matrix diagonal of the pressure
     // equation. Each coefficient in the matrix is a 4x4 tensor.
     void Sp
     (
@@ -195,7 +195,7 @@ namespace vfvm
     );
 
 
-    // Add the displacement coefficients of the pressure equation to the 
+    // Add the displacement coefficients of the pressure equation to the
     // matrix. Each coefficients in the matrix is a 4x4 tensor.
     void addPbar
     (

@@ -581,7 +581,7 @@ Foam::surfaceScalarField& Foam::mechanicalLaw::muf()
 }
 
 
-const Foam::volScalarField& 
+const Foam::volScalarField&
 Foam::mechanicalLaw::mu(const dimensionedScalar& mu)
 {
     if (muPtr_.empty())
@@ -1099,9 +1099,9 @@ bool Foam::mechanicalLaw::updateF
 
                     WarningIn
                     (
-                        "void " + type() 
+                        "void " + type()
                         + "::correct(volSymmTensorField& sigma)"
-                    )   << "Material linearity enforced for stability!" 
+                    )   << "Material linearity enforced for stability!"
                         << endl;
                 }
 
@@ -1133,9 +1133,9 @@ bool Foam::mechanicalLaw::updateF
 
                     WarningIn
                     (
-                        "void " + type() 
+                        "void " + type()
                         + "::correct(volSymmTensorField& sigma)"
-                    )   << "Material linearity enforced for stability!" 
+                    )   << "Material linearity enforced for stability!"
                         << endl;
                 }
 
@@ -1151,8 +1151,8 @@ bool Foam::mechanicalLaw::updateF
         FatalErrorIn
         (
             "void " + type() + "::correct(volSymmTensorField& sigma)"
-        )   << "Unknown nonLinGeom type: " 
-            << nonLinGeom() 
+        )   << "Unknown nonLinGeom type: "
+            << nonLinGeom()
             << abort(FatalError);
     }
 
@@ -1255,7 +1255,7 @@ bool Foam::mechanicalLaw::updateF
                     (
                         "void " + type()
                       + "::correct(surfaceSymmTensorField& sigma)"
-                    )   << "Material linearity enforced for stability!" 
+                    )   << "Material linearity enforced for stability!"
                         << endl;
                 }
 
@@ -1289,7 +1289,7 @@ bool Foam::mechanicalLaw::updateF
                     (
                         "void " + type()
                       + "::correct(surfaceSymmTensorField& sigma)"
-                    )   << "Material linearity enforced for stability!" 
+                    )   << "Material linearity enforced for stability!"
                         << endl;
                 }
 
@@ -1305,8 +1305,8 @@ bool Foam::mechanicalLaw::updateF
         FatalErrorIn
         (
             "void " + type() + "::correct(surfaceSymmTensorField& sigma)"
-        )   << "Unknown nonLinGeom type: " 
-            << nonLinGeom() 
+        )   << "Unknown nonLinGeom type: "
+            << nonLinGeom()
             << abort(FatalError);
     }
 
@@ -1490,7 +1490,7 @@ Foam::mechanicalLaw::mechanicalLaw
     (
         dict_.lookupOrAddDefault<Switch>
         (
-            "solveVertexCentredPressureEqn", 
+            "solveVertexCentredPressureEqn",
             false
         )
     ),
@@ -1592,7 +1592,7 @@ Foam::mechanicalLaw::materialTangentField() const
     (
         new Field<RectangularMatrix<scalar>>
         (
-            mesh().nFaces(), 
+            mesh().nFaces(),
             materialTangent()
         )
     );

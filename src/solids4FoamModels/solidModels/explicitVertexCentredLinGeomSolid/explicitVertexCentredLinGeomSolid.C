@@ -43,8 +43,8 @@ namespace solidModels
 defineTypeNameAndDebug(explicitVertexCentredLinGeomSolid, 0);
 addToRunTimeSelectionTable
 (
-    solidModel, 
-    explicitVertexCentredLinGeomSolid, 
+    solidModel,
+    explicitVertexCentredLinGeomSolid,
     dictionary
 );
 
@@ -106,7 +106,7 @@ void explicitVertexCentredLinGeomSolid::updatePointDivSigma
         }
     }
 
-    // Calculate divergence of stress (force per unit volume) for the 
+    // Calculate divergence of stress (force per unit volume) for the
     // dual cells
     const vectorField dualDivSigma = fvc::div(dualTraction*dualMesh().magSf());
 
@@ -118,7 +118,7 @@ void explicitVertexCentredLinGeomSolid::updatePointDivSigma
     // We temporarily use the pointDivSigma field to hold absolute forces
     // but convert them back to force per unit volume below
     vectorField& pointDivSigmaI = pointDivSigma;
-    const labelList& dualCellToPoint = dualMeshMap().dualCellToPoint();    
+    const labelList& dualCellToPoint = dualMeshMap().dualCellToPoint();
     forAll(dualDivSigmaAbs, dualCellI)
     {
         const label pointID = dualCellToPoint[dualCellI];
@@ -198,7 +198,7 @@ void explicitVertexCentredLinGeomSolid::enforceTractionBoundaries
             // the average of all the points that map to it
             scalarField nPointsPerDualFace(dualFaceTraction.size(), 0.0);
 
-            // Map from primary mesh point field to second mesh face field 
+            // Map from primary mesh point field to second mesh face field
             // using the pointToDualFaces map
             forAll(totalTraction, pI)
             {
@@ -655,7 +655,7 @@ void explicitVertexCentredLinGeomSolid::writeFields(const Time& runTime)
 
 #ifdef OPENFOAM_COM
     // Interpolate pointD to D
-    // This is useful for visualisation but it is also needed when 
+    // This is useful for visualisation but it is also needed when
     // using preCICE
     pointVolInterp_.interpolate(pointD(), D());
 #endif

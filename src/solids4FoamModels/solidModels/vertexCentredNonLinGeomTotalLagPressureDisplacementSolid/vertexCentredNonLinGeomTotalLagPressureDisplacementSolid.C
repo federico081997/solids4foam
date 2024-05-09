@@ -122,9 +122,9 @@ void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::updateSource
     forAll(dualDivSigma, dualCellI)
     {
         const label pointID = dualCellToPoint[dualCellI];
-        pointDivSigmaI[pointID] = dualDivSigma[dualCellI];       	 
+        pointDivSigmaI[pointID] = dualDivSigma[dualCellI];
     }
-    
+
     // Insert momentum coefficients into the source
 
     forAll (source, pointI)
@@ -136,10 +136,8 @@ void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::updateSource
 
             // Add gravity body forces
             source[pointI](i,0) -= pointRhoI[pointI]*g().value().component(i)*pointVolI[pointI];
-        }        
-    }   
-    
-    residualD_.primitiveFieldRef() = pointDivSigmaI*pointVolI; 
+        }
+    }
 
     // The source vector for the pressure equation is -F, where:
     // F = p - gamma*laplacian(p) - pBar(D)
@@ -163,9 +161,9 @@ void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::updateSource
     const scalar E = 70e9;
     const scalar nu = 0.3;
     const scalar K( (nu*E/((1.0 + nu)*(1.0 - 2.0*nu))) + (2.0/3.0)*(E/(2.0*(1.0 + nu))) );
-    
+
     // Calculate the pBar field (TO FIX LATER)
-    scalarField pBar(-0.5*K*pow(pointJ_, 2.0));    
+    scalarField pBar(-0.5*K*pow(pointJ_, 2.0));
     pBar += 0.5*K;
     pBar /= pointJ_;
 
@@ -517,14 +515,13 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::vertexCentredNonL
 
         // Pressure residual
         residualPAbs += sqr(pointDPcorr[pointI](3,0));
-        
+
         nPoints ++;
     }
-    
+
     residualDAbs /= sqrt(residualDAbs/nPoints);
-    //residualPAbs /= sqrt(residualPAbs/nPoints);
-    residualPAbs = 0;
-    
+    residualPAbs /= sqrt(residualPAbs/nPoints);
+
     // Store initial residual
     if (iCorr == 0)
     {
@@ -953,7 +950,7 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::pBarSensitivityField
     const scalar K( (nu*E/((1.0 + nu)*(1.0 - 2.0*nu))) + (2.0/3.0)*(E/(2.0*(1.0 + nu))) );
 
     //d(pBar)/d(gradD) = -0.5*K*d(J^2)/d(gradD)
-    
+
     // Calculate unperturbed F
     const tensorField FRef(I + pGradDRef.T());
 
@@ -989,7 +986,7 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::pBarSensitivityField
 
         // Calculate each component
         const scalarField tangCmpt((pBarPerturb - pBarRef)/eps);
-        
+
 //        Info << "pBarPerturb: " << pBarPerturb << endl;
 //        Info << "pBarRef: " << pBarRef << endl;
 
@@ -1034,19 +1031,19 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::pBarSensitivityField
             }
         }
     }
-    
+
     //Info << result[0] << endl;
     //Info << pGradDRef << endl;
     //pointScalarField pointJ = det(I + pGradDRef.T());
     //Info << pointJ << endl;
-//    tensorField pBar = -0.5*K*( 
+//    tensorField pBar = -0.5*K*(
 //    	(2*(I + tr(pGradDRef)*I - pGradDRef.T() + cof(pGradDRef))) -
 //    	(I + tr(pGradDRef)*I - pGradDRef.T() + cof(pGradDRef))*(1 - 1/sqr(pointJ))
 //    	);
-    
+
     //(sqr(pointJ) - 1)*(I + tr(pGradDRef)*I - pGradDRef.T() + cof(pGradDRef)));
     //Info << pBar[0] << endl;
-    	
+
     return tresult;
 }
 
@@ -1386,7 +1383,7 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::~vertexCentredNonLinGe
 bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
 {
     Info<< "Evolving solid solver" << endl;
-    
+
     ////// Prepare fields at the beginning of each time step //////
 
     // Lookup compact edge gradient factor
@@ -1395,7 +1392,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
     {
         Info<< "zeta: " << zeta << endl;
     }
-    
+
     //Calculate the bulk modulus
     const scalar E = 70e9;
     const scalar nu = 0.3;
@@ -1429,10 +1426,10 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         pointD(),
         mesh()
     );
-    
+
     // Calculate J at the primary points
     pointJ_ = det(I + pointGradD_.T());
-    
+
     // Calculate cell P
     volP_ = vfvc::interpolate
     (
@@ -1470,9 +1467,9 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
     BlockSolverPerformance<vector> solverPerf;
 #endif
     do
-    {	
+    {
     	////// Update fields at the beginning of each outer iteration //////
-        
+
         // Update gradD at dual faces
         dualGradDf_ = vfvc::fGrad
         (
@@ -1484,7 +1481,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             zeta,
             debug
         );
-        
+
         // Update F
         dualFf_ = I + dualGradDf_.T();
 
@@ -1493,7 +1490,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
 
         // Update J
         dualJf_ = det(dualFf_);
-        
+
         // Update the pressure at the dual faces
         dualPf_ = vfvc::interpolate
         (
@@ -1510,10 +1507,10 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             pointD(),
             mesh()
         );
-        
+
         // Update J at the primary points
     	pointJ_ = det(I + pointGradD_.T());
-    	
+
 	    // Update cell P
 		volP_ = vfvc::interpolate
 		(
@@ -1529,7 +1526,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
 
         pointP_.correctBoundaryConditions();
         pointD().correctBoundaryConditions();
-        
+
         ////// Assemble the source //////
 
         updateSource
@@ -1566,8 +1563,8 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         // Calculate pBarSensitivity
         tensorField pBarSensitivity = -0.5*K*(
         	I + tr(pointGradD_)*I - pointGradD_.T() + cof(pointGradD_) +
-        	pow(pointJ_,-2.0)*(I + tr(pointGradD_)*I - pointGradD_.T() + cof(pointGradD_))); 
-        	
+        	pow(pointJ_,-2.0)*(I + tr(pointGradD_)*I - pointGradD_.T() + cof(pointGradD_)));
+
 //        tensorField pBarSensitivity
 //        (
 //            pBarSensitivityField
@@ -1575,13 +1572,13 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
 //                pointGradD_
 //            )
 //        );
-//        	
+//
 //        for (int i = 0; i < 60; i++)
 //        {
 //        	Info << pBarSensitivity[i] << endl;
 //        }
-        //Info << pBarSensitivity << endl;  
-        
+        //Info << pBarSensitivity << endl;
+
         // Add div(sigma) pressure and displacement coefficients
         vfvm::divSigma
         (
@@ -1632,11 +1629,6 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             debug
         );
 
-//        forAll (materialTangent, faceI) 
-//        {
-//        	Info << "materialTangent for face " << faceI << ": " << materialTangent[faceI] << endl;
-//        }          
-//        
 //		    Info << endl << "Before enforcing DOFs: " << endl << endl;
 //		    matrixExtended.print();
 //		    Info << endl << "Print out the source: " << endl << endl;
@@ -1721,13 +1713,13 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
 //		    }
 
         ////// Solve the linear system //////
-        
+
         if (debug)
         {
             Info<< "bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve(): "
                 << " solving linear system: start" << endl;
         }
-        
+
         Info<< "    Solving" << endl;
 
         if (Switch(solidModelDict().lookup("usePETSc")))
@@ -1799,10 +1791,6 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
 #endif
             }
         }
-        
-//        Info << pointP_ << endl;
-//        Info << pointD() << endl;
-		
         pointD().correctBoundaryConditions();
         pointP_.correctBoundaryConditions();
 
@@ -1861,7 +1849,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             pointDPcorr
         ) && ++iCorr
     );
-    
+
     ////// Update fields at the end of each time step //////
 
     // Update gradD at dual faces
@@ -1875,7 +1863,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         zeta,
         debug
     );
-    
+
     // Update F
     dualFf_ = I + dualGradDf_.T();
 
@@ -1884,7 +1872,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
 
     // Update J
     dualJf_ = det(dualFf_);
-    
+
     // Update the pressure at the dual faces
     dualPf_ = vfvc::interpolate
     (
@@ -1901,10 +1889,10 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         pointD(),
         mesh()
     );
-    
+
     // Update J at the primary points
 	pointJ_ = det(I + pointGradD_.T());
-    
+
     // Update cell P
     volP_ = vfvc::interpolate
     (

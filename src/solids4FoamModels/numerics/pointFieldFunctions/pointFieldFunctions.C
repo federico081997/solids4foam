@@ -227,7 +227,7 @@ tmp<pointScalarField> sqr(const pointScalarField& ptr)
 
 tmp<pointScalarField> pow
 (
-    const pointScalarField& ptr, 
+    const pointScalarField& ptr,
     const scalar& power
 )
 {
