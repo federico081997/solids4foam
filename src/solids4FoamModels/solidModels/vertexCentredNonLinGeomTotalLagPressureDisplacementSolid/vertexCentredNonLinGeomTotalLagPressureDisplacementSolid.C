@@ -46,8 +46,8 @@ namespace solidModels
 defineTypeNameAndDebug(vertexCentredNonLinGeomTotalLagPressureDisplacementSolid, 0);
 addToRunTimeSelectionTable
 (
-    solidModel, 
-    vertexCentredNonLinGeomTotalLagPressureDisplacementSolid, 
+    solidModel,
+    vertexCentredNonLinGeomTotalLagPressureDisplacementSolid,
     dictionary
 );
 
@@ -181,7 +181,7 @@ void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::setFixedDofs
                             << abort(FatalError);
                     }
 
-                    // If the point is not fully fixed then make sure the 
+                    // If the point is not fully fixed then make sure the
                     // normal direction is fixed
                     if (mag(fixedDofDirections[pointID] - symmTensor(I)) > 0)
                     {
@@ -192,7 +192,7 @@ void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::setFixedDofs
                             FatalError
                                 << "Point " << pointID << " is fixed in two "
                                 << "directions: this is only implemented for "
-                                << "Cartesian axis directions" 
+                                << "Cartesian axis directions"
                                 << abort(FatalError);
                         }
 
@@ -265,7 +265,7 @@ enforceTractionBoundaries
             // the average of all the points that map to it
             scalarField nPointsPerDualFace(dualFaceTraction.size(), 0.0);
 
-            // Map from primary mesh point field to second mesh face field 
+            // Map from primary mesh point field to second mesh face field
             // using the pointToDualFaces map
             forAll(totalTraction, pI)
             {
@@ -395,7 +395,7 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::converged
         // If the initial residual is small then convergence has been achieved
         if (initResidualD < SMALL && initResidualP < SMALL)
         {
-            Info<< "    Both displacement and pressure residuals are less " 
+            Info<< "    Both displacement and pressure residuals are less "
                 << "than 1e-15"
                 << "    Converged" << endl;
             return true;
@@ -439,11 +439,11 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::converged
         << ", maxP = " << maxMagP << endl;
 
     // Displacement tolerance
-    const scalar DTol = 
+    const scalar DTol =
         solidModelDict().lookupOrDefault<scalar>("solutionDTolerance", 1e-11);
 
     // Pressure tolerance
-    const scalar PTol = 
+    const scalar PTol =
         solidModelDict().lookupOrDefault<scalar>("solutionPTolerance", 1e-6);
 
     // Check for convergence
@@ -481,7 +481,7 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::geometricStiffnessFiel
     (
         new Field<Foam::RectangularMatrix<Foam::scalar>>
         (
-            dualMesh().nFaces(), 
+            dualMesh().nFaces(),
             Foam::RectangularMatrix<scalar>(3,9,0)
         )
     );
@@ -761,7 +761,7 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::residualD
         int(bool(debug))
     );
 
-    // Return the momentum residual field   
+    // Return the momentum residual field
     return tresult;
 }
 
@@ -779,11 +779,11 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::residualP
 
     // The residual for the pressure equation is:
     // F = p - gamma*laplacian(p) - pBar(D)
-    
+
     // Take reference to pointJ and pointK
     const scalarField& pointKI = pointK_.internalField();
     const scalarField& pointJI = pointJ_.internalField();
-    
+
     // Dual face area vectors at deformed configuration
     const surfaceVectorField deformedDualSf
     (
@@ -846,7 +846,7 @@ void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::finiteDiffMatrix
 )
 {
     Info<< "Calculating the Jacobian using finite differences" << endl;
-        
+
     // Small number used for perturbations
     const scalar relEps = 1e-8; // sqrt of computer tolerance
     const scalar typicalDisplacementValue =
@@ -860,10 +860,10 @@ void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::finiteDiffMatrix
         );
     const scalar epsP = relEps*max
         (
-            average(mag(pointP.primitiveField())), 
+            average(mag(pointP.primitiveField())),
             typicalPressureValue
         );
-    
+
     Info<< "epsD = " << epsD << ", epsP = " << epsP << endl;
 
     // Create fields to be used for perturbations
@@ -877,16 +877,16 @@ void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::finiteDiffMatrix
     {
         forAll(pointD, blockColI)
         {
-            // For each component of pointD, sequentially apply a perturbation 
+            // For each component of pointD, sequentially apply a perturbation
             // and then calculate the resulting residuals
             for (label cmptI = 0; cmptI < vector::nComponents; cmptI++)
             {
-                // Reset pointDPerturb and multiply by 1.0 to avoid it being 
+                // Reset pointDPerturb and multiply by 1.0 to avoid it being
                 // removed from the object registry
                 pointDPerturb = 1.0*pointD;
 
                 // Perturb this component of pointD
-                pointDPerturb[blockColI].component(cmptI) = 
+                pointDPerturb[blockColI].component(cmptI) =
                     pointD[blockColI].component(cmptI) + epsD;
 
                 // Calculate residualD with this component perturbed
@@ -908,11 +908,11 @@ void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::finiteDiffMatrix
                 );
 
                 // Insert components
-                matrix(blockRowI, blockColI)(0,cmptI) = 
+                matrix(blockRowI, blockColI)(0,cmptI) =
                     tangCmptD.component(vector::X);
-                matrix(blockRowI, blockColI)(1,cmptI) = 
+                matrix(blockRowI, blockColI)(1,cmptI) =
                     tangCmptD.component(vector::Y);
-                matrix(blockRowI, blockColI)(2,cmptI) = 
+                matrix(blockRowI, blockColI)(2,cmptI) =
                     tangCmptD.component(vector::Z);
                 matrix(blockRowI, blockColI)(3,cmptI) = tangCmptP;
             }
@@ -924,7 +924,7 @@ void vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::finiteDiffMatrix
     {
         forAll(pointP, blockColI)
         {
-            // Reset pointPPerturb and multiply by 1.0 to avoid it being 
+            // Reset pointPPerturb and multiply by 1.0 to avoid it being
             // removed from the object registry
             pointPPerturb = 1.0*pointP;
 
@@ -1299,8 +1299,8 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         dualMesh(),
         dualMeshMap().dualFaceToCell(),
         dualMeshMap().dualCellToPoint()
-    );  
-    
+    );
+
     // Calculate gradD at the primary mesh points
     pointGradD_ = vfvc::pGrad
     (
@@ -1407,7 +1407,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         // Create the source vector for displacement-pressure implementation
         Field<RectangularMatrix<scalar>> source
         (
-            mesh().nPoints(), 
+            mesh().nPoints(),
             RectangularMatrix<scalar>(4,1,0)
         );
 
@@ -1435,14 +1435,14 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         (
             residualD
             (
-                pointD(), 
+                pointD(),
                 pointP_
             )
         );
         const scalarField pressureRes
         (
             residualP
-            ( 
+            (
                 pointD(),
                 pointP_
             )
@@ -1505,7 +1505,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             pressureSmoothingFactor_,
             debug
         );
-        
+
         // Add displacement coefficients of pressure equation
         vfvm::addPbar
         (
@@ -1640,22 +1640,22 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             forAll(pointDPcorr, pointI)
             {
 #ifdef OPENFOAM_NOT_EXTEND
-                pointD().primitiveFieldRef()[pointI].component(0) += 
+                pointD().primitiveFieldRef()[pointI].component(0) +=
                     pointDPcorr[pointI](0,0);
-                pointD().primitiveFieldRef()[pointI].component(1) += 
+                pointD().primitiveFieldRef()[pointI].component(1) +=
                     pointDPcorr[pointI](1,0);
-                pointD().primitiveFieldRef()[pointI].component(2) += 
+                pointD().primitiveFieldRef()[pointI].component(2) +=
                     pointDPcorr[pointI](2,0);
-                pointP_.primitiveFieldRef()[pointI] += 
+                pointP_.primitiveFieldRef()[pointI] +=
                     pointDPcorr[pointI](3,0);
 #else
-                pointD().internalField()[pointI].component(0) += 
+                pointD().internalField()[pointI].component(0) +=
                     pointDPcorr[pointI](0,0);
-                pointD().internalField()[pointI].component(1) += 
+                pointD().internalField()[pointI].component(1) +=
                     pointDPcorr[pointI](1,0);
-                pointD().internalField()[pointI].component(2) += 
+                pointD().internalField()[pointI].component(2) +=
                     pointDPcorr[pointI](2,0);
-                pointP_.internalField()[pointI] += 
+                pointP_.internalField()[pointI] +=
                     pointDPcorr[pointI](3,0);
 #endif
             }
@@ -1748,7 +1748,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         dualMesh(),
         dualMeshMap().dualFaceToCell(),
         dualMeshMap().dualCellToPoint()
-    );    
+    );
 
     // Update gradD at the primary mesh points
     pointGradD_ = vfvc::pGrad
