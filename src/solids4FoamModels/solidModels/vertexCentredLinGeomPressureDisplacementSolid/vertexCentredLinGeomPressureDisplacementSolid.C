@@ -576,7 +576,7 @@ vertexCentredLinGeomPressureDisplacementSolid::residualP
     );
 
     // Calculate the pBar field
-    const scalarField pBar = -pointK_.internalField()*tr(pointGradD);
+    const scalarField pBar(-pointK_.internalField()*tr(pointGradD));
 
     // Point volume field
     const scalarField& pointVolI = pointVol_.internalField();
@@ -1082,11 +1082,11 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         Field<RectangularMatrix<scalar>> source
         (
             mesh().nPoints(), 
-            RectangularMatrix<scalar>(4,1,0)
+            RectangularMatrix<scalar>(4, 1, 0.0)
         );
 
         // Calculate d(pBar)/d(gradD) for the matrix coefficients
-        pointTensorField pBarSensitivity = -pointK_*tensor(I);
+        const pointTensorField pBarSensitivity(-pointK_*tensor(I));
         
         pointP_.correctBoundaryConditions();
         pointD().correctBoundaryConditions();

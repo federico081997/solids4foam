@@ -817,7 +817,7 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::residualP
     );
 
     // Calculate the pBar field
-    const scalarField pBar = -0.5*pointKI*(pow(pointJI, 2.0) - 1)/pointJI;
+    const scalarField pBar(-0.5*pointKI*(pow(pointJI, 2.0) - 1)/pointJI);
 
     // Point volume field
     const scalarField& pointVolI = pointVol_.internalField();
@@ -1412,9 +1412,20 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         );
 
         // Calculate pBarSensitivity
-        pointTensorField pBarSensitivity = -0.5*pointK_*(
-            I + tr(pointGradD_)*I - pointGradD_.T() + cof(pointGradD_) +
-            pow(pointJ_,-2.0)*(I + tr(pointGradD_)*I - pointGradD_.T() + cof(pointGradD_)));
+        const pointTensorField pBarSensitivity
+        (
+          - 0.5*pointK_
+           *(
+                I
+              + tr(pointGradD_)*I
+              - pointGradD_.T()
+              + cof(pointGradD_)
+              + pow(pointJ_, -2.0)
+               *(
+                   I + tr(pointGradD_)*I - pointGradD_.T() + cof(pointGradD_)
+                )
+            )
+        );
 
         pointP_.correctBoundaryConditions();
         pointD().correctBoundaryConditions();
@@ -1453,7 +1464,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         materialTangent = dualMechanicalPtr_().materialTangentFaceField();
 
         // Undeformed surface vector field
-        surfaceVectorField SfUndef = dualMesh().Sf();
+        const surfaceVectorField& SfUndef = dualMesh().Sf();
 
         // Calculate geometric stiffness field for dual mesh faces
         Foam::Field<Foam::RectangularMatrix<Foam::scalar>> geometricStiffness
