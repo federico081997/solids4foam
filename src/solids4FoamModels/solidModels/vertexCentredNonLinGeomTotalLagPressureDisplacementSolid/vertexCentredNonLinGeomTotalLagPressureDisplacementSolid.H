@@ -168,17 +168,7 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
 
     // Private Member Functions
 
-        ////- Update the source vector for the linear system
-        //void updateSource
-        //(
-            //Field<RectangularMatrix<scalar>>& source,
-            //const labelList& dualFaceToCell,
-            //const labelList& dualCellToPoint,
-            //const scalar& pressureSmoothing,
-            //const scalar& zeta,
-            //const bool debug
-        //);
-
+        
         //- Set fixed degree of freedom lists
         void setFixedDofs
         (
@@ -240,12 +230,6 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
             const pointVectorField& pointD,
             const pointScalarField& pointP
         );
-
-        //Foam::tmp<tensorField>
-        //pBarSensitivityField
-        //(
-            //const pointTensorField pGradDRef //Reference pointGradD
-        //) const;
 
         //- Disallow default bitwise copy construct
         vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
