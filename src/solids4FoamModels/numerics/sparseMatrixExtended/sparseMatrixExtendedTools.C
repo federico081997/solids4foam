@@ -128,7 +128,7 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
             );
             coefficients.push_back
             (
-                Eigen::Triplet<scalar>(rowI, colI+2, coeff(0,2))
+                Eigen::Triplet<scalar>(rowI, colI+2, coeff(0,3))
             );
 
             coefficients.push_back
@@ -141,20 +141,20 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
             );
             coefficients.push_back
             (
-                Eigen::Triplet<scalar>(rowI+1, colI+2, coeff(1,2))
+                Eigen::Triplet<scalar>(rowI+1, colI+2, coeff(1,3))
             );
             
             coefficients.push_back
             (
-                Eigen::Triplet<scalar>(rowI+2, colI, coeff(2,0))
+                Eigen::Triplet<scalar>(rowI+2, colI, coeff(3,0))
             );
             coefficients.push_back
             (
-                Eigen::Triplet<scalar>(rowI+2, colI+1, coeff(2,1))
+                Eigen::Triplet<scalar>(rowI+2, colI+1, coeff(3,1))
             );
             coefficients.push_back
             (
-                Eigen::Triplet<scalar>(rowI+2, colI+2, coeff(2,2))
+                Eigen::Triplet<scalar>(rowI+2, colI+2, coeff(3,3))
             );
         }
         else // 3-D
@@ -247,14 +247,19 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
         label index = 0;
         forAll(source, i)
         {
-            b(index++) = source[i](0,0);
-            b(index++) = source[i](1,0);
-            b(index++) = source[i](2,0);
-
-            if (!twoD)
+            if (twoD)
             {
+                b(index++) = source[i](0,0);
+                b(index++) = source[i](1,0);
                 b(index++) = source[i](3,0);
             }
+            else // 3-D
+            {
+                b(index++) = source[i](0,0);
+                b(index++) = source[i](1,0);
+                b(index++) = source[i](2,0);
+                b(index++) = source[i](3,0);
+            } 
         }
     }
 
@@ -289,7 +294,7 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
     const Eigen::Matrix<scalar, Eigen::Dynamic, 1> initResidual = A*x - b;
 
     // Exit early if the initial residual is small
-    if (initResidual.squaredNorm() < 1e-12)
+    if (initResidual.squaredNorm() < 1e-25)
     {
         Info<< "    Linear solver initial residual is "
             << initResidual.squaredNorm() << ": exiting" << endl;
@@ -305,15 +310,20 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
         label index = 0;
         forAll(solution, i)
         {
-            solution[i](0,0) = x(index++);
-            solution[i](1,0) = x(index++);
-            solution[i](2,0) = x(index++);
-
-            if (!twoD)
+            if (twoD)
             {
+                solution[i](0,0) = x(index++);
+                solution[i](1,0) = x(index++);
                 solution[i](3,0) = x(index++);
             }
-        }
+            else // 3-D
+            {
+                solution[i](0,0) = x(index++);
+                solution[i](1,0) = x(index++);
+                solution[i](2,0) = x(index++);
+                solution[i](3,0) = x(index++);
+            } 
+        }    
     }
 #endif
 }
