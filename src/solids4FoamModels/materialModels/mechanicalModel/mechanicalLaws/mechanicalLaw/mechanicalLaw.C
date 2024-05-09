@@ -1527,7 +1527,7 @@ Foam::mechanicalLaw::mechanicalLaw
         ) << "solid region name not found" << abort(FatalError);
     }
 
-    if (solvePressureEqn_ || solveVertexCentredPressureEqn_)
+    if (solvePressureEqn_)
     {
         Info<< "    Laplacian equation will be solved for pressure" << nl
             << "    pressureSmoothingScaleFactor: "

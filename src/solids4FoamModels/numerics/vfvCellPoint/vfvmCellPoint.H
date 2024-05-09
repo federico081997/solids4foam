@@ -139,7 +139,7 @@ namespace vfvm
 
 
     // Add coefficients to the matrix for the Laplacian of a scalar field with
-    // a scalar diffusivity field in the small-strain pressure-displacement 
+    // a scalar diffusivity in the small-strain pressure-displacement 
     // formulation. Each coefficient in the matrix is a 4x4 tensor.     
     void laplacian
     (
@@ -149,13 +149,13 @@ namespace vfvm
         const fvMesh& dualMesh,
         const labelList& dualFaceToCell,
         const labelList& dualCellToPoint,
-        const scalarField& diffusivity,
+        const scalar& diffusivity,
         const bool debug
     );
   
 
     // Add coefficients to the matrix for the Laplacian of a scalar field with
-    // a scalar diffusivity field in the large-strain pressure-displacement 
+    // a scalar diffusivity in the large-strain pressure-displacement 
     // formulation. Each coefficient in the matrix is a 4x4 tensor. 
     void laplacian
     (

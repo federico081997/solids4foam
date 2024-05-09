@@ -818,7 +818,7 @@ void Foam::vfvm::laplacian
     const fvMesh& dualMesh,
     const labelList& dualFaceToCell,
     const labelList& dualCellToPoint,
-    const scalarField& diffusivity,
+    const scalar& diffusivity,
     const bool debug
 )
 {
@@ -843,9 +843,6 @@ void Foam::vfvm::laplacian
     {
         // Primary mesh cell in which dualFaceI resides
         const label cellID = dualFaceToCell[dualFaceI];
-
-        // Diffusivity in the primary cells
-        const scalar diffCellID = diffusivity[cellID];
 
         // Points in cellID
         const labelList& curCellPoints = cellPoints[cellID];
@@ -878,7 +875,7 @@ void Foam::vfvm::laplacian
                 1.0/(curDualN & (points[neiPointID] - points[ownPointID]));
 
             // Compact edge direction coefficient
-            const scalar coeff = diffCellID*curDualMagSf*deltaCoeff;
+            const scalar coeff = diffusivity*curDualMagSf*deltaCoeff;
 
             // Insert coefficients for the ownPoint
             matrix(ownPointID, ownPointID)(3,3) -= coeff;
@@ -908,7 +905,7 @@ void Foam::vfvm::laplacian
 
                 // Calculate the coefficient for this point coming from 
                 // dualFaceI
-                const scalar coeff = diffCellID*curDualSf & lsVec;
+                const scalar coeff = (diffusivity*curDualSf) & lsVec;
 
                 // Add the coefficient to the ownPointID equation coming from
                 // pointID

@@ -24,11 +24,13 @@ Description
     unknown.
 
     Discretisation is performed using a vertex-centred finite volume approach
-    where the governing equations are integrated over a dual mesh. The dual mesh
-    is automatically constructed from the primary mesh using the meshDualiser.
+    where the governing equations are integrated over a dual mesh. The dual 
+    mesh is automatically constructed from the primary mesh using the 
+    meshDualiser.
 
 Author
     Philip Cardiff, UCD.  All rights reserved.
+    Federico Mazzanti, UCD. All rights reserved.
 
 SourceFiles
     vertexCentredLinGeomPressureDisplacementSolid.C
@@ -49,6 +51,7 @@ SourceFiles
 #include "globalPointIndices.H"
 #include "pointFieldFunctions.H"
 #include "sparseMatrixExtended.H"
+#include "mechanicalLaw.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,26 +76,21 @@ class vertexCentredLinGeomPressureDisplacementSolid
         //- Mechanical model for dual mesh
         autoPtr<dualMechanicalModel> dualMechanicalPtr_;
 
-        //- Flag to enable full Newton-Raphson approach, where the stiffness
-        //  matrix is updated once per outer iteration. Alternatively, the
-        //  stiffness matrix is only updated once per time-step
-        const Switch fullNewton_;
-
         //- Flag to enable steadyState
         Switch steadyState_;
 
         //- Compact stencil flag
         Switch compactStencil_;
 
-        //- Pressure smoothing factor
-        const scalar pressureSmoothing_;
-        
         //- zeta coefficient
         const scalar zeta_;
-        
-        //- mu
-        const surfaceScalarField mu_;
 
+        //- Pressure smoothing coefficient
+        const scalar pressureSmoothingFactor_;
+
+        //- Bulk modulus at the primary points
+        const pointScalarField pointK_;
+        
         //- Flag indicating if the case is 2-D or 3-D
         const bool twoD_;
 
@@ -110,8 +108,8 @@ class vertexCentredLinGeomPressureDisplacementSolid
         //  fixed
         symmTensorField fixedDofDirections_;
 
-        //- Scale factor for the fixed degree of freedom equations to improve the
-        //  matrix conditioning
+        //- Scale factor for the fixed degree of freedom equations to improve 
+        //  the matrix conditioning
         const scalar fixedDofScale_;
 
         //- Point pressure
@@ -130,7 +128,7 @@ class vertexCentredLinGeomPressureDisplacementSolid
         //  Dual mesh cell volumes associated with the primary mesh points
         pointScalarField pointVol_;
 
- 		//- Point gradD field
+        //- Point gradD field
         //  gradD associated with the primary mesh points
         pointTensorField pointGradD_;
 
@@ -146,28 +144,11 @@ class vertexCentredLinGeomPressureDisplacementSolid
         //- Cell pressure
         volScalarField volP_;
         
-        //- Momentum equation residual
-        pointVectorField residualD_;
-        
-        //- Pressure equation residual
-        pointScalarField residualP_;
-
         //- Local-to-global point map and owner list
         globalPointIndices globalPointIndices_;
 
 
     // Private Member Functions
-
-        //- Update the source vector for the linear system
-        void updateSource
-		(
-			Field<RectangularMatrix<scalar>>& source,
-			const labelList& dualFaceToCell,
-			const labelList& dualCellToPoint,
-			const scalar& pressureSmoothing,
-			const scalar& zeta,
-			const bool debug
-		);
 
         //- Set fixed degree of freedom lists
         void setFixedDofs
@@ -183,70 +164,51 @@ class vertexCentredLinGeomPressureDisplacementSolid
         (
             const pointVectorField& pointD,
             surfaceVectorField& dualTraction,
-            const fvMesh& mesh, // corresponding to pointD mesh
+            const fvMesh& mesh, // Corresponding to pointD mesh
             const labelListList& pointToDualFaces
         ) const;
 
         //- Check convergence of Newton-Raphson loop
         bool converged
-		(
-			const label iCorr,
-			scalar& initResidualD,
-			scalar& initResidualP,
-			const label nInterations,
-			const pointVectorField& pointD,
-			const pointScalarField& pointP,
-			const Field<RectangularMatrix<scalar>>& pointDPcorr
-		) const;
+        (
+            const label iCorr,
+            scalar& initResidualD,
+            scalar& initResidualP,
+            const label nInterations,
+            const pointVectorField& pointD,
+            const pointScalarField& pointP,
+            const Field<RectangularMatrix<scalar>>& pointDPcorr
+        ) const;
 
-/*        //- Calculate line search slope for the given eta parameter*/
-/*        scalar calculateLineSearchSlope*/
-/*        (*/
-/*            const scalar eta,*/
-/*            const vectorField& pointDcorr,*/
-/*            pointVectorField& pointD,*/
-/*            surfaceTensorField& dualGradDf,*/
-/*            surfaceSymmTensorField& dualSigmaf,*/
-/*            const scalar zeta*/
-/*        );*/
-
-/*        scalar calculateLineSearchFactor*/
-/*        (*/
-/*            const scalar rTol, // Slope reduction tolerance*/
-/*            const int maxIter, // Maximum number of line search iterations*/
-/*            const vectorField& pointDcorr, // Point displacement correction*/
-/*            const vectorField& source, // Linear system source*/
-/*            const scalar zeta // Discretisation parameter*/
-/*        );*/
-
-		tmp<tensorField> pBarSensitivityField
-		(
-			const pointTensorField& pGradDRef
-		) const;
-		
-		tmp<vectorField> residualD
-		(
-			const pointVectorField& pointD,
-			const pointScalarField& pointP
-		) const;
-		
-		tmp<scalarField> residualP
-		(
-			const pointVectorField& pointD,
-			const pointScalarField& pointP
-		) const;
-		
-		void matrixCoefficients
-		(
-			sparseMatrixExtended& matrix,
-			const vectorField& residualD,
-			const scalarField& residualP,
-			const pointVectorField& pointD,
-			const pointScalarField& pointP
-		);
+        //- Calculate the residual of the momentum equation
+        tmp<vectorField> residualD
+        (
+            const pointVectorField& pointD,
+            const pointScalarField& pointP
+        ) const;
+        
+        //- Calculate the residual of the pressure equation
+        tmp<scalarField> residualP
+        (
+            const pointVectorField& pointD,
+            const pointScalarField& pointP
+        ) const;
+        
+        //- Calculate the matrix coefficients using finite difference
+        void finiteDiffMatrix
+        (
+            sparseMatrixExtended& matrix,
+            const vectorField& residualD,
+            const scalarField& residualP,
+            const pointVectorField& pointD,
+            const pointScalarField& pointP
+        );
 
         //- Disallow default bitwise copy construct
-        vertexCentredLinGeomPressureDisplacementSolid(const vertexCentredLinGeomPressureDisplacementSolid&);
+        vertexCentredLinGeomPressureDisplacementSolid
+        (
+            const vertexCentredLinGeomPressureDisplacementSolid&
+        );
 
         //- Disallow default bitwise assignment
         void operator=(const vertexCentredLinGeomPressureDisplacementSolid&);

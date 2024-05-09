@@ -223,12 +223,6 @@ protected:
             return solveVertexCentredPressureEqn_;
         }
 
-        //- Return const access to pressureSmoothingScaleFactor         
-        scalar pressureSmoothingScaleFactor() const
-        {
-            return pressureSmoothingScaleFactor_;
-        }
-
         //- Return the base mesh region name
         const word& baseMeshRegionName() const
         {

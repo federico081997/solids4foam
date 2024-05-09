@@ -113,7 +113,6 @@ namespace sparseMatrixExtendedTools
     (
         sparseMatrixExtended& matrix,
         Field<RectangularMatrix<scalar>>& source,
-        const bool twoD,
         const boolList& fixedDofs,
         const symmTensorField& fixedDofDirections,
         const pointField& fixedDofValues,
@@ -125,7 +124,6 @@ namespace sparseMatrixExtendedTools
     (
         sparseMatrixExtended& matrix,
         Field<RectangularMatrix<scalar>>& source,
-        const bool twoD,
         const boolList& fixedDofs,
         const symmTensorField& fixedDofDirections
     );
