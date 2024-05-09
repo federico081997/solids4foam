@@ -210,6 +210,12 @@ protected:
             return solvePressureEqn_;
         }
 
+        //- Return the pressure equation smoothing factor
+        scalar pressureSmoothingScaleFactor() const
+        {
+            return pressureSmoothingScaleFactor_;
+        }
+
         //- Return const access to solveVertexCentredPressureEqn switch
         const Switch& solveVertexCentredPressureEqn() const
         {
