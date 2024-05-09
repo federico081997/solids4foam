@@ -841,6 +841,29 @@ Foam::linearElasticMisesPlastic::impK() const
 }
 
 
+Foam::tmp<Foam::pointScalarField>
+Foam::linearElasticMisesPlastic::pBulkModulus() const
+{
+    return tmp<pointScalarField>
+    (
+        new pointScalarField
+        (
+            IOobject
+            (
+                "pBulkModulus",
+                mesh().time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            pointMesh::New(mesh()),
+            K_,
+            "calculated"
+        )
+    );
+}
+
+
 #ifndef OPENFOAM_NOT_EXTEND
 Foam::tmp<Foam::volDiagTensorField>
 Foam::linearElasticMisesPlastic::impKdiagTensor() const

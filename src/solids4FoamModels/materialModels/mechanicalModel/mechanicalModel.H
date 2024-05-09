@@ -164,6 +164,9 @@ public:
             //- Return bulk modulus
             tmp<volScalarField> bulkModulus() const;
 
+            //- Return bulk modulus at the points
+            tmp<pointScalarField> pBulkModulus() const;
+
             //- Return material residual i.e. a measured of how convergence of
             //  the material model
             scalar residual();

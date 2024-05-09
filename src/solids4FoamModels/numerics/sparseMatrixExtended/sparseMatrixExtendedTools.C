@@ -27,7 +27,7 @@ License
     #include <petscksp.h>
 #endif
 
-// * * * * * * * * * * * * * * * * * Functions  * * * * * * * * * * * * * * *//
+// * * * * * * * * * * * * * * * * *  Functions  * * * * * * * * * * * * * * //
 
 bool Foam::sparseMatrixExtendedTools::checkTwoD(const polyMesh& mesh)
 {
@@ -79,8 +79,7 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
     FatalErrorIn
     (
         "void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen(...)"
-    )
-        << "This function cannot be called as the S4F_NO_USE_EIGEN variable "
+    )   << "This function cannot be called as the S4F_NO_USE_EIGEN variable "
         << " is set.  If you would like to use this option then unset the "
         << "S4F_NO_USE_EIGEN variable and re-run the top-level Allwmake script"
         << abort(FatalError);
@@ -118,6 +117,8 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
             const label rowI = 3*iter.key()[0];
             const label colI = 3*iter.key()[1];
 
+            // Note: for 2-D, we drop the 3rd row and column, but keep the 4th,
+            // which corresponds to the pressure equation
             coefficients.push_back
             (
                 Eigen::Triplet<scalar>(rowI, colI, coeff(0,0))
@@ -143,7 +144,8 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
             (
                 Eigen::Triplet<scalar>(rowI+1, colI+2, coeff(1,3))
             );
-            
+
+            // Pressure equation
             coefficients.push_back
             (
                 Eigen::Triplet<scalar>(rowI+2, colI, coeff(3,0))
@@ -247,19 +249,16 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
         label index = 0;
         forAll(source, i)
         {
-            if (twoD)
+            b(index++) = source[i](0,0);
+            b(index++) = source[i](1,0);
+
+            if (!twoD)
             {
-                b(index++) = source[i](0,0);
-                b(index++) = source[i](1,0);
-                b(index++) = source[i](3,0);
-            }
-            else // 3-D
-            {
-                b(index++) = source[i](0,0);
-                b(index++) = source[i](1,0);
+                // Momentum z is included for 3-D
                 b(index++) = source[i](2,0);
-                b(index++) = source[i](3,0);
-            } 
+            }
+
+            b(index++) = source[i](3,0);
         }
     }
 
@@ -294,7 +293,7 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
     const Eigen::Matrix<scalar, Eigen::Dynamic, 1> initResidual = A*x - b;
 
     // Exit early if the initial residual is small
-    if (initResidual.squaredNorm() < 1e-25)
+    if (initResidual.squaredNorm() < VSMALL)
     {
         Info<< "    Linear solver initial residual is "
             << initResidual.squaredNorm() << ": exiting" << endl;
@@ -310,20 +309,16 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
         label index = 0;
         forAll(solution, i)
         {
-            if (twoD)
+            solution[i](0,0) = x(index++);
+            solution[i](1,0) = x(index++);
+
+            if (!twoD)
             {
-                solution[i](0,0) = x(index++);
-                solution[i](1,0) = x(index++);
-                solution[i](3,0) = x(index++);
-            }
-            else // 3-D
-            {
-                solution[i](0,0) = x(index++);
-                solution[i](1,0) = x(index++);
                 solution[i](2,0) = x(index++);
-                solution[i](3,0) = x(index++);
-            } 
-        }    
+            }
+
+            solution[i](3,0) = x(index++);
+        }
     }
 #endif
 }
@@ -539,11 +534,13 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
         if (twoD)
         {
             // Prepare values
+            // Note: pressure is stored in row 3
+            // In 2-D, we keep the 1st, 2nd and 4th rows and columns
             const PetscScalar values[9] =
             {
-                coeff(0,0), coeff(0,1), coeff(0,2),
-                coeff(1,0), coeff(1,1), coeff(1,2),
-                coeff(2,0), coeff(2,1), coeff(2,2)
+                coeff(0,0), coeff(0,1), coeff(0,3),
+                coeff(1,0), coeff(1,1), coeff(1,3),
+                coeff(3,0), coeff(3,1), coeff(3,3)
             };
 
             // Insert tensor coefficient
@@ -650,11 +647,10 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
             if (twoD)
             {
                 // Prepare values
-                const PetscScalar values[3] = 
+                // Note: pressure is in row 3
+                const PetscScalar values[3] =
                 {
-                    sourceI(0,0), 
-                    sourceI(1,0), 
-                    sourceI(2,0)
+                    sourceI(0,0), sourceI(1,0), sourceI(3,0)
                 };
 
                 // Insert values
@@ -776,7 +772,7 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
                 }
             }
 
-            ierr = PCSetCoordinates(pc, sdim, n, petscPoints.data());
+            ierr = PCSetCoordinates(pc, sdim, blockn, petscPoints.data());
             checkErr(ierr);
         }
     }
@@ -812,9 +808,10 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
             {
                 if (twoD)
                 {
+                    // Put pressure in row 3
                     solution[i](0,0) = xArr[index++];
                     solution[i](1,0) = xArr[index++];
-                    solution[i](2,0) = xArr[index++];
+                    solution[i](3,0) = xArr[index++];
                 }
                 else
                 {
@@ -850,10 +847,11 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
             {
                 indices[index++] = blockSize*localToGlobalPointMap[pI];
                 indices[index++] = blockSize*localToGlobalPointMap[pI] + 1;
+                indices[index++] = blockSize*localToGlobalPointMap[pI] + 2;
 
                 if (!twoD)
                 {
-                    indices[index++] = blockSize*localToGlobalPointMap[pI] + 2;
+                    indices[index++] = blockSize*localToGlobalPointMap[pI] + 3;
                 }
             }
         }
@@ -911,9 +909,10 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
                 {
                     if (twoD)
                     {
+                        // Put pressure in row 3
                         solution[i](0,0) = xNotOwnedArr[index++];
                         solution[i](1,0) = xNotOwnedArr[index++];
-                        solution[i](2,0) = xNotOwnedArr[index++];
+                        solution[i](3,0) = xNotOwnedArr[index++];
                     }
                     else
                     {
@@ -964,18 +963,10 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     //     (double)norm,
     //     its
     // );
-    // Pout<< "    Error norm: " << norm << ", nIters = " << its << endl;
 
     // Free work space.  All PETSc objects should be destroyed when they
     // are no longer needed.
-    // Pout<< "        Freeing memory" << endl;
-    // ierr = VecDestroy(&x);CHKERRQ(ierr); ierr = VecDestroy(&u);
-    // CHKERRQ(ierr);
-    // ierr = VecDestroy(&b);CHKERRQ(ierr); ierr = MatDestroy(&A);
-    // CHKERRQ(ierr);
-    // ierr = KSPDestroy(&ksp);CHKERRQ(ierr);
     ierr = VecDestroy(&x); checkErr(ierr);
-    //ierr = VecDestroy(&u);
     ierr = VecDestroy(&b); checkErr(ierr);
     ierr = MatDestroy(&A); checkErr(ierr);
     ierr = KSPDestroy(&ksp); checkErr(ierr);
@@ -1105,7 +1096,6 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
 (
     sparseMatrixExtended& matrix,
     Field<RectangularMatrix<scalar>>& source,
-    const bool twoD,
     const boolList& fixedDofs,
     const symmTensorField& fixedDofDirections,
     const pointField& fixedDofValues,
@@ -1137,70 +1127,40 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             // Extract the displacement coefficients of the momentum equation
             tensor momentumEqnDispCoeff(tensor::zero);
 
-            if (twoD)
-            {
-                momentumEqnDispCoeff.xx() = coeff(0,0);
-                momentumEqnDispCoeff.xy() = coeff(0,1);
-                momentumEqnDispCoeff.yx() = coeff(1,0);
-                momentumEqnDispCoeff.yy() = coeff(1,1);
-            }
-            else
-            {
-                momentumEqnDispCoeff.xx() = coeff(0,0);
-                momentumEqnDispCoeff.xy() = coeff(0,1);
-                momentumEqnDispCoeff.xz() = coeff(0,2);
-                momentumEqnDispCoeff.yx() = coeff(1,0);
-                momentumEqnDispCoeff.yy() = coeff(1,1);
-                momentumEqnDispCoeff.yz() = coeff(1,2);
-                momentumEqnDispCoeff.zx() = coeff(2,0);
-                momentumEqnDispCoeff.zy() = coeff(2,1);
-                momentumEqnDispCoeff.zz() = coeff(2,2);
-            }
+            momentumEqnDispCoeff.xx() = coeff(0,0);
+            momentumEqnDispCoeff.xy() = coeff(0,1);
+            momentumEqnDispCoeff.xz() = coeff(0,2);
+            momentumEqnDispCoeff.yx() = coeff(1,0);
+            momentumEqnDispCoeff.yy() = coeff(1,1);
+            momentumEqnDispCoeff.yz() = coeff(1,2);
+            momentumEqnDispCoeff.zx() = coeff(2,0);
+            momentumEqnDispCoeff.zy() = coeff(2,1);
+            momentumEqnDispCoeff.zz() = coeff(2,2);
+            
 
             // Extract the pressure coefficients of the momentum equation
             vector momentumEqnPressCoeff(vector::zero);
 
-            if (twoD)
-            {
-                momentumEqnPressCoeff.x() = coeff(0,2);
-                momentumEqnPressCoeff.y() = coeff(1,2);
-            }
-            else
-            {
-                momentumEqnPressCoeff.x() = coeff(0,3);
-                momentumEqnPressCoeff.y() = coeff(1,3);
-                momentumEqnPressCoeff.z() = coeff(2,3);
-            }
+            momentumEqnPressCoeff.x() = coeff(0,3);
+            momentumEqnPressCoeff.y() = coeff(1,3);
+            momentumEqnPressCoeff.z() = coeff(2,3);
+            
             
             // Extract the displacement coefficients of the pressure equation
             vector pressureEqnDispCoeff(vector::zero);
 
-            if (twoD)
-            {
-                pressureEqnDispCoeff.x() = coeff(2,0);
-                pressureEqnDispCoeff.y() = coeff(2,1);
-            }
-            else
-            {
-                pressureEqnDispCoeff.x() = coeff(3,0);
-                pressureEqnDispCoeff.y() = coeff(3,1);
-                pressureEqnDispCoeff.z() = coeff(3,2);
-            }
+            pressureEqnDispCoeff.x() = coeff(3,0);
+            pressureEqnDispCoeff.y() = coeff(3,1);
+            pressureEqnDispCoeff.z() = coeff(3,2);
+            
 
             // Extract the source terms of the momentum equation
             vector sourceTerms(vector::zero);
 
-            if (twoD)
-            {
-                sourceTerms.x() = source[blockRowI](0,0);
-                sourceTerms.y() = source[blockRowI](1,0);
-            }
-            else
-            {
-                sourceTerms.x() = source[blockRowI](0,0);
-                sourceTerms.y() = source[blockRowI](1,0);
-                sourceTerms.z() = source[blockRowI](2,0);
-            }
+            sourceTerms.x() = source[blockRowI](0,0);
+            sourceTerms.y() = source[blockRowI](1,0);
+            sourceTerms.z() = source[blockRowI](2,0);
+            
 
             if (debug)
             {
@@ -1244,66 +1204,34 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
 
             // Insert the changed displacement coefficients of the momentum
             // equation back into the matrix
-            if (twoD)
-            {
-                coeff(0,0) = momentumEqnDispCoeff.xx();
-                coeff(0,1) = momentumEqnDispCoeff.xy();
-                coeff(1,0) = momentumEqnDispCoeff.yx();
-                coeff(1,1) = momentumEqnDispCoeff.yy();
-            }
-            else
-            {
-                coeff(0,0) = momentumEqnDispCoeff.xx();
-                coeff(0,1) = momentumEqnDispCoeff.xy();
-                coeff(0,2) = momentumEqnDispCoeff.xz();
-                coeff(1,0) = momentumEqnDispCoeff.yx();
-                coeff(1,1) = momentumEqnDispCoeff.yy();
-                coeff(1,2) = momentumEqnDispCoeff.yz();
-                coeff(2,0) = momentumEqnDispCoeff.zx();
-                coeff(2,1) = momentumEqnDispCoeff.zy();
-                coeff(2,2) = momentumEqnDispCoeff.zz();
-            }
+            coeff(0,0) = momentumEqnDispCoeff.xx();
+            coeff(0,1) = momentumEqnDispCoeff.xy();
+            coeff(0,2) = momentumEqnDispCoeff.xz();
+            coeff(1,0) = momentumEqnDispCoeff.yx();
+            coeff(1,1) = momentumEqnDispCoeff.yy();
+            coeff(1,2) = momentumEqnDispCoeff.yz();
+            coeff(2,0) = momentumEqnDispCoeff.zx();
+            coeff(2,1) = momentumEqnDispCoeff.zy();
+            coeff(2,2) = momentumEqnDispCoeff.zz();
+            
             
             // Insert the changed pressure coefficients of the momentum 
             // equation back into the matrix
-            if (twoD)
-            {
-                coeff(0,2) = momentumEqnPressCoeff.x();
-                coeff(1,2) = momentumEqnPressCoeff.y();
-            }
-            else
-            {
-                coeff(0,3) = momentumEqnPressCoeff.x();
-                coeff(1,3) = momentumEqnPressCoeff.y();
-                coeff(2,3) = momentumEqnPressCoeff.z();
-            }   
+            coeff(0,3) = momentumEqnPressCoeff.x();
+            coeff(1,3) = momentumEqnPressCoeff.y();
+            coeff(2,3) = momentumEqnPressCoeff.z();
+            
             
             // Insert the changed pressure coefficients of the pressure 
             // equation back into the matrix
-            if (twoD)
-            {
-                coeff(2,0) = pressureEqnDispCoeff.x();
-                coeff(2,1) = pressureEqnDispCoeff.y();
-            }
-            else
-            {
-                coeff(3,0) = pressureEqnDispCoeff.x();
-                coeff(3,1) = pressureEqnDispCoeff.y();
-                coeff(3,2) = pressureEqnDispCoeff.z();
-            }   
-                   
+            coeff(3,0) = pressureEqnDispCoeff.x();
+            coeff(3,1) = pressureEqnDispCoeff.y();
+            coeff(3,2) = pressureEqnDispCoeff.z();
+            
             // Insert the changed source terms back into the source
-            if (twoD)
-            {
-                source[blockRowI](0,0) = sourceTerms.x();
-                source[blockRowI](1,0) = sourceTerms.y();
-            }
-            else
-            {
-                source[blockRowI](0,0) = sourceTerms.x();
-                source[blockRowI](1,0) = sourceTerms.y();
-                source[blockRowI](2,0) = sourceTerms.z();
-            }
+            source[blockRowI](0,0) = sourceTerms.x();
+            source[blockRowI](1,0) = sourceTerms.y();
+            source[blockRowI](2,0) = sourceTerms.z();
 
             if (debug)
             {
@@ -1327,40 +1255,22 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             // Extract the displacement coefficients of the momentum equation
             tensor momentumEqnDispCoeff(tensor::zero);
 
-            if (twoD)
-            {
-                momentumEqnDispCoeff.xx() = coeff(0,0);
-                momentumEqnDispCoeff.xy() = coeff(0,1);
-                momentumEqnDispCoeff.yx() = coeff(1,0);
-                momentumEqnDispCoeff.yy() = coeff(1,1);
-            }
-            else
-            {
-                momentumEqnDispCoeff.xx() = coeff(0,0);
-                momentumEqnDispCoeff.xy() = coeff(0,1);
-                momentumEqnDispCoeff.xz() = coeff(0,2);
-                momentumEqnDispCoeff.yx() = coeff(1,0);
-                momentumEqnDispCoeff.yy() = coeff(1,1);
-                momentumEqnDispCoeff.yz() = coeff(1,2);
-                momentumEqnDispCoeff.zx() = coeff(2,0);
-                momentumEqnDispCoeff.zy() = coeff(2,1);
-                momentumEqnDispCoeff.zz() = coeff(2,2);
-            }
+            momentumEqnDispCoeff.xx() = coeff(0,0);
+            momentumEqnDispCoeff.xy() = coeff(0,1);
+            momentumEqnDispCoeff.xz() = coeff(0,2);
+            momentumEqnDispCoeff.yx() = coeff(1,0);
+            momentumEqnDispCoeff.yy() = coeff(1,1);
+            momentumEqnDispCoeff.yz() = coeff(1,2);
+            momentumEqnDispCoeff.zx() = coeff(2,0);
+            momentumEqnDispCoeff.zy() = coeff(2,1);
+            momentumEqnDispCoeff.zz() = coeff(2,2);
             
             // Extract the displacement coefficients of the pressure equation
             vector pressureEqnDispCoeff(vector::zero);
 
-            if (twoD)
-            {
-                pressureEqnDispCoeff.x() = coeff(2,0);
-                pressureEqnDispCoeff.y() = coeff(2,1);
-            }
-            else
-            {
-                pressureEqnDispCoeff.x() = coeff(3,0);
-                pressureEqnDispCoeff.y() = coeff(3,1);
-                pressureEqnDispCoeff.z() = coeff(3,2);
-            }
+            pressureEqnDispCoeff.x() = coeff(3,0);
+            pressureEqnDispCoeff.y() = coeff(3,1);
+            pressureEqnDispCoeff.z() = coeff(3,2);
             
             if (debug)
             {
@@ -1382,39 +1292,21 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
 
             // Insert the changed displacement coefficients of the momentum
             // equation back into the matrix
-            if (twoD)
-            {
-                coeff(0,0) = momentumEqnDispCoeff.xx();
-                coeff(0,1) = momentumEqnDispCoeff.xy();
-                coeff(1,0) = momentumEqnDispCoeff.yx();
-                coeff(1,1) = momentumEqnDispCoeff.yy();
-            }
-            else
-            {
-                coeff(0,0) = momentumEqnDispCoeff.xx();
-                coeff(0,1) = momentumEqnDispCoeff.xy();
-                coeff(0,2) = momentumEqnDispCoeff.xz();
-                coeff(1,0) = momentumEqnDispCoeff.yx();
-                coeff(1,1) = momentumEqnDispCoeff.yy();
-                coeff(1,2) = momentumEqnDispCoeff.yz();
-                coeff(2,0) = momentumEqnDispCoeff.zx();
-                coeff(2,1) = momentumEqnDispCoeff.zy();
-                coeff(2,2) = momentumEqnDispCoeff.zz();
-            }
+            coeff(0,0) = momentumEqnDispCoeff.xx();
+            coeff(0,1) = momentumEqnDispCoeff.xy();
+            coeff(0,2) = momentumEqnDispCoeff.xz();
+            coeff(1,0) = momentumEqnDispCoeff.yx();
+            coeff(1,1) = momentumEqnDispCoeff.yy();
+            coeff(1,2) = momentumEqnDispCoeff.yz();
+            coeff(2,0) = momentumEqnDispCoeff.zx();
+            coeff(2,1) = momentumEqnDispCoeff.zy();
+            coeff(2,2) = momentumEqnDispCoeff.zz();
 
             // Insert the changed displacement coefficients of the pressure
             // equation back into the matrix
-            if (twoD)
-            {
-                coeff(2,0) = pressureEqnDispCoeff.x();
-                coeff(2,1) = pressureEqnDispCoeff.y();
-            }
-            else
-            {
-                coeff(3,0) = pressureEqnDispCoeff.x();
-                coeff(3,1) = pressureEqnDispCoeff.y();
-                coeff(3,2) = pressureEqnDispCoeff.z();
-            }  
+            coeff(3,0) = pressureEqnDispCoeff.x();
+            coeff(3,1) = pressureEqnDispCoeff.y();
+            coeff(3,2) = pressureEqnDispCoeff.z();
             
             if (debug)
             {
@@ -1432,7 +1324,6 @@ void Foam::sparseMatrixExtendedTools::enforceFixedPressureDof
 (
     sparseMatrixExtended& matrix,
     Field<RectangularMatrix<scalar>>& source,
-    const bool twoD,
     const boolList& fixedDofs,
     const symmTensorField& fixedDofDirections
 )

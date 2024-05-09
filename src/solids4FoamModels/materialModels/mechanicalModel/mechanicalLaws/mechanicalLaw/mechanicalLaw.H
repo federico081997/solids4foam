@@ -39,6 +39,7 @@ Author
 #include "runTimeSelectionTables.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "pointFields.H"
 #include "tmp.H"
 #include "autoPtr.H"
 #include "nonLinearGeometry.H"
@@ -208,6 +209,12 @@ protected:
         const Switch& solvePressureEqn() const
         {
             return solvePressureEqn_;
+        }
+
+        //- Return the pressure equation smoothing factor
+        scalar pressureSmoothingScaleFactor() const
+        {
+            return pressureSmoothingScaleFactor_;
         }
 
         //- Return const access to solveVertexCentredPressureEqn switch
@@ -533,7 +540,16 @@ public:
             notImplemented("bulkModulus() const");
 
             // Keep compiler happy
-            return rho();
+            return tmp<volScalarField>();
+        }
+
+        //- Return bulk modulus at the points
+        virtual tmp<pointScalarField> pBulkModulus() const
+        {
+            notImplemented("pBulkModulus() const");
+
+            // Keep compiler happy
+            return tmp<pointScalarField>();
         }
 
         //- Calculate the stress
