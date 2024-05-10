@@ -344,6 +344,25 @@ Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::divSigma
     );
     sparseMatrixExtended& matrix = tmatrix.ref();
 
+    // Check the material tangents are the correct shape
+    forAll(materialTangentField, faceI)
+    {
+        if (materialTangentField[faceI].m() != 6)
+        {
+            FatalErrorIn("tmp< > Foam::vfvm::divSigma(...)")
+                << "The materialTangent for face " << faceI << " has "
+                << materialTangentField[faceI].m() << " rows "
+                << "but it should have 6!" << abort(FatalError);
+        }
+        else if (materialTangentField[faceI].n() != 6)
+        {
+            FatalErrorIn("tmp< > Foam::vfvm::divSigma(...)")
+                << "The materialTangent for face " << faceI << " has "
+                << materialTangentField[faceI].m() << " rows "
+                << "but it should have 6!" << abort(FatalError);
+        }
+    }
+
     // Take reference for clarity and efficiency
     const labelListList& cellPoints = mesh.cellPoints();
     const pointField& points = mesh.points();
@@ -527,6 +546,25 @@ Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::divSigma
         new sparseMatrixExtended(20*mesh.nPoints())
     );
     sparseMatrixExtended& matrix = tmatrix.ref();
+
+    // Check the material tangents are the correct shape
+    forAll(materialTangentField, faceI)
+    {
+        if (materialTangentField[faceI].m() != 6)
+        {
+            FatalErrorIn("tmp< > Foam::vfvm::divSigma(...)")
+                << "The materialTangent for face " << faceI << " has "
+                << materialTangentField[faceI].m() << " rows "
+                << "but it should have 6!" << abort(FatalError);
+        }
+        else if (materialTangentField[faceI].n() != 6)
+        {
+            FatalErrorIn("tmp< > Foam::vfvm::divSigma(...)")
+                << "The materialTangent for face " << faceI << " has "
+                << materialTangentField[faceI].m() << " rows "
+                << "but it should have 6!" << abort(FatalError);
+        }
+    }
 
     // Take reference for clarity and efficiency
     const labelListList& cellPoints = mesh.cellPoints();
