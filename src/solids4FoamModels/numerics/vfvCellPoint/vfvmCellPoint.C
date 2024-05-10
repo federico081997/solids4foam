@@ -814,11 +814,11 @@ void Foam::vfvm::laplacian
 
                 // Add the coefficient to the ownPointID equation coming from
                 // pointID
-                matrix(ownPointID, pointID) += coeff;
+                matrix(ownPointID, pointID) -= coeff;
 
                 // Add the coefficient to the neiPointID equation coming from
                 // pointID
-                matrix(neiPointID, pointID) -= coeff;
+                matrix(neiPointID, pointID) += coeff;
             }
         }
     }
@@ -930,11 +930,11 @@ Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::laplacian
 
                 // Add the coefficient to the ownPointID equation coming from
                 // pointID
-                matrix(ownPointID, pointID)(3,3) += coeff;
+                matrix(ownPointID, pointID)(3,3) -= coeff;
 
                 // Add the coefficient to the neiPointID equation coming from
                 // pointID
-                matrix(neiPointID, pointID)(3,3) -= coeff;
+                matrix(neiPointID, pointID)(3,3) += coeff;
             }
         }
     }
@@ -1059,11 +1059,11 @@ Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::laplacian
 
                 // Add the coefficient to the ownPointID equation coming from
                 // pointID
-                matrix(ownPointID, pointID)(3,3) += coeff;
+                matrix(ownPointID, pointID)(3,3) -= coeff;
 
                 // Add the coefficient to the neiPointID equation coming from
                 // pointID
-                matrix(neiPointID, pointID)(3,3) -= coeff;
+                matrix(neiPointID, pointID)(3,3) += coeff;
             }
         }
     }
