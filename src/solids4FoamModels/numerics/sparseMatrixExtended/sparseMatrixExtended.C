@@ -34,6 +34,26 @@ Foam::sparseMatrixExtended::sparseMatrixExtended(const label size)
     data_(size)
 {}
 
+
+Foam::sparseMatrixExtended::sparseMatrixExtended(const sparseMatrixExtended& sm)
+:
+    refCount(),
+    data_(sm.data_)
+{}
+
+
+Foam::sparseMatrixExtended::sparseMatrixExtended
+(
+    const tmp<sparseMatrixExtended>& tsm
+)
+:
+    refCount(),
+    data_(std::move(tsm.ref().data_))
+{
+    tsm.clear();
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::label Foam::sparseMatrixExtended::nBlockRows() const
@@ -48,6 +68,53 @@ Foam::label Foam::sparseMatrixExtended::nBlockRows() const
     }
 
     return nBlockRows + 1;
+}
+
+
+void Foam::sparseMatrixExtended::print() const
+{
+    Info<< "Print out sparseMatrixExtended coefficients: " << endl;
+
+    // Create a vector to store the matrix indices
+    std::vector<FixedList<label, 2>> keys(data_.size());
+
+    // Insert the matrix indices into the vector for all data
+    int i = 0;
+    for (auto iter = data_.begin(); iter != data_.end(); ++iter)
+    {
+        keys[i] = iter.key();
+        i++;
+    }
+
+    // Define custom sorting criteria
+    auto cmp = [](const FixedList<label, 2>& a, const FixedList<label, 2>& b)
+    {
+        if (a[0] < b[0])
+        {
+            return true;
+        }
+        else if (a[0] == b[0])
+        {
+            return a[1] < b[1];
+        }
+        else
+        {
+            return false;
+        }
+    };
+
+    // Sort keys by row and column
+    std::sort(keys.begin(), keys.end(), cmp);
+
+    // Print out sorted values
+    for (unsigned long k = 0; k < keys.size(); ++k)
+    {
+        const label rowI = keys[k][0];
+        const label colI = keys[k][1];
+        const scalarRectangularMatrix& coeff = data_[keys[k]];
+
+        Info<< "(" << rowI << ", " << colI << ") : " << coeff << endl;
+    }
 }
 
 
@@ -68,7 +135,7 @@ Foam::scalarRectangularMatrix& Foam::sparseMatrixExtended::operator()
 
     if (iter == data_.end())
     {
-        data_.insert(key, Foam::scalarRectangularMatrix(4,4,0));
+        data_.insert(key, scalarRectangularMatrix(4, 4, 0.0));
         return *(data_.find(key));
     }
     else
@@ -78,50 +145,178 @@ Foam::scalarRectangularMatrix& Foam::sparseMatrixExtended::operator()
 }
 
 
-void Foam::sparseMatrixExtended::print() const
+void Foam::sparseMatrixExtended::operator+=
+(
+    const sparseMatrixExtended& A
+)
 {
-    Info << "Print out sparseMatrixExtended coefficients: " << endl;
-
-    //Create a vector to store the matrix indices
-    std::vector<FixedList<label, 2>> keys(data_.size());
-
-    //Insert the matrix indices into the vector for all data
-    int i = 0;
-    for (auto iter = data_.begin(); iter != data_.end(); ++iter)
+    // Copy the A data into the result one-by-one
+    const sparseMatrixExtendedData& AData = A.data();
+    for (auto AIter = AData.begin(); AIter != AData.end(); ++AIter)
     {
-        keys[i] = iter.key();
-        i++;
-    }
+        // Check if the entry already exists
+        sparseMatrixExtendedData::iterator iter =
+            data_.find(AIter.key());
 
-    //Define custom sorting criteria
-    auto cmp = [](const FixedList<label, 2>& a, const FixedList<label, 2>& b)
-    {
-        if (a[0] < b[0])
+        if (iter == data_.end())
         {
-                return true;
-        }
-        else if (a[0] == b[0])
-        {
-                return a[1] < b[1];
+            // Create a new entry
+            data_.insert(AIter.key(), AIter.val());
         }
         else
         {
-                return false;
+            // Add to the existing entry
+            for (int i = 0; i < iter.val().m(); ++i)
+            {
+                for (int j = 0; j < iter.val().n(); ++j)
+                {
+                    iter.val()(i, j) += AIter.val()(i, j);
+                }
+            }
         }
-    };
-
-    //Sort keys by row and column
-    std::sort(keys.begin(), keys.end(), cmp);
-
-    //Print out sorted values
-    for (unsigned long k = 0; k < keys.size(); ++k)
-    {
-        const label rowI = keys[k][0];
-        const label colI = keys[k][1];
-        const scalarRectangularMatrix& coeff = data_[keys[k]];
-
-        Info << "(" << rowI << ", " << colI << ") : " << coeff << endl;
     }
+}
+
+
+void Foam::sparseMatrixExtended::operator-=
+(
+    const sparseMatrixExtended& A
+)
+{
+    // Copy the A data into the result one-by-one
+    const sparseMatrixExtendedData& AData = A.data();
+    for (auto AIter = AData.begin(); AIter != AData.end(); ++AIter)
+    {
+        // Check if the entry already exists
+        sparseMatrixExtendedData::iterator iter =
+            data_.find(AIter.key());
+
+        if (iter == data_.end())
+        {
+            // Create a new entry
+            data_.insert(AIter.key(), -AIter.val());
+        }
+        else
+        {
+            // Subtract from the existing entry
+            for (int i = 0; i < iter.val().m(); ++i)
+            {
+                for (int j = 0; j < iter.val().n(); ++j)
+                {
+                    iter.val()(i, j) -= AIter.val()(i, j);
+                }
+            }
+        }
+    }
+}
+
+
+Foam::tmp<Foam::sparseMatrixExtended> Foam::sparseMatrixExtended::operator+
+(
+    const sparseMatrixExtended& A
+) const
+{
+    // Prepare the result
+    tmp<sparseMatrixExtended> tresult
+    (
+        new sparseMatrixExtended(max(data_.size(), A.data().size()))
+    );
+    sparseMatrixExtended& result = tresult.ref();
+
+    // Copy data_ into the result
+    result.data() = data_;
+
+    // Copy the A data into the result one-by-one
+    sparseMatrixExtendedData& resultData = result.data();
+    const sparseMatrixExtendedData& AData = A.data();
+    for (auto AIter = AData.begin(); AIter != AData.end(); ++AIter)
+    {
+        // Check if the entry already exists
+        sparseMatrixExtendedData::iterator resultIter =
+            resultData.find(AIter.key());
+
+        if (resultIter == data_.end())
+        {
+            // Create a new entry
+            resultData.insert(AIter.key(), AIter.val());
+        }
+        else
+        {
+            // Add to the existing entry
+            for (int i = 0; i < resultIter.val().m(); ++i)
+            {
+                for (int j = 0; j < resultIter.val().n(); ++j)
+                {
+                    resultIter.val()(i, j) += AIter.val()(i, j);
+                }
+            }
+        }
+    }
+
+    return tresult;
+}
+
+
+Foam::tmp<Foam::sparseMatrixExtended> Foam::sparseMatrixExtended::operator*
+(
+    const scalarField& sf
+) const
+{
+    // Prepare the result
+    tmp<sparseMatrixExtended> tresult(new sparseMatrixExtended(data_.size()));
+    sparseMatrixExtended& result = tresult.ref();
+
+    // Copy data_ into the result
+    result.data() = data_;
+
+    // Copy data_ into the result
+    result.data() = data_;
+
+    // Multiply each row by sf[rowI]
+    sparseMatrixExtendedData& data = result.data();
+    for (auto iter = data.begin(); iter != data.end(); ++iter)
+    {
+        const label rowI = iter.key()[0];
+
+        for (int i = 0; i < iter.val().m(); ++i)
+        {
+            for (int j = 0; j < iter.val().n(); ++j)
+            {
+                iter.val()(i, j) *= sf[rowI];
+            }
+        }
+    }
+
+    return tresult;
+}
+
+
+Foam::tmp<Foam::sparseMatrixExtended> Foam::sparseMatrixExtended::operator*
+(
+    const scalar s
+) const
+{
+    // Prepare the result
+    tmp<sparseMatrixExtended> tresult(new sparseMatrixExtended(data_.size()));
+    sparseMatrixExtended& result = tresult.ref();
+
+    // Copy data_ into the result
+    result.data() = data_;
+
+    // Multiply each entry by s
+    sparseMatrixExtendedData& data = result.data();
+    for (auto iter = data.begin(); iter != data.end(); ++iter)
+    {
+        for (int i = 0; i < iter.val().m(); ++i)
+        {
+            for (int j = 0; j < iter.val().n(); ++j)
+            {
+                iter.val()(i, j) *= s;
+            }
+        }
+    }
+
+    return tresult;
 }
 
 
