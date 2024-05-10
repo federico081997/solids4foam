@@ -974,52 +974,21 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
     // Initialise matrix where each coefficient is a 4x4 tensor
     sparseMatrixExtended matrix(sum(globalPointIndices_.stencilSize()));
 
-    // Initialise matrix calculated using finite differences
-    sparseMatrixExtended finiteDifferenceMatrix
-    (
-        sum(globalPointIndices_.stencilSize())
-    );
-
-    // Interpolate the the hydrostatic pressure to the dual faces
-    dualPf_ = vfvc::interpolate
-    (
-        pointP_,
-        mesh(),
-        dualMesh(),
-        dualMeshMap().dualFaceToCell(),
-        dualMeshMap().dualCellToPoint()
-    );
-
-    // Calculate gradD at the primary mesh points
-    pointGradD_ = vfvc::pGrad
-    (
-        pointD(),
-        mesh()
-    );
-
-    // Interpolate pointP to the primary cells
-    volP_ = vfvc::interpolate
-    (
-        pointP_,
-        mesh()
-    );
-
     // Store material tangent field for the dual mesh faces
     Field<scalarSquareMatrix> materialTangent
     (
         dualMechanicalPtr_().materialTangentFaceField()
     );
 
-    // Calculate stress field at the dual faces
-    dualMechanicalPtr_().correct(dualSigmaf_);
+    // Calculate d(pBar)/d(gradD) for the matrix coefficients
+    const pointTensorField pBarSensitivity(-pointK_*tensor(I));
 
-    // Calculate stress for the primary cells
-    mechanical().correct(sigma());
-
-    // Global point index lists
-    const boolList& ownedByThisProc = globalPointIndices_.ownedByThisProc();
-    const labelList& localToGlobalPointMap =
-        globalPointIndices_.localToGlobalPointMap();
+    // Initialise the source
+    Field<scalarRectangularMatrix> source
+    (
+        mesh().nPoints(),
+        scalarRectangularMatrix(4, 1, 0.0)
+    );
 
     // Unknown pressure and displacement correction
     Field<scalarRectangularMatrix> pointDPcorr
@@ -1032,13 +1001,13 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
     int iCorr = 0;
     scalar initResidualD = 0.0;
     scalar initResidualP = 0.0;
-#ifdef OPENFOAM_NOT_EXTEND
     SolverPerformance<vector> solverPerf;
-#else
-    BlockSolverPerformance<vector> solverPerf;
-#endif
     do
     {
+        // Update boundary conditions
+        pointP_.correctBoundaryConditions();
+        pointD().correctBoundaryConditions();
+
         // Update gradD at the dual faces
         dualGradDf_ = vfvc::fGrad
         (
@@ -1078,36 +1047,9 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         // Calculate stress at the dual faces
         dualMechanicalPtr_().correct(dualSigmaf_);
 
-        // Initialise the source
-        Field<scalarRectangularMatrix> source
-        (
-            mesh().nPoints(),
-            scalarRectangularMatrix(4, 1, 0.0)
-        );
-
-        // Calculate d(pBar)/d(gradD) for the matrix coefficients
-        const pointTensorField pBarSensitivity(-pointK_*tensor(I));
-
-        pointP_.correctBoundaryConditions();
-        pointD().correctBoundaryConditions();
-
         // Calculate the residuals of the momentum and pressure equations
-        const vectorField momentumRes
-        (
-            residualD
-            (
-                pointD(),
-                pointP_
-            )
-        );
-        const scalarField pressureRes
-        (
-            residualP
-            (
-                pointD(),
-                pointP_
-            )
-        );
+        const vectorField momentumRes(residualD(pointD(), pointP_));
+        const scalarField pressureRes(residualP(pointD(), pointP_));
 
         // Assemble the source
         forAll(momentumRes, pointI)
@@ -1125,9 +1067,8 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         materialTangent = dualMechanicalPtr_().materialTangentFaceField();
 
         // Add div(sigma) pressure and displacement coefficients
-        vfvm::divSigma
+        matrix += vfvm::divSigma
         (
-            matrix,
             mesh(),
             dualMesh(),
             dualMeshMap().dualFaceToCell(),
@@ -1138,9 +1079,9 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         );
 
         // Add laplacian coefficients to the pressure equation
-        vfvm::laplacian
+        // PC: shouldn't this be subtracted?!
+        matrix += vfvm::laplacian
         (
-            matrix,
             compactStencil_,
             mesh(),
             dualMesh(),
@@ -1151,9 +1092,9 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         );
 
         // Add displacement coefficients of pressure equation
-        vfvm::addPbar
+        // PC: shouldn't this be subtracted?!
+        matrix += vfvm::divU
         (
-            matrix,
             mesh(),
             dualMeshMap().dualCellToPoint(),
             pointVol_,
@@ -1162,16 +1103,17 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         );
 
         // Add source terms of pressure equation to the matrix
-        vfvm::Sp
-        (
-            matrix,
-            pointVol_,
-            debug
-        );
+        matrix += vfvm::Sp(pointVol_, debug);
 
         // Calculate the matrix using finite difference
         if (Switch(solidModelDict().lookup("finiteDifferenceJacobian")))
         {
+            // Initialise matrix calculated using finite differences
+            sparseMatrixExtended finiteDifferenceMatrix
+            (
+                sum(globalPointIndices_.stencilSize())
+            );
+
             vertexCentredLinGeomPressureDisplacementSolid::finiteDiffMatrix
             (
                 finiteDifferenceMatrix,
@@ -1239,8 +1181,8 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
                 twoD_,
                 optionsFile,
                 mesh().points(),
-                ownedByThisProc,
-                localToGlobalPointMap,
+                globalPointIndices_.ownedByThisProc(),
+                globalPointIndices_.localToGlobalPointMap(),
                 globalPointIndices_.stencilSizeOwned(),
                 globalPointIndices_.stencilSizeNotOwned(),
                 solidModelDict().lookupOrDefault<bool>("debugPETSc", false)

@@ -1276,83 +1276,36 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
     // Initialise matrix where each coefficient is a 4x4 tensor
     sparseMatrixExtended matrix(sum(globalPointIndices_.stencilSize()));
 
-    // Initialise matrix calculated using finite differences
-    sparseMatrixExtended finiteDifferenceMatrix
-    (
-        sum(globalPointIndices_.stencilSize())
-    );
-
-    // Calculate F
-    dualFf_ = I + dualGradDf_.T();
-
-    // Calculate Finv
-    dualFinvf_ = inv(dualFf_);
-
-    // Calculate J
-    dualJf_ = det(dualFf_);
-
-    // Interpolate the pressure to the dual faces
-    dualPf_ = vfvc::interpolate
-    (
-        pointP_,
-        mesh(),
-        dualMesh(),
-        dualMeshMap().dualFaceToCell(),
-        dualMeshMap().dualCellToPoint()
-    );
-
-    // Calculate gradD at the primary mesh points
-    pointGradD_ = vfvc::pGrad
-    (
-        pointD(),
-        mesh()
-    );
-
-    // Calculate J at the primary points
-    pointJ_ = det(I + pointGradD_.T());
-
-    // Calculate cell P
-    volP_ = vfvc::interpolate
-    (
-        pointP_,
-        mesh()
-    );
-
     // Store material tangent field for dual mesh faces
     Field<scalarSquareMatrix> materialTangent
     (
         dualMechanicalPtr_().materialTangentFaceField()
     );
 
-    // Calculate stress field at dual faces
-    dualMechanicalPtr_().correct(dualSigmaf_);
-
-    // Calculate stress for primary cells
-    mechanical().correct(sigma());
-
-    // Global point index lists
-    const boolList& ownedByThisProc = globalPointIndices_.ownedByThisProc();
-    const labelList& localToGlobalPointMap =
-        globalPointIndices_.localToGlobalPointMap();
-
+    // Create the source vector for displacement-pressure implementation
+    Field<scalarRectangularMatrix> source
+    (
+        mesh().nPoints(),
+        scalarRectangularMatrix(4, 1, 0.0)
+    );
     // Coupled pressure and displacement correction
     Field<scalarRectangularMatrix> pointDPcorr
     (
         pointD().internalField().size(),
-        scalarRectangularMatrix(4,1,0)
+        scalarRectangularMatrix(4, 1, 0.0)
     );
 
     // Newton-Raphson loop over momentum equation
     int iCorr = 0;
     scalar initResidualD = 0.0;
     scalar initResidualP = 0.0;
-#ifdef OPENFOAM_NOT_EXTEND
     SolverPerformance<vector> solverPerf;
-#else
-    BlockSolverPerformance<vector> solverPerf;
-#endif
     do
     {
+        // Update boundary conditions
+        pointP_.correctBoundaryConditions();
+        pointD().correctBoundaryConditions();
+
         // Update gradD at dual faces
         dualGradDf_ = vfvc::fGrad
         (
@@ -1404,13 +1357,6 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         // Calculate stress at dual faces
         dualMechanicalPtr_().correct(dualSigmaf_);
 
-        // Create the source vector for displacement-pressure implementation
-        Field<scalarRectangularMatrix> source
-        (
-            mesh().nPoints(),
-            scalarRectangularMatrix(4,1,0)
-        );
-
         // Calculate pBarSensitivity
         const pointTensorField pBarSensitivity
         (
@@ -1427,26 +1373,9 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             )
         );
 
-        pointP_.correctBoundaryConditions();
-        pointD().correctBoundaryConditions();
-
         // Calculate the residuals of the momentum and pressure equations
-        const vectorField momentumRes
-        (
-            residualD
-            (
-                pointD(),
-                pointP_
-            )
-        );
-        const scalarField pressureRes
-        (
-            residualP
-            (
-                pointD(),
-                pointP_
-            )
-        );
+        const vectorField momentumRes(residualD(pointD(), pointP_));
+        const scalarField pressureRes(residualP(pointD(), pointP_));
 
         // Assemble the source
         forAll(momentumRes, pointI)
@@ -1467,7 +1396,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         const surfaceVectorField& SfUndef = dualMesh().Sf();
 
         // Calculate geometric stiffness field for dual mesh faces
-        Foam::Field<Foam::scalarRectangularMatrix> geometricStiffness
+        Field<scalarRectangularMatrix> geometricStiffness
         (
             geometricStiffnessField
             (
@@ -1477,9 +1406,8 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         );
 
         // Add div(sigma) pressure and displacement coefficients
-        vfvm::divSigma
+        matrix += vfvm::divSigma
         (
-            matrix,
             mesh(),
             dualMesh(),
             dualMeshMap().dualFaceToCell(),
@@ -1493,9 +1421,8 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         );
 
         // Add laplacian coefficient to the pressure equation
-        vfvm::laplacian
+        matrix += vfvm::laplacian
         (
-            matrix,
             compactStencil_,
             mesh(),
             dualMesh(),
@@ -1507,9 +1434,8 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         );
 
         // Add displacement coefficients of pressure equation
-        vfvm::addPbar
+        matrix += vfvm::divU
         (
-            matrix,
             mesh(),
             dualMeshMap().dualCellToPoint(),
             pointVol_,
@@ -1518,16 +1444,17 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         );
 
         // Add source terms of pressure equation to the matrix
-        vfvm::Sp
-        (
-            matrix,
-            pointVol_,
-            debug
-        );
+        matrix += vfvm::Sp(pointVol_, debug);
 
         // Calculate the matrix using finite difference
         if (Switch(solidModelDict().lookup("finiteDifferenceJacobian")))
         {
+            // Initialise matrix calculated using finite differences
+            sparseMatrixExtended finiteDifferenceMatrix
+            (
+                sum(globalPointIndices_.stencilSize())
+            );
+
             finiteDiffMatrix
             (
                 finiteDifferenceMatrix,
@@ -1595,8 +1522,8 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
                 twoD_,
                 optionsFile,
                 mesh().points(),
-                ownedByThisProc,
-                localToGlobalPointMap,
+                globalPointIndices_.ownedByThisProc(),
+                globalPointIndices_.localToGlobalPointMap(),
                 globalPointIndices_.stencilSizeOwned(),
                 globalPointIndices_.stencilSizeNotOwned(),
                 solidModelDict().lookupOrDefault<bool>("debugPETSc", false)

@@ -29,6 +29,9 @@ InClass
 #include "fvm.H"
 #include "fvc.H"
 #include "zeroGradientFvPatchFields.H"
+#include "vertexCentredLinGeomPressureDisplacementSolid.H"
+#include "vertexCentredNonLinGeomTotalLagPressureDisplacementSolid.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -516,6 +519,32 @@ bool Foam::mechanicalLaw::planeStress() const
     }
 }
 
+
+const Foam::Switch Foam::mechanicalLaw::solveVertexCentredPressureEqn() const
+{
+    // Lookup the solideModel
+    const solidModel& solMod = lookupSolidModel(mesh(), baseMeshRegionName_);
+
+    // Check if a pressure-based vertex-centred solver is used
+    if
+    (
+        isA
+        <
+            solidModels::
+            vertexCentredLinGeomPressureDisplacementSolid
+        >(solMod)
+     || isA
+        <
+            solidModels::
+            vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
+        >(solMod)
+    )
+    {
+        return Switch(true);
+    }
+
+    return Switch(false);
+}
 
 const Foam::volScalarField& Foam::mechanicalLaw::mu() const
 {
@@ -1485,14 +1514,6 @@ Foam::mechanicalLaw::mechanicalLaw
     solvePressureEqn_
     (
         dict_.lookupOrAddDefault<Switch>("solvePressureEqn", false)
-    ),
-    solveVertexCentredPressureEqn_
-    (
-        dict_.lookupOrAddDefault<Switch>
-        (
-            "solveVertexCentredPressureEqn",
-            false
-        )
     ),
     pressureSmoothingScaleFactor_
     (

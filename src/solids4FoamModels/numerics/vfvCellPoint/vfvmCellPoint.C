@@ -320,9 +320,8 @@ void Foam::vfvm::divSigma
 }
 
 
-void Foam::vfvm::divSigma
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::divSigma
 (
-    sparseMatrixExtended& matrix,
     const fvMesh& mesh,
     const fvMesh& dualMesh,
     const labelList& dualFaceToCell,
@@ -334,8 +333,16 @@ void Foam::vfvm::divSigma
 {
     if (debug)
     {
-        Info<< "void Foam::vfvm::divSigma(...): start" << endl;
+        Info<< "tmp<sparseMatrixExtended> Foam::vfvm::divSigma(...): start"
+            << endl;
     }
+
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(20*mesh.nPoints())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
 
     // Take reference for clarity and efficiency
     const labelListList& cellPoints = mesh.cellPoints();
@@ -486,14 +493,16 @@ void Foam::vfvm::divSigma
 
     if (debug)
     {
-        Info<< "void Foam::vfvm::divSigma(...): end" << endl;
+        Info<< "tmp<sparseMatrixExtended> Foam::vfvm::divSigma(...): end"
+            << endl;
     }
+
+    return tmatrix;
 }
 
 
-void Foam::vfvm::divSigma
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::divSigma
 (
-    sparseMatrixExtended& matrix,
     const fvMesh& mesh,
     const fvMesh& dualMesh,
     const labelList& dualFaceToCell,
@@ -508,8 +517,16 @@ void Foam::vfvm::divSigma
 {
     if (debug)
     {
-        Info<< "void Foam::vfvm::divSigma(...): start" << endl;
+        Info<< "tmp<sparseMatrixExtended> Foam::vfvm::divSigma(...): start"
+            << endl;
     }
+
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(20*mesh.nPoints())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
 
     // Take reference for clarity and efficiency
     const labelListList& cellPoints = mesh.cellPoints();
@@ -687,8 +704,11 @@ void Foam::vfvm::divSigma
 
     if (debug)
     {
-        Info<< "void Foam::vfvm::divSigma(...): end" << endl;
+        Info<< "tmp<sparseMatrixExtended> Foam::vfvm::divSigma(...): end"
+            << endl;
     }
+
+    return tmatrix;
 }
 
 
@@ -810,9 +830,8 @@ void Foam::vfvm::laplacian
 }
 
 
-void Foam::vfvm::laplacian
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::laplacian
 (
-    sparseMatrixExtended& matrix,
     const Switch compactStencil,
     const fvMesh& mesh,
     const fvMesh& dualMesh,
@@ -822,10 +841,12 @@ void Foam::vfvm::laplacian
     const bool debug
 )
 {
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::laplacian(...): start" << endl;
-    }
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(20*mesh.nPoints())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
 
     // Take references for clarity and efficiency
     const labelListList& cellPoints = mesh.cellPoints();
@@ -918,16 +939,12 @@ void Foam::vfvm::laplacian
         }
     }
 
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::laplacian(...): end" << endl;
-    }
+    return tmatrix;
 }
 
 
-void Foam::vfvm::laplacian
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::laplacian
 (
-    sparseMatrixExtended& matrix,
     const Switch compactStencil,
     const fvMesh& mesh,
     const fvMesh& dualMesh,
@@ -938,10 +955,12 @@ void Foam::vfvm::laplacian
     const bool debug
 )
 {
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::laplacian(...): start" << endl;
-    }
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(20*mesh.nPoints())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
 
     // Take references for clarity and efficiency
     const labelListList& cellPoints = mesh.cellPoints();
@@ -1049,10 +1068,7 @@ void Foam::vfvm::laplacian
         }
     }
 
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::laplacian(...): end" << endl;
-    }
+    return tmatrix;
 }
 
 
@@ -1116,17 +1132,18 @@ void Foam::vfvm::d2dt2
 }
 
 
-void Foam::vfvm::Sp
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::Sp
 (
-    sparseMatrixExtended& matrix,
     const scalarField& pointVolI,
     const int debug
 )
 {
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::Sp(...): start" << endl;
-    }
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(pointVolI.size())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
 
     // Insert the pressure coefficient of the pressure equation
     forAll(pointVolI, pointI)
@@ -1134,16 +1151,12 @@ void Foam::vfvm::Sp
         matrix(pointI, pointI)(3,3) += pointVolI[pointI];
     }
 
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::Sp(...): end" << endl;
-    }
+    return tmatrix;
 }
 
 
-void Foam::vfvm::addPbar
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::divU
 (
-    sparseMatrixExtended& matrix,
     const fvMesh& mesh,
     const labelList& dualCellToPoint,
     const scalarField& pointVolI,
@@ -1151,10 +1164,12 @@ void Foam::vfvm::addPbar
     const int debug
 )
 {
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::addPbar(...): start" << endl;
-    }
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(20*mesh.nPoints())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
 
     // Take references for clarity and efficiency
     const labelListList& pointPoints = mesh.pointPoints();
@@ -1196,10 +1211,7 @@ void Foam::vfvm::addPbar
         }
     }
 
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::addPbar(...): end" << endl;
-    }
+    return tmatrix;
 }
 
 
