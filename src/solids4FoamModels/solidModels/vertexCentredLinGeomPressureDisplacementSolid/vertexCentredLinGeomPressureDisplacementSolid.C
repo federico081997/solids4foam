@@ -46,8 +46,8 @@ namespace solidModels
 defineTypeNameAndDebug(vertexCentredLinGeomPressureDisplacementSolid, 0);
 addToRunTimeSelectionTable
 (
-    solidModel, 
-    vertexCentredLinGeomPressureDisplacementSolid, 
+    solidModel,
+    vertexCentredLinGeomPressureDisplacementSolid,
     dictionary
 );
 
@@ -190,7 +190,7 @@ void vertexCentredLinGeomPressureDisplacementSolid::setFixedDofs
                             FatalError
                                 << "Point " << pointID << " is fixed in two "
                                 << "directions: this is only implemented for "
-                                << "Cartesian axis directions" 
+                                << "Cartesian axis directions"
                                 << abort(FatalError);
                         }
 
@@ -260,7 +260,7 @@ void vertexCentredLinGeomPressureDisplacementSolid::enforceTractionBoundaries
             // the average of all the points that map to it
             scalarField nPointsPerDualFace(dualFaceTraction.size(), 0.0);
 
-            // Map from primary mesh point field to second mesh face field 
+            // Map from primary mesh point field to second mesh face field
             // using the pointToDualFaces map
             forAll(totalTraction, pI)
             {
@@ -302,7 +302,7 @@ void vertexCentredLinGeomPressureDisplacementSolid::enforceTractionBoundaries
                     "void vertexCentredLinGeomPressureDisplacementSolid::"
                     "enforceTractionBoundaries(...)"
                 )   << "Problem setting tractions: gMin(nPointsPerDualFace) < 1"
-                    << nl << "nPointsPerDualFace = " 
+                    << nl << "nPointsPerDualFace = "
                     << nPointsPerDualFace << abort(FatalError);
             }
 
@@ -347,12 +347,12 @@ bool vertexCentredLinGeomPressureDisplacementSolid::converged
     const label nInterations,
     const pointVectorField& pointD,
     const pointScalarField& pointP,
-    const Field<RectangularMatrix<scalar>>& pointDPcorr
+    const Field<scalarRectangularMatrix>& pointDPcorr
 ) const
 {
     scalar residualDAbs = 0;
     scalar residualPAbs = 0;
-    
+
     // Calculate the residuals as the root mean square of the correction
     scalar maxDCorr = 0.0;
     scalar maxPCorr = 0.0;
@@ -386,7 +386,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::converged
         // If the initial residual is small then convergence has been achieved
         if (initResidualD < SMALL && initResidualP < SMALL)
         {
-            Info<< "    Both displacement and pressure residuals are less " 
+            Info<< "    Both displacement and pressure residuals are less "
                 << "than 1e-15"
                 << "    Converged" << endl;
             return true;
@@ -422,11 +422,11 @@ bool vertexCentredLinGeomPressureDisplacementSolid::converged
         << ", maxPCorr = " << maxPCorr << endl;
 
     // Displacement tolerance
-    const scalar DTol = 
+    const scalar DTol =
         solidModelDict().lookupOrDefault<scalar>("solutionDTolerance", 1e-11);
 
     // Pressure tolerance
-    const scalar PTol = 
+    const scalar PTol =
         solidModelDict().lookupOrDefault<scalar>("solutionPTolerance", 1e-6);
 
     // Check for convergence
@@ -531,7 +531,7 @@ vertexCentredLinGeomPressureDisplacementSolid::residualD
         int(bool(debug))
     );
 
-    // Return the momentum residual field   
+    // Return the momentum residual field
     return tresult;
 }
 
@@ -549,7 +549,7 @@ vertexCentredLinGeomPressureDisplacementSolid::residualP
 
     // The residual for the pressure equation is:
     // F = p - gamma*laplacian(p) - pBar(D)
-    
+
     // Calculate gradD at the primary mesh points
     const pointTensorField pointGradD
     (
@@ -576,7 +576,7 @@ vertexCentredLinGeomPressureDisplacementSolid::residualP
     );
 
     // Calculate the pBar field
-    const scalarField pBar = -pointK_.internalField()*tr(pointGradD);
+    const scalarField pBar(-pointK_.internalField()*tr(pointGradD));
 
     // Point volume field
     const scalarField& pointVolI = pointVol_.internalField();
@@ -605,7 +605,7 @@ void vertexCentredLinGeomPressureDisplacementSolid::finiteDiffMatrix
 )
 {
     Info<< "Calculating the Jacobian using finite differences" << endl;
-        
+
     // Small number used for perturbations
     const scalar relEps = 1e-8; // sqrt of computer tolerance
     const scalar typicalDisplacementValue =
@@ -619,10 +619,10 @@ void vertexCentredLinGeomPressureDisplacementSolid::finiteDiffMatrix
         );
     const scalar epsP = relEps*max
         (
-            average(mag(pointP.primitiveField())), 
+            average(mag(pointP.primitiveField())),
             typicalPressureValue
         );
-    
+
     Info<< "epsD = " << epsD << ", epsP = " << epsP << endl;
 
     // Create fields to be used for perturbations
@@ -636,16 +636,16 @@ void vertexCentredLinGeomPressureDisplacementSolid::finiteDiffMatrix
     {
         forAll(pointD, blockColI)
         {
-            // For each component of pointD, sequentially apply a perturbation 
+            // For each component of pointD, sequentially apply a perturbation
             // and then calculate the resulting residuals
             for (label cmptI = 0; cmptI < vector::nComponents; cmptI++)
             {
-                // Reset pointDPerturb and multiply by 1.0 to avoid it being 
+                // Reset pointDPerturb and multiply by 1.0 to avoid it being
                 // removed from the object registry
                 pointDPerturb = 1.0*pointD;
 
                 // Perturb this component of pointD
-                pointDPerturb[blockColI].component(cmptI) = 
+                pointDPerturb[blockColI].component(cmptI) =
                     pointD[blockColI].component(cmptI) + epsD;
 
                 // Calculate residualD with this component perturbed
@@ -667,11 +667,11 @@ void vertexCentredLinGeomPressureDisplacementSolid::finiteDiffMatrix
                 );
 
                 // Insert components
-                matrix(blockRowI, blockColI)(0,cmptI) = 
+                matrix(blockRowI, blockColI)(0,cmptI) =
                     tangCmptD.component(vector::X);
-                matrix(blockRowI, blockColI)(1,cmptI) = 
+                matrix(blockRowI, blockColI)(1,cmptI) =
                     tangCmptD.component(vector::Y);
-                matrix(blockRowI, blockColI)(2,cmptI) = 
+                matrix(blockRowI, blockColI)(2,cmptI) =
                     tangCmptD.component(vector::Z);
                 matrix(blockRowI, blockColI)(3,cmptI) = tangCmptP;
             }
@@ -683,7 +683,7 @@ void vertexCentredLinGeomPressureDisplacementSolid::finiteDiffMatrix
     {
         forAll(pointP, blockColI)
         {
-            // Reset pointPPerturb and multiply by 1.0 to avoid it being 
+            // Reset pointPPerturb and multiply by 1.0 to avoid it being
             // removed from the object registry
             pointPPerturb = 1.0*pointP;
 
@@ -1005,7 +1005,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
     );
 
     // Store material tangent field for the dual mesh faces
-    Field<RectangularMatrix<scalar>> materialTangent
+    Field<scalarSquareMatrix> materialTangent
     (
         dualMechanicalPtr_().materialTangentFaceField()
     );
@@ -1022,10 +1022,10 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         globalPointIndices_.localToGlobalPointMap();
 
     // Unknown pressure and displacement correction
-    Field<RectangularMatrix<scalar>> pointDPcorr
+    Field<scalarRectangularMatrix> pointDPcorr
     (
         pointD().internalField().size(),
-        RectangularMatrix<scalar>(4,1,0)
+        scalarRectangularMatrix(4,1,0)
     );
 
     // Newton-Raphson loop over momentum and pressure equations
@@ -1079,15 +1079,15 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         dualMechanicalPtr_().correct(dualSigmaf_);
 
         // Initialise the source
-        Field<RectangularMatrix<scalar>> source
+        Field<scalarRectangularMatrix> source
         (
-            mesh().nPoints(), 
-            RectangularMatrix<scalar>(4,1,0)
+            mesh().nPoints(),
+            scalarRectangularMatrix(4, 1, 0.0)
         );
 
         // Calculate d(pBar)/d(gradD) for the matrix coefficients
-        pointTensorField pBarSensitivity = -pointK_*tensor(I);
-        
+        const pointTensorField pBarSensitivity(-pointK_*tensor(I));
+
         pointP_.correctBoundaryConditions();
         pointD().correctBoundaryConditions();
 
@@ -1096,14 +1096,14 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         (
             residualD
             (
-                pointD(), 
+                pointD(),
                 pointP_
             )
         );
         const scalarField pressureRes
         (
             residualP
-            ( 
+            (
                 pointD(),
                 pointP_
             )
@@ -1248,7 +1248,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
 #else
             FatalErrorIn("vertexCentredLinGeomPressureDisplacementSolid::evolve()")
                 << "PETSc not available. Please set the PETSC_DIR "
-                << "environment variable and re-compile solids4foam" 
+                << "environment variable and re-compile solids4foam"
                 << abort(FatalError);
 #endif
         }
@@ -1285,22 +1285,22 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
             forAll(pointDPcorr, pointI)
             {
 #ifdef OPENFOAM_NOT_EXTEND
-                pointD().primitiveFieldRef()[pointI].component(0) += 
+                pointD().primitiveFieldRef()[pointI].component(0) +=
                     pointDPcorr[pointI](0,0);
-                pointD().primitiveFieldRef()[pointI].component(1) += 
+                pointD().primitiveFieldRef()[pointI].component(1) +=
                     pointDPcorr[pointI](1,0);
-                pointD().primitiveFieldRef()[pointI].component(2) += 
+                pointD().primitiveFieldRef()[pointI].component(2) +=
                     pointDPcorr[pointI](2,0);
-                pointP_.primitiveFieldRef()[pointI] += 
+                pointP_.primitiveFieldRef()[pointI] +=
                     pointDPcorr[pointI](3,0);
 #else
-                pointD().internalField()[pointI].component(0) += 
+                pointD().internalField()[pointI].component(0) +=
                     pointDPcorr[pointI](0,0);
-                pointD().internalField()[pointI].component(1) += 
+                pointD().internalField()[pointI].component(1) +=
                     pointDPcorr[pointI](1,0);
-                pointD().internalField()[pointI].component(2) += 
+                pointD().internalField()[pointI].component(2) +=
                     pointDPcorr[pointI](2,0);
-                pointP_.internalField()[pointI] += 
+                pointP_.internalField()[pointI] +=
                     pointDPcorr[pointI](3,0);
 #endif
             }
@@ -1309,7 +1309,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         pointP_.correctBoundaryConditions();
 
         // Update point accelerations
-        // Note: for NewmarkBeta, this needs to come before the pointU 
+        // Note: for NewmarkBeta, this needs to come before the pointU
         // update
 #ifdef OPENFOAM_NOT_EXTEND
         pointA_.primitiveFieldRef() =
@@ -1479,12 +1479,12 @@ void vertexCentredLinGeomPressureDisplacementSolid::writeFields
     const Time& runTime
 )
 {
-    // Calculate gradD at the primary points using least squares: this 
+    // Calculate gradD at the primary points using least squares: this
     // should be second-order accurate (... I think).
     const pointTensorField pGradD(vfvc::pGrad(pointD(), mesh()));
 
     // Calculate strain at the primary points based on pGradD
-    // Note: the symm operator is not defined for pointTensorFields so we 
+    // Note: the symm operator is not defined for pointTensorFields so we
     // will do it manually
     pointSymmTensorField pEpsilon
     (

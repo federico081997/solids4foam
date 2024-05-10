@@ -19,12 +19,12 @@ Class
     vertexCentredNonLinGeomTotalLagDisplacementSolid
 
 Description
-    Mathematical model where where non linear geometry is modelled i.e. large 
+    Mathematical model where where non linear geometry is modelled i.e. large
     strains and the total displacement is the primary unknown.
 
     Discretisation is performed using a vertex-centred finite volume approach
-    where the governing equations are integrated over a dual mesh. The dual 
-    mesh is automatically constructed from the primary mesh using the 
+    where the governing equations are integrated over a dual mesh. The dual
+    mesh is automatically constructed from the primary mesh using the
     meshDualiser.
 
 Author
@@ -100,7 +100,7 @@ class vertexCentredNonLinGeomTotalLagDisplacementSolid
         //  fixed
         symmTensorField fixedDofDirections_;
 
-        //- Scale factor for the fixed degree of freedom equations to improve 
+        //- Scale factor for the fixed degree of freedom equations to improve
         //  the matrix conditioning
         const scalar fixedDofScale_;
 
@@ -194,7 +194,7 @@ class vertexCentredNonLinGeomTotalLagDisplacementSolid
             const scalar zeta // Discretisation parameter
         );
 
-        Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
+        Foam::tmp<Foam::Field<Foam::scalarRectangularMatrix>>
         geometricStiffnessField
         (
             const surfaceVectorField SfUndef, // Undeformed surface area

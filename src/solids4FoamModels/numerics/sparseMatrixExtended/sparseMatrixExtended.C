@@ -51,7 +51,7 @@ Foam::label Foam::sparseMatrixExtended::nBlockRows() const
 }
 
 
-Foam::RectangularMatrix<Foam::scalar>& Foam::sparseMatrixExtended::operator()
+Foam::scalarRectangularMatrix& Foam::sparseMatrixExtended::operator()
 (
     const label rowI,
     const label colI
@@ -68,7 +68,7 @@ Foam::RectangularMatrix<Foam::scalar>& Foam::sparseMatrixExtended::operator()
 
     if (iter == data_.end())
     {
-        data_.insert(key, Foam::RectangularMatrix<Foam::scalar>(4,4,0));
+        data_.insert(key, Foam::scalarRectangularMatrix(4,4,0));
         return *(data_.find(key));
     }
     else
@@ -118,7 +118,7 @@ void Foam::sparseMatrixExtended::print() const
     {
         const label rowI = keys[k][0];
         const label colI = keys[k][1];
-        const RectangularMatrix<scalar>& coeff = data_[keys[k]];
+        const scalarRectangularMatrix& coeff = data_[keys[k]];
 
         Info << "(" << rowI << ", " << colI << ") : " << coeff << endl;
     }

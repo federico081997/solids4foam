@@ -65,7 +65,7 @@ namespace vfvm
         const fvMesh& dualMesh,
         const labelList& dualFaceToCell,
         const labelList& dualCellToPoint,
-        const Field<RectangularMatrix<scalar>>& materialTangentField,
+        const Field<scalarSquareMatrix>& materialTangentField,
         const scalar zeta, // Fraction of compact edge direction component used
         const bool debug = false
     );
@@ -80,8 +80,8 @@ namespace vfvm
         const fvMesh& dualMesh,
         const labelList& dualFaceToCell,
         const labelList& dualCellToPoint,
-        const Field<RectangularMatrix<scalar>>& materialTangentField,
-        const Field<RectangularMatrix<scalar>>& geometricStiffnessField,
+        const Field<scalarSquareMatrix>& materialTangentField,
+        const Field<scalarRectangularMatrix>& geometricStiffnessField,
         const symmTensorField& sigma,
         const tensorField& dualGradDField,
         const scalar zeta, // Fraction of compact edge direction component used
@@ -99,7 +99,7 @@ namespace vfvm
         const fvMesh& dualMesh,
         const labelList& dualFaceToCell,
         const labelList& dualCellToPoint,
-        const Field<RectangularMatrix<scalar>>& materialTangentField,
+        const Field<scalarSquareMatrix>& materialTangentField,
         const scalar zeta, // Fraction of compact edge direction component used
         const bool debug
     );
@@ -115,8 +115,8 @@ namespace vfvm
         const fvMesh& dualMesh,
         const labelList& dualFaceToCell,
         const labelList& dualCellToPoint,
-        const Field<RectangularMatrix<scalar>>& materialTangentField,
-        const Field<RectangularMatrix<scalar>>& geometricStiffnessField,
+        const Field<scalarSquareMatrix>& materialTangentField,
+        const Field<scalarRectangularMatrix>& geometricStiffnessField,
         const symmTensorField& sigma,
         const tensorField& dualGradDField,
         const scalar zeta, // Fraction of compact edge direction component used
@@ -140,8 +140,8 @@ namespace vfvm
 
 
     // Add coefficients to the matrix for the Laplacian of a scalar field with
-    // a scalar diffusivity in the small-strain pressure-displacement 
-    // formulation. Each coefficient in the matrix is a 4x4 tensor.     
+    // a scalar diffusivity in the small-strain pressure-displacement
+    // formulation. Each coefficient in the matrix is a 4x4 tensor.
     void laplacian
     (
         sparseMatrixExtended& matrix,
@@ -156,8 +156,8 @@ namespace vfvm
 
 
     // Add coefficients to the matrix for the Laplacian of a scalar field with
-    // a scalar diffusivity in the large-strain pressure-displacement 
-    // formulation. Each coefficient in the matrix is a 4x4 tensor. 
+    // a scalar diffusivity in the large-strain pressure-displacement
+    // formulation. Each coefficient in the matrix is a 4x4 tensor.
     void laplacian
     (
         sparseMatrixExtended& matrix,

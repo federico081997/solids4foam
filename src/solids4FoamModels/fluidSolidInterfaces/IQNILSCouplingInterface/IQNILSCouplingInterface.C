@@ -285,9 +285,9 @@ void IQNILSCouplingInterface::updateDisplacement()
             // in the DynamicList and calculate the QR-decomposition of V
             // with modified Gram-Schmidt
             label cols = fluidPatchesPointsV_[interfaceI].size();
-            RectangularMatrix<scalar> R(cols, cols, 0.0);
-            RectangularMatrix<scalar> C(cols, 1);
-            RectangularMatrix<scalar> Rcolsum(1, cols);
+            scalarRectangularMatrix R(cols, cols, 0.0);
+            scalarRectangularMatrix C(cols, 1);
+            scalarRectangularMatrix Rcolsum(1, cols);
             DynamicList<vectorField> Q;
 
             for (label i = 0; i < cols; i++)

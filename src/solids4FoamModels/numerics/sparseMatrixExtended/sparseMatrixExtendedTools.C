@@ -68,8 +68,8 @@ bool Foam::sparseMatrixExtendedTools::checkTwoD(const polyMesh& mesh)
 void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
 (
     const sparseMatrixExtended& matrix,
-    const Field<RectangularMatrix<scalar>>& source,
-    Field<RectangularMatrix<scalar>>& solution,
+    const Field<scalarRectangularMatrix>& source,
+    Field<scalarRectangularMatrix>& solution,
     const bool twoD,
     const bool exportToMatlab,
     const bool debug
@@ -110,7 +110,7 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
         ++iter
     )
     {
-        const RectangularMatrix<scalar>& coeff = iter();
+        const scalarRectangularMatrix& coeff = iter();
 
         if (twoD)
         {
@@ -335,8 +335,8 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
 Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
 (
     const sparseMatrixExtended& matrix,
-    const Field<RectangularMatrix<scalar>>& source,
-    Field<RectangularMatrix<scalar>>& solution,
+    const Field<scalarRectangularMatrix>& source,
+    Field<scalarRectangularMatrix>& solution,
     const bool twoD,
     fileName& optionsFile,
     const pointField& points,
@@ -527,7 +527,7 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
         ++iter
     )
     {
-        const RectangularMatrix<scalar>& coeff = iter();
+        const scalarRectangularMatrix& coeff = iter();
         const label blockRowI = localToGlobalPointMap[iter.key()[0]];
         const label blockColI = localToGlobalPointMap[iter.key()[1]];
 
@@ -641,7 +641,7 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     {
         forAll(source, localBlockRowI)
         {
-            const RectangularMatrix<scalar>& sourceI = source[localBlockRowI];
+            const scalarRectangularMatrix& sourceI = source[localBlockRowI];
             const label blockRowI = localToGlobalPointMap[localBlockRowI];
 
             if (twoD)
@@ -1095,7 +1095,7 @@ void Foam::sparseMatrixExtendedTools::checkErr(const int ierr)
 void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
 (
     sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source,
+    Field<scalarRectangularMatrix>& source,
     const boolList& fixedDofs,
     const symmTensorField& fixedDofDirections,
     const pointField& fixedDofValues,
@@ -1122,7 +1122,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
 
         if (fixedDofs[blockRowI])
         {
-            RectangularMatrix<scalar>& coeff = iter();
+            scalarRectangularMatrix& coeff = iter();
 
             // Extract the displacement coefficients of the momentum equation
             tensor momentumEqnDispCoeff(tensor::zero);
@@ -1136,21 +1136,21 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             momentumEqnDispCoeff.zx() = coeff(2,0);
             momentumEqnDispCoeff.zy() = coeff(2,1);
             momentumEqnDispCoeff.zz() = coeff(2,2);
-            
+
             // Extract the pressure coefficients of the momentum equation
             vector momentumEqnPressCoeff(vector::zero);
 
             momentumEqnPressCoeff.x() = coeff(0,3);
             momentumEqnPressCoeff.y() = coeff(1,3);
             momentumEqnPressCoeff.z() = coeff(2,3);
-            
+
             // Extract the displacement coefficients of the pressure equation
             vector pressureEqnDispCoeff(vector::zero);
 
             pressureEqnDispCoeff.x() = coeff(3,0);
             pressureEqnDispCoeff.y() = coeff(3,1);
             pressureEqnDispCoeff.z() = coeff(3,2);
-            
+
 
             // Extract the source terms of the momentum equation
             vector sourceTerms(vector::zero);
@@ -1158,7 +1158,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             sourceTerms.x() = source[blockRowI](0,0);
             sourceTerms.y() = source[blockRowI](1,0);
             sourceTerms.z() = source[blockRowI](2,0);
-            
+
 
             if (debug)
             {
@@ -1211,21 +1211,21 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             coeff(2,0) = momentumEqnDispCoeff.zx();
             coeff(2,1) = momentumEqnDispCoeff.zy();
             coeff(2,2) = momentumEqnDispCoeff.zz();
-            
-            
-            // Insert the changed pressure coefficients of the momentum 
+
+
+            // Insert the changed pressure coefficients of the momentum
             // equation back into the matrix
             coeff(0,3) = momentumEqnPressCoeff.x();
             coeff(1,3) = momentumEqnPressCoeff.y();
             coeff(2,3) = momentumEqnPressCoeff.z();
-            
-            
-            // Insert the changed pressure coefficients of the pressure 
+
+
+            // Insert the changed pressure coefficients of the pressure
             // equation back into the matrix
             coeff(3,0) = pressureEqnDispCoeff.x();
             coeff(3,1) = pressureEqnDispCoeff.y();
             coeff(3,2) = pressureEqnDispCoeff.z();
-            
+
             // Insert the changed source terms back into the source
             source[blockRowI](0,0) = sourceTerms.x();
             source[blockRowI](1,0) = sourceTerms.y();
@@ -1248,7 +1248,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             // This equation refers to a fixed direction
             // We will eliminate the coeff and add the contribution to the
             // source
-            RectangularMatrix<scalar>& coeff = iter();
+            scalarRectangularMatrix& coeff = iter();
 
             // Extract the displacement coefficients of the momentum equation
             tensor momentumEqnDispCoeff(tensor::zero);
@@ -1262,14 +1262,14 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             momentumEqnDispCoeff.zx() = coeff(2,0);
             momentumEqnDispCoeff.zy() = coeff(2,1);
             momentumEqnDispCoeff.zz() = coeff(2,2);
-            
+
             // Extract the displacement coefficients of the pressure equation
             vector pressureEqnDispCoeff(vector::zero);
 
             pressureEqnDispCoeff.x() = coeff(3,0);
             pressureEqnDispCoeff.y() = coeff(3,1);
             pressureEqnDispCoeff.z() = coeff(3,2);
-            
+
             if (debug)
             {
                 Info<< "blockCol fixed: " << blockColI << nl
@@ -1305,7 +1305,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             coeff(3,0) = pressureEqnDispCoeff.x();
             coeff(3,1) = pressureEqnDispCoeff.y();
             coeff(3,2) = pressureEqnDispCoeff.z();
-            
+
             if (debug)
             {
                 Info<< "    Displacement coeff of momentum equation after: "
@@ -1321,7 +1321,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
 void Foam::sparseMatrixExtendedTools::enforceFixedPressureDof
 (
     sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source,
+    Field<scalarRectangularMatrix>& source,
     const boolList& fixedDofs,
     const symmTensorField& fixedDofDirections
 )
@@ -1346,7 +1346,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedPressureDof
 
         if (fixedDofs[blockRowI])
         {
-            RectangularMatrix<scalar>& coeff = iter();
+            scalarRectangularMatrix& coeff = iter();
 
             // Set the displacement coefficients of the pressure equation to
             // zero
@@ -1364,7 +1364,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedPressureDof
         }
         else if (fixedDofs[blockColI])
         {
-            RectangularMatrix<scalar>& coeff = iter();
+            scalarRectangularMatrix& coeff = iter();
 
             // Set the displacement coefficients of the momentum equation to
             // zero

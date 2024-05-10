@@ -34,7 +34,6 @@ SourceFiles
 #define sparseMatrixExtendedTools_H
 
 #include "sparseMatrixExtended.H"
-#include "RectangularMatrix.H"
 #include "vectorField.H"
 #include "polyMesh.H"
 #ifdef OPENFOAM_NOT_EXTEND
@@ -60,8 +59,8 @@ namespace sparseMatrixExtendedTools
     void solveLinearSystemEigen
     (
         const sparseMatrixExtended& matrix,
-        const Field<RectangularMatrix<scalar>>& source,
-        Field<RectangularMatrix<scalar>>& solution,
+        const Field<scalarRectangularMatrix>& source,
+        Field<scalarRectangularMatrix>& solution,
         const bool twoD,
         const bool exportToMatlab = false,
         const bool debug = false
@@ -77,8 +76,8 @@ namespace sparseMatrixExtendedTools
 #endif
     (
         const sparseMatrixExtended& matrix,
-        const Field<RectangularMatrix<scalar>>& source,
-        Field<RectangularMatrix<scalar>>& solution,
+        const Field<scalarRectangularMatrix>& source,
+        Field<scalarRectangularMatrix>& solution,
         const bool twoD,
         fileName& optionsFile,
         const pointField& points,
@@ -112,7 +111,7 @@ namespace sparseMatrixExtendedTools
     void enforceFixedDisplacementDof
     (
         sparseMatrixExtended& matrix,
-        Field<RectangularMatrix<scalar>>& source,
+        Field<scalarRectangularMatrix>& source,
         const boolList& fixedDofs,
         const symmTensorField& fixedDofDirections,
         const pointField& fixedDofValues,
@@ -123,7 +122,7 @@ namespace sparseMatrixExtendedTools
     void enforceFixedPressureDof
     (
         sparseMatrixExtended& matrix,
-        Field<RectangularMatrix<scalar>>& source,
+        Field<scalarRectangularMatrix>& source,
         const boolList& fixedDofs,
         const symmTensorField& fixedDofDirections
     );

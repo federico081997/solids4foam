@@ -376,7 +376,7 @@ tmp<surfaceVectorField> fGrad
                 if (cellID > 1)
                 {
                     // Use the gradient in the adjacent primary cell-centre
-                    // This will result in inconsistent values at processor 
+                    // This will result in inconsistent values at processor
                     // patches
                     // Is this an issue?
 #ifdef OPENFOAM_NOT_EXTEND

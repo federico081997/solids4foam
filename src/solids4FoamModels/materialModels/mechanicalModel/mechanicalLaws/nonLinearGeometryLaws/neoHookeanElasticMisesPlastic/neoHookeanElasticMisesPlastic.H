@@ -284,8 +284,7 @@ public:
         virtual tmp<pointScalarField> pBulkModulus() const;
 
         //- Material tangent for Newton Raphson loop
-        virtual tmp<Field<RectangularMatrix<scalar>>>
-        materialTangentField() const;
+        virtual tmp<Field<scalarSquareMatrix>> materialTangentField() const;
 
         //- Update the volField stress
         virtual void correct(volSymmTensorField& sigma);

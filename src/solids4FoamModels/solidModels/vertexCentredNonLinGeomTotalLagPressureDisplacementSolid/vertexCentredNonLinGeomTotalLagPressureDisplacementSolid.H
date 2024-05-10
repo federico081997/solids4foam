@@ -19,13 +19,13 @@ Class
     vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
 
 Description
-    
-    Mathematical model where where non linear geometry is modelled i.e. large 
+
+    Mathematical model where where non linear geometry is modelled i.e. large
     strains and the total displacement and pressure are the primary unknowns.
 
     Discretisation is performed using a vertex-centred finite volume approach
-    where the governing equations are integrated over a dual mesh. The dual 
-    mesh is automatically constructed from the primary mesh using the 
+    where the governing equations are integrated over a dual mesh. The dual
+    mesh is automatically constructed from the primary mesh using the
     meshDualiser.
 
 Author
@@ -90,7 +90,7 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
 
         //- zeta coefficient
         const scalar zeta_;
-    
+
         //- Pressure smoothing factor
         const scalar pressureSmoothingFactor_;
 
@@ -114,7 +114,7 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
         //  fixed
         symmTensorField fixedDofDirections_;
 
-        //- Scale factor for the fixed degree of freedom equations to improve 
+        //- Scale factor for the fixed degree of freedom equations to improve
         //  the matrix conditioning
         const scalar fixedDofScale_;
 
@@ -161,14 +161,14 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
 
         //- Cell pressure
         volScalarField volP_;
-        
+
         //- Local-to-global point map and owner list
         globalPointIndices globalPointIndices_;
 
 
     // Private Member Functions
 
-        
+
         //- Set fixed degree of freedom lists
         void setFixedDofs
         (
@@ -196,11 +196,11 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
             const label nInterations,
             const pointVectorField& pointD,
             const pointScalarField& pointP,
-            const Field<RectangularMatrix<scalar>>& pointDPcorr
+            const Field<scalarRectangularMatrix>& pointDPcorr
         ) const;
 
         //- Calculate the geometric stiffness field
-        Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
+        Foam::tmp<Foam::Field<Foam::scalarRectangularMatrix>>
         geometricStiffnessField
         (
             const surfaceVectorField SfUndef, // Undeformed surface area
@@ -213,14 +213,14 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
             const pointVectorField& pointD,
             const pointScalarField& pointP
         ) const;
-        
+
         //- Calculate the residual of the pressure equation
         tmp<scalarField> residualP
         (
             const pointVectorField& pointD,
             const pointScalarField& pointP
         ) const;
-        
+
         //- Calculate the matrix coefficients using finite difference
         void finiteDiffMatrix
         (

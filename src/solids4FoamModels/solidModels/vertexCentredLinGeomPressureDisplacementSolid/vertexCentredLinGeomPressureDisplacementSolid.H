@@ -24,8 +24,8 @@ Description
     unknown.
 
     Discretisation is performed using a vertex-centred finite volume approach
-    where the governing equations are integrated over a dual mesh. The dual 
-    mesh is automatically constructed from the primary mesh using the 
+    where the governing equations are integrated over a dual mesh. The dual
+    mesh is automatically constructed from the primary mesh using the
     meshDualiser.
 
 Author
@@ -88,7 +88,7 @@ class vertexCentredLinGeomPressureDisplacementSolid
 
         //- Bulk modulus at the primary points
         const pointScalarField pointK_;
-        
+
         //- Flag indicating if the case is 2-D or 3-D
         const bool twoD_;
 
@@ -106,7 +106,7 @@ class vertexCentredLinGeomPressureDisplacementSolid
         //  fixed
         symmTensorField fixedDofDirections_;
 
-        //- Scale factor for the fixed degree of freedom equations to improve 
+        //- Scale factor for the fixed degree of freedom equations to improve
         //  the matrix conditioning
         const scalar fixedDofScale_;
 
@@ -175,7 +175,7 @@ class vertexCentredLinGeomPressureDisplacementSolid
             const label nInterations,
             const pointVectorField& pointD,
             const pointScalarField& pointP,
-            const Field<RectangularMatrix<scalar>>& pointDPcorr
+            const Field<scalarRectangularMatrix>& pointDPcorr
         ) const;
 
         //- Calculate the residual of the momentum equation
@@ -184,14 +184,14 @@ class vertexCentredLinGeomPressureDisplacementSolid
             const pointVectorField& pointD,
             const pointScalarField& pointP
         ) const;
-        
+
         //- Calculate the residual of the pressure equation
         tmp<scalarField> residualP
         (
             const pointVectorField& pointD,
             const pointScalarField& pointP
         ) const;
-        
+
         //- Calculate the matrix coefficients using finite difference
         void finiteDiffMatrix
         (

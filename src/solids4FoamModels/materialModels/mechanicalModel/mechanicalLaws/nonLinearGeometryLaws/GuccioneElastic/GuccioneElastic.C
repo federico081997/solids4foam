@@ -508,21 +508,21 @@ Foam::tmp<Foam::volScalarField> Foam::GuccioneElastic::impK() const
 }
 
 
-Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
+Foam::tmp<Foam::Field<Foam::scalarRectangularMatrix>>
 Foam::GuccioneElastic::materialTangentField() const
 {
     // Prepare tmp field
-    tmp<Field<Foam::RectangularMatrix<Foam::scalar>>> tresult
+    tmp<Field<Foam::scalarRectangularMatrix>> tresult
     (
-        new Field<Foam::RectangularMatrix<Foam::scalar>>
+        new Field<Foam::scalarRectangularMatrix>
         (
-            mesh().nFaces(), Foam::RectangularMatrix<scalar>(6, 9, 0.0)
+            mesh().nFaces(), Foam::scalarRectangularMatrix(6, 9, 0.0)
         )
     );
 #ifdef OPENFOAM_NOT_EXTEND
-    Field<Foam::RectangularMatrix<Foam::scalar>>& result = tresult.ref();
+    Field<Foam::scalarRectangularMatrix>& result = tresult.ref();
 #else
-    Field<Foam::RectangularMatrix<Foam::scalar>>& result = tresult();
+    Field<Foam::scalarRectangularMatrix>& result = tresult();
 #endif
 
     // Calculate tangent field
