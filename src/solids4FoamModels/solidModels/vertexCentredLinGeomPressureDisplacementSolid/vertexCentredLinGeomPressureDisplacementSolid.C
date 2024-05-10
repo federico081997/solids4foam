@@ -1066,7 +1066,8 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         // Update material tangent
         materialTangent = dualMechanicalPtr_().materialTangentFaceField();
 
-        // Add div(sigma) pressure and displacement coefficients
+        // Add div(dev(sigma)) displacement coefficients to the momentum
+        // equation
         matrix += vfvm::divSigma
         (
             mesh(),
@@ -1075,6 +1076,17 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
             dualMeshMap().dualCellToPoint(),
             materialTangent,
             zeta_,
+            debug
+        );
+
+        // Add div(p*I) pressure coefficients to the momentum equation
+        // PC: shouldn't this be subtracted?!
+        matrix += vfvm::gradP
+        (
+            mesh(),
+            dualMesh(),
+            dualMeshMap().dualFaceToCell(),
+            dualMeshMap().dualCellToPoint(),
             debug
         );
 

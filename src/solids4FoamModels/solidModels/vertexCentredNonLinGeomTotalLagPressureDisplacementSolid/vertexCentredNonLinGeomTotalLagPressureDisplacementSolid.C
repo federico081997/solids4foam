@@ -1405,7 +1405,8 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             )
         );
 
-        // Add div(sigma) pressure and displacement coefficients
+        // Add div(dev(sigma)) displacement coefficients to the momentum
+        // equation
         matrix += vfvm::divSigma
         (
             mesh(),
@@ -1417,6 +1418,17 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             dualSigmaf_,
             dualGradDf_,
             zeta_,
+            debug
+        );
+
+        // Add div(p*I) pressure coefficients to the momentum equation
+        // PC: shouldn't this be subtracted?!
+        matrix += vfvm::gradP
+        (
+            mesh(),
+            dualMesh(),
+            dualMeshMap().dualFaceToCell(),
+            dualMeshMap().dualCellToPoint(),
             debug
         );
 

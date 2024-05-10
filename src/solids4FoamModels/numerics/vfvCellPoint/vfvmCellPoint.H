@@ -122,6 +122,19 @@ namespace vfvm
     );
 
 
+    // Add coefficients to the matrix for the gradP term in the
+    // small-strain displacement-pressure formulation. Each coefficient in the
+    // matrix is a 4x4 tensor.
+    tmp<sparseMatrixExtended> gradP
+    (
+        const fvMesh& mesh,
+        const fvMesh& dualMesh,
+        const labelList& dualFaceToCell,
+        const labelList& dualCellToPoint,
+        const bool debug
+    );
+
+
     // Add coefficients to the matrix for the Laplacian of a scalar field with
     // a scalar diffusivity field. Each coefficient in the matrix is a scalar.
     void laplacian

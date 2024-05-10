@@ -437,19 +437,6 @@ Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::divSigma
                 lsVec
             );
 
-            // Insert pressure coefficients of the momentum equation
-            for (int i = 0; i < 3; i++)
-            {
-                // Add the coefficient to the ownPointID equation
-                matrix(ownPointID, pointID)(i,3) +=
-                    -curDualSf.component(i)/curCellPoints.size();
-
-                // Add the coefficient to the neiPointID equation coming from
-                // ownPointID
-                matrix(neiPointID, pointID)(i,3) -=
-                    -curDualSf.component(i)/curCellPoints.size();
-            }
-
             // Insert displacement coefficients of the momentum equation
             label cmptI = 0;
             for (int i = 0; i < 3; i++)
@@ -664,19 +651,6 @@ Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::divSigma
                 lsVec
             );
 
-            // Insert pressure coefficients of the momentum equation
-            for (int i = 0; i < 3; i++)
-            {
-                // Add the coefficient to the ownPointID equation
-                matrix(ownPointID, pointID)(i,3) +=
-                    -curDualSfDef.component(i)/curCellPoints.size();
-
-                // Add the coefficient to the neiPointID equation coming from
-                // ownPointID
-                matrix(neiPointID, pointID)(i,3) -=
-                    -curDualSfDef.component(i)/curCellPoints.size();
-            }
-
             // Insert displacement coefficients of the momentum equation
             label cmptI = 0;
             for (int i = 0; i < 3; i++)
@@ -744,6 +718,76 @@ Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::divSigma
     {
         Info<< "tmp<sparseMatrixExtended> Foam::vfvm::divSigma(...): end"
             << endl;
+    }
+
+    return tmatrix;
+}
+
+
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::gradP
+(
+    const fvMesh& mesh,
+    const fvMesh& dualMesh,
+    const labelList& dualFaceToCell,
+    const labelList& dualCellToPoint,
+    const bool debug
+)
+{
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(20*mesh.nPoints())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
+
+    // Take reference for clarity and efficiency
+    const labelListList& cellPoints = mesh.cellPoints();
+    const labelList& dualOwn = dualMesh.owner();
+    const labelList& dualNei = dualMesh.neighbour();
+    const vectorField& dualSf = dualMesh.faceAreas();
+
+    // Loop over all internal faces of the dual mesh
+    forAll(dualOwn, dualFaceI)
+    {
+        // Primary mesh cell in which dualFaceI resides
+        const label cellID = dualFaceToCell[dualFaceI];
+
+        // Points in cellID
+        const labelList& curCellPoints = cellPoints[cellID];
+
+        // Dual cell owner of dualFaceI
+        const label dualOwnCellID = dualOwn[dualFaceI];
+
+        // Dual cell neighbour of dualFaceI
+        const label dualNeiCellID = dualNei[dualFaceI];
+
+        // Primary mesh point at the centre of dualOwnCellID
+        const label ownPointID = dualCellToPoint[dualOwnCellID];
+
+        // Primary mesh point at the centre of dualNeiCellID
+        const label neiPointID = dualCellToPoint[dualNeiCellID];
+
+        // dualFaceI area vector
+        const vector& curDualSf = dualSf[dualFaceI];
+
+        forAll(curCellPoints, cpI)
+        {
+            // Primary point index
+            const label pointID = curCellPoints[cpI];
+
+            // Insert pressure coefficients of the momentum equation
+            for (int i = 0; i < 3; i++)
+            {
+                // Add the coefficient to the ownPointID equation
+                matrix(ownPointID, pointID)(i,3) +=
+                    -curDualSf.component(i)/curCellPoints.size();
+
+                // Add the coefficient to the neiPointID equation coming from
+                // ownPointID
+                matrix(neiPointID, pointID)(i,3) -=
+                    -curDualSf.component(i)/curCellPoints.size();
+            }
+        }
     }
 
     return tmatrix;
