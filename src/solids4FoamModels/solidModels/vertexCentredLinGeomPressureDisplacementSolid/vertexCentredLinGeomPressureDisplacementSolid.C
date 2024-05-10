@@ -347,7 +347,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::converged
     const label nInterations,
     const pointVectorField& pointD,
     const pointScalarField& pointP,
-    const Field<RectangularMatrix<scalar>>& pointDPcorr
+    const Field<scalarRectangularMatrix>& pointDPcorr
 ) const
 {
     scalar residualDAbs = 0;
@@ -1005,7 +1005,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
     );
 
     // Store material tangent field for the dual mesh faces
-    Field<RectangularMatrix<scalar>> materialTangent
+    Field<scalarSquareMatrix> materialTangent
     (
         dualMechanicalPtr_().materialTangentFaceField()
     );
@@ -1022,10 +1022,10 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         globalPointIndices_.localToGlobalPointMap();
 
     // Unknown pressure and displacement correction
-    Field<RectangularMatrix<scalar>> pointDPcorr
+    Field<scalarRectangularMatrix> pointDPcorr
     (
         pointD().internalField().size(),
-        RectangularMatrix<scalar>(4,1,0)
+        scalarRectangularMatrix(4,1,0)
     );
 
     // Newton-Raphson loop over momentum and pressure equations
@@ -1079,10 +1079,10 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         dualMechanicalPtr_().correct(dualSigmaf_);
 
         // Initialise the source
-        Field<RectangularMatrix<scalar>> source
+        Field<scalarRectangularMatrix> source
         (
             mesh().nPoints(),
-            RectangularMatrix<scalar>(4, 1, 0.0)
+            scalarRectangularMatrix(4, 1, 0.0)
         );
 
         // Calculate d(pBar)/d(gradD) for the matrix coefficients

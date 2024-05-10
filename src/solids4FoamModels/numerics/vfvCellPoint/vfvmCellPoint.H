@@ -65,7 +65,7 @@ namespace vfvm
         const fvMesh& dualMesh,
         const labelList& dualFaceToCell,
         const labelList& dualCellToPoint,
-        const Field<RectangularMatrix<scalar>>& materialTangentField,
+        const Field<scalarSquareMatrix>& materialTangentField,
         const scalar zeta, // Fraction of compact edge direction component used
         const bool debug = false
     );
@@ -80,8 +80,8 @@ namespace vfvm
         const fvMesh& dualMesh,
         const labelList& dualFaceToCell,
         const labelList& dualCellToPoint,
-        const Field<RectangularMatrix<scalar>>& materialTangentField,
-        const Field<RectangularMatrix<scalar>>& geometricStiffnessField,
+        const Field<scalarSquareMatrix>& materialTangentField,
+        const Field<scalarRectangularMatrix>& geometricStiffnessField,
         const symmTensorField& sigma,
         const tensorField& dualGradDField,
         const scalar zeta, // Fraction of compact edge direction component used
@@ -99,7 +99,7 @@ namespace vfvm
         const fvMesh& dualMesh,
         const labelList& dualFaceToCell,
         const labelList& dualCellToPoint,
-        const Field<RectangularMatrix<scalar>>& materialTangentField,
+        const Field<scalarSquareMatrix>& materialTangentField,
         const scalar zeta, // Fraction of compact edge direction component used
         const bool debug
     );
@@ -115,8 +115,8 @@ namespace vfvm
         const fvMesh& dualMesh,
         const labelList& dualFaceToCell,
         const labelList& dualCellToPoint,
-        const Field<RectangularMatrix<scalar>>& materialTangentField,
-        const Field<RectangularMatrix<scalar>>& geometricStiffnessField,
+        const Field<scalarSquareMatrix>& materialTangentField,
+        const Field<scalarRectangularMatrix>& geometricStiffnessField,
         const symmTensorField& sigma,
         const tensorField& dualGradDField,
         const scalar zeta, // Fraction of compact edge direction component used

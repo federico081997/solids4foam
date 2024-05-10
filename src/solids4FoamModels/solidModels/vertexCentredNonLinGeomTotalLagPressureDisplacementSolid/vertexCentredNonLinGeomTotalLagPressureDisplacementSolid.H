@@ -196,11 +196,11 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
             const label nInterations,
             const pointVectorField& pointD,
             const pointScalarField& pointP,
-            const Field<RectangularMatrix<scalar>>& pointDPcorr
+            const Field<scalarRectangularMatrix>& pointDPcorr
         ) const;
 
         //- Calculate the geometric stiffness field
-        Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
+        Foam::tmp<Foam::Field<Foam::scalarRectangularMatrix>>
         geometricStiffnessField
         (
             const surfaceVectorField SfUndef, // Undeformed surface area

@@ -108,7 +108,7 @@ public:
         virtual tmp<volScalarField> impK() const;
 
         //- Material tangent for Newton Raphson loop
-        virtual tmp<Field<RectangularMatrix<scalar>>>
+        virtual tmp<Field<scalarRectangularMatrix>>
         materialTangentField() const;
 
         //- Return the bulk modulus field

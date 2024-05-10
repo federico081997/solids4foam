@@ -293,10 +293,9 @@ public:
         //- Return bulk modulus at the points
         virtual tmp<pointScalarField> pBulkModulus() const;
 
-#ifdef OPENFOAM_NOT_EXTEND
+#ifdef OPENFOAM_COM
         //- Material tangent for Newton Raphson loop
-        virtual tmp<Field<RectangularMatrix<scalar>>>
-        materialTangentField() const;
+        virtual tmp<Field<scalarSquareMatrix>> materialTangentField() const;
 #endif
 
         //- Return the implicit stiffness as a diagTensor

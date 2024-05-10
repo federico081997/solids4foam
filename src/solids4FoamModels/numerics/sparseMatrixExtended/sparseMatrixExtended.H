@@ -41,7 +41,7 @@ SourceFiles
 
 #include "HashTable.H"
 #include "FixedList.H"
-#include "RectangularMatrix.H"
+#include "scalarMatrices.H"
 #include "refCount.H"
 
 
@@ -52,7 +52,7 @@ namespace Foam
 
     typedef HashTable
     <
-        RectangularMatrix<scalar>,
+        scalarRectangularMatrix,
         FixedList<label, 2>,
         FixedList<label, 2>::Hash<>
     > sparseMatrixExtendedData;
@@ -131,7 +131,7 @@ public:
 
             //- Non-const access to a value entry. If the entry does not exist
             //  then create it and initialise it to zero
-            RectangularMatrix<scalar>& operator()
+            scalarRectangularMatrix& operator()
             (
                 const label rowI,
                 const label colI

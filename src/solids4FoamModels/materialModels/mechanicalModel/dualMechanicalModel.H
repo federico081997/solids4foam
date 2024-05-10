@@ -131,10 +131,9 @@ public:
             //- Return const access to the mesh
             const fvMesh& mesh() const;
 
-#ifdef OPENFOAM_NOT_EXTEND
+#ifdef OPENFOAM_COM
             //- Material tangent field defined at dual mesh faces
-            tmp<Field<RectangularMatrix<scalar>>>
-            materialTangentFaceField() const;
+            tmp<Field<scalarSquareMatrix>> materialTangentFaceField() const;
 #endif
 
             //- Implicit modulus field at the faces

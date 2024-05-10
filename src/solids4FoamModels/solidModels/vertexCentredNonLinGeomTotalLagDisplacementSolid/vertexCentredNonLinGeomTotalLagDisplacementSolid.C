@@ -641,7 +641,7 @@ scalar vertexCentredNonLinGeomTotalLagDisplacementSolid::calculateLineSearchFact
     return eta;
 }
 
-Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
+Foam::tmp<Foam::Field<Foam::scalarRectangularMatrix>>
 vertexCentredNonLinGeomTotalLagDisplacementSolid::geometricStiffnessField
 (
     const surfaceVectorField SfUndef, // Undeformed surface area vector field
@@ -649,18 +649,18 @@ vertexCentredNonLinGeomTotalLagDisplacementSolid::geometricStiffnessField
 ) const
 {
     // Prepare tmp field
-    tmp<Field<Foam::RectangularMatrix<Foam::scalar>>> tresult
+    tmp<Field<Foam::scalarRectangularMatrix>> tresult
     (
-        new Field<Foam::RectangularMatrix<Foam::scalar>>
+        new Field<Foam::scalarRectangularMatrix>
         (
             dualMesh().nFaces(), 
-            Foam::RectangularMatrix<scalar>(3,9,0)
+            Foam::scalarRectangularMatrix(3,9,0)
         )
     );
 #ifdef OPENFOAM_NOT_EXTEND
-    Field<Foam::RectangularMatrix<Foam::scalar>>& result = tresult.ref();
+    Field<Foam::scalarRectangularMatrix>& result = tresult.ref();
 #else
-    Field<Foam::RectangularMatrix<Foam::scalar>>& result = tresult();
+    Field<Foam::scalarRectangularMatrix>& result = tresult();
 #endif
 
     // Don't include the geometric stiffness
@@ -1097,7 +1097,7 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
     dualJf_ = det(dualFf_);
 
     // Store material tangent field for dual mesh faces
-    Field<RectangularMatrix<scalar>> materialTangent
+    Field<scalarSquareMatrix> materialTangent
     (
         dualMechanicalPtr_().materialTangentFaceField()
     );
@@ -1125,7 +1125,7 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
         surfaceTensorField gradDRef = dualGradDf_;
 
         // Calculate geometric stiffness field for dual mesh faces
-        Foam::Field<Foam::RectangularMatrix<Foam::scalar>> geometricStiffness
+        Foam::Field<Foam::scalarRectangularMatrix> geometricStiffness
         (
             geometricStiffnessField
             (
@@ -1226,7 +1226,7 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
             surfaceVectorField SfUndef = dualMesh().Sf();
 
             // Calculate geometric stiffness field for dual mesh faces
-            Foam::Field<Foam::RectangularMatrix<Foam::scalar>> 
+            Foam::Field<Foam::scalarRectangularMatrix> 
             geometricStiffness
             (
                 geometricStiffnessField

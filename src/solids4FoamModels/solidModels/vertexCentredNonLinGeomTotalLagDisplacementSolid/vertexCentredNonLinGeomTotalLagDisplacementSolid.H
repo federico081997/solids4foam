@@ -194,7 +194,7 @@ class vertexCentredNonLinGeomTotalLagDisplacementSolid
             const scalar zeta // Discretisation parameter
         );
 
-        Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
+        Foam::tmp<Foam::Field<Foam::scalarRectangularMatrix>>
         geometricStiffnessField
         (
             const surfaceVectorField SfUndef, // Undeformed surface area

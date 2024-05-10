@@ -356,7 +356,7 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::converged
     const label nInterations,
     const pointVectorField& pointD,
     const pointScalarField& pointP,
-    const Field<RectangularMatrix<scalar>>& pointDPcorr
+    const Field<scalarRectangularMatrix>& pointDPcorr
 ) const
 {
     scalar residualDAbs = 0;
@@ -469,7 +469,7 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::converged
 }
 
 
-Foam::tmp<Foam::Field<Foam::RectangularMatrix<Foam::scalar>>>
+Foam::tmp<Foam::Field<Foam::scalarRectangularMatrix>>
 vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::geometricStiffnessField
 (
         const surfaceVectorField SfUndef,
@@ -477,18 +477,18 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::geometricStiffnessFiel
 ) const
 {
     // Prepare tmp field
-    tmp<Field<Foam::RectangularMatrix<Foam::scalar>>> tresult
+    tmp<Field<Foam::scalarRectangularMatrix>> tresult
     (
-        new Field<Foam::RectangularMatrix<Foam::scalar>>
+        new Field<Foam::scalarRectangularMatrix>
         (
             dualMesh().nFaces(),
-            Foam::RectangularMatrix<scalar>(3,9,0)
+            Foam::scalarRectangularMatrix(3,9,0)
         )
     );
 #ifdef OPENFOAM_NOT_EXTEND
-    Field<Foam::RectangularMatrix<Foam::scalar>>& result = tresult.ref();
+    Field<Foam::scalarRectangularMatrix>& result = tresult.ref();
 #else
-    Field<Foam::RectangularMatrix<Foam::scalar>>& result = tresult();
+    Field<Foam::scalarRectangularMatrix>& result = tresult();
 #endif
 
     // Don't include geometric stiffness
@@ -1319,7 +1319,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
     );
 
     // Store material tangent field for dual mesh faces
-    Field<RectangularMatrix<scalar>> materialTangent
+    Field<scalarSquareMatrix> materialTangent
     (
         dualMechanicalPtr_().materialTangentFaceField()
     );
@@ -1336,10 +1336,10 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         globalPointIndices_.localToGlobalPointMap();
 
     // Coupled pressure and displacement correction
-    Field<RectangularMatrix<scalar>> pointDPcorr
+    Field<scalarRectangularMatrix> pointDPcorr
     (
         pointD().internalField().size(),
-        RectangularMatrix<scalar>(4,1,0)
+        scalarRectangularMatrix(4,1,0)
     );
 
     // Newton-Raphson loop over momentum equation
@@ -1405,10 +1405,10 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         dualMechanicalPtr_().correct(dualSigmaf_);
 
         // Create the source vector for displacement-pressure implementation
-        Field<RectangularMatrix<scalar>> source
+        Field<scalarRectangularMatrix> source
         (
             mesh().nPoints(),
-            RectangularMatrix<scalar>(4,1,0)
+            scalarRectangularMatrix(4,1,0)
         );
 
         // Calculate pBarSensitivity
@@ -1467,7 +1467,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
         const surfaceVectorField& SfUndef = dualMesh().Sf();
 
         // Calculate geometric stiffness field for dual mesh faces
-        Foam::Field<Foam::RectangularMatrix<Foam::scalar>> geometricStiffness
+        Foam::Field<Foam::scalarRectangularMatrix> geometricStiffness
         (
             geometricStiffnessField
             (

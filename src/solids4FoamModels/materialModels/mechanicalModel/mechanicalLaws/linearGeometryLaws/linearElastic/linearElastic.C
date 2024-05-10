@@ -242,21 +242,39 @@ Foam::tmp<Foam::volScalarField> Foam::linearElastic::impK() const
 
 
 #ifdef OPENFOAM_NOT_EXTEND
-Foam::RectangularMatrix<Foam::scalar> Foam::linearElastic::materialTangent() const
+Foam::scalarSquareMatrix Foam::linearElastic::materialTangent() const
 {
-    RectangularMatrix<scalar> matTang(6,6,0);
-    matTang(0,0) = 2*mu_.value() + lambda().value();
-    matTang(0,1) = lambda().value();
-    matTang(0,2) = lambda().value();
-    matTang(1,0) = lambda().value();
-    matTang(1,1) = 2*mu_.value() + lambda().value();
-    matTang(1,2) = lambda().value();
-    matTang(2,0) = lambda().value();
-    matTang(2,1) = lambda().value();
-    matTang(2,2) = 2*mu_.value() + lambda().value();
-    matTang(3,3) = mu_.value();
-    matTang(4,4) = mu_.value();
-    matTang(5,5) = mu_.value();
+    // Prepare 6x6 tangent matrix
+    scalarSquareMatrix matTang(6, 0.0);
+
+    // Define matrix indices for readability
+    const label XX = symmTensor::XX;
+    const label YY = symmTensor::YY;
+    const label ZZ = symmTensor::ZZ;
+    const label XY = symmTensor::XY;
+    const label YZ = symmTensor::YZ;
+    const label XZ = symmTensor::XZ;
+
+    const scalar lambda = lambda_.value();
+    const scalar mu = mu_.value();
+    const scalar twoMuLambda = 2*mu + lambda;
+
+    // Set components
+    matTang(XX, XX) = twoMuLambda;
+    matTang(XX, YY) = lambda;
+    matTang(XX, ZZ) = lambda;
+
+    matTang(YY, XX) = lambda;
+    matTang(YY, YY) = twoMuLambda;
+    matTang(YY, ZZ) = lambda;
+
+    matTang(ZZ, XX) = lambda;
+    matTang(ZZ, YY) = lambda;
+    matTang(ZZ, ZZ) = twoMuLambda;
+
+    matTang(XY, XY) = mu;
+    matTang(YZ, YZ) = mu;
+    matTang(XZ, XZ) = mu;
 
     return matTang;
 }

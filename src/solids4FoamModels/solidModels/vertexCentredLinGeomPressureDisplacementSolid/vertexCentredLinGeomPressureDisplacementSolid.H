@@ -175,7 +175,7 @@ class vertexCentredLinGeomPressureDisplacementSolid
             const label nInterations,
             const pointVectorField& pointD,
             const pointScalarField& pointP,
-            const Field<RectangularMatrix<scalar>>& pointDPcorr
+            const Field<scalarRectangularMatrix>& pointDPcorr
         ) const;
 
         //- Calculate the residual of the momentum equation

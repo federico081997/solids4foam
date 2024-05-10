@@ -68,8 +68,8 @@ bool Foam::sparseMatrixExtendedTools::checkTwoD(const polyMesh& mesh)
 void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
 (
     const sparseMatrixExtended& matrix,
-    const Field<RectangularMatrix<scalar>>& source,
-    Field<RectangularMatrix<scalar>>& solution,
+    const Field<scalarRectangularMatrix>& source,
+    Field<scalarRectangularMatrix>& solution,
     const bool twoD,
     const bool exportToMatlab,
     const bool debug
@@ -110,7 +110,7 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
         ++iter
     )
     {
-        const RectangularMatrix<scalar>& coeff = iter();
+        const scalarRectangularMatrix& coeff = iter();
 
         if (twoD)
         {
@@ -335,8 +335,8 @@ void Foam::sparseMatrixExtendedTools::solveLinearSystemEigen
 Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
 (
     const sparseMatrixExtended& matrix,
-    const Field<RectangularMatrix<scalar>>& source,
-    Field<RectangularMatrix<scalar>>& solution,
+    const Field<scalarRectangularMatrix>& source,
+    Field<scalarRectangularMatrix>& solution,
     const bool twoD,
     fileName& optionsFile,
     const pointField& points,
@@ -527,7 +527,7 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
         ++iter
     )
     {
-        const RectangularMatrix<scalar>& coeff = iter();
+        const scalarRectangularMatrix& coeff = iter();
         const label blockRowI = localToGlobalPointMap[iter.key()[0]];
         const label blockColI = localToGlobalPointMap[iter.key()[1]];
 
@@ -641,7 +641,7 @@ Foam::sparseMatrixExtendedTools::solveLinearSystemPETSc
     {
         forAll(source, localBlockRowI)
         {
-            const RectangularMatrix<scalar>& sourceI = source[localBlockRowI];
+            const scalarRectangularMatrix& sourceI = source[localBlockRowI];
             const label blockRowI = localToGlobalPointMap[localBlockRowI];
 
             if (twoD)
@@ -1095,7 +1095,7 @@ void Foam::sparseMatrixExtendedTools::checkErr(const int ierr)
 void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
 (
     sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source,
+    Field<scalarRectangularMatrix>& source,
     const boolList& fixedDofs,
     const symmTensorField& fixedDofDirections,
     const pointField& fixedDofValues,
@@ -1122,7 +1122,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
 
         if (fixedDofs[blockRowI])
         {
-            RectangularMatrix<scalar>& coeff = iter();
+            scalarRectangularMatrix& coeff = iter();
 
             // Extract the displacement coefficients of the momentum equation
             tensor momentumEqnDispCoeff(tensor::zero);
@@ -1248,7 +1248,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
             // This equation refers to a fixed direction
             // We will eliminate the coeff and add the contribution to the
             // source
-            RectangularMatrix<scalar>& coeff = iter();
+            scalarRectangularMatrix& coeff = iter();
 
             // Extract the displacement coefficients of the momentum equation
             tensor momentumEqnDispCoeff(tensor::zero);
@@ -1321,7 +1321,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedDisplacementDof
 void Foam::sparseMatrixExtendedTools::enforceFixedPressureDof
 (
     sparseMatrixExtended& matrix,
-    Field<RectangularMatrix<scalar>>& source,
+    Field<scalarRectangularMatrix>& source,
     const boolList& fixedDofs,
     const symmTensorField& fixedDofDirections
 )
@@ -1346,7 +1346,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedPressureDof
 
         if (fixedDofs[blockRowI])
         {
-            RectangularMatrix<scalar>& coeff = iter();
+            scalarRectangularMatrix& coeff = iter();
 
             // Set the displacement coefficients of the pressure equation to
             // zero
@@ -1364,7 +1364,7 @@ void Foam::sparseMatrixExtendedTools::enforceFixedPressureDof
         }
         else if (fixedDofs[blockColI])
         {
-            RectangularMatrix<scalar>& coeff = iter();
+            scalarRectangularMatrix& coeff = iter();
 
             // Set the displacement coefficients of the momentum equation to
             // zero
