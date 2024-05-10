@@ -1972,7 +1972,7 @@ void vertexCentredLinGeomSolid::writeFields(const Time& runTime)
 
         pSigma.write();
     }
-        
+
     solidModel::writeFields(runTime);
 }
 
