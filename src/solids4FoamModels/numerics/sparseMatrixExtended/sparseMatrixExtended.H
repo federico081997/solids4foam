@@ -28,7 +28,7 @@ Description
     Used in coupled solid mechanics solvers in solids4foam.
 
 Author
-	Philip Cardiff,UCD.
+    Philip Cardiff, UCD.
     Federico Mazzanti, UCD.
 
 SourceFiles
@@ -73,9 +73,6 @@ class sparseMatrixExtended
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        sparseMatrixExtended(const sparseMatrixExtended&);
-
         //- Disallow default bitwise assignment
         void operator=(const sparseMatrixExtended&);
 
@@ -90,6 +87,11 @@ public:
         //- Construct given approximate size
         sparseMatrixExtended(const label size = 128);
 
+        //- Copy construct
+        sparseMatrixExtended(const sparseMatrixExtended& sm);
+
+        //- Construct from tmp\<sparseMatrixExtended\> deleting argument
+        sparseMatrixExtended(const tmp<sparseMatrixExtended>& tsm);
 
     // Destructor
 
@@ -136,6 +138,28 @@ public:
                 const label rowI,
                 const label colI
             );
+
+            //- Operator to add a sparseMatrixExtended A to this object
+            void operator+=(const sparseMatrixExtended& A);
+
+            //- Operator to subtract a sparseMatrixExtended A from this object
+            void operator-=(const sparseMatrixExtended& A);
+
+            //- Operator to add a sparseMatrixExtended A to this object and
+            //  return the result
+            tmp<sparseMatrixExtended> operator+
+            (
+                const sparseMatrixExtended& A
+            ) const;
+
+            //- Operator to multiply the diagonal coefficients of this
+            //  sparseMatrixExtended by a scalar and return the result
+            tmp<sparseMatrixExtended> operator*(const scalar s) const;
+
+            //- Operator to multiply the diagonal coefficients of this
+            //  sparseMatrixExtended by a scalarField and return the result
+            //  It is assumed that the field index corresponds to the matrix row
+            tmp<sparseMatrixExtended> operator*(const scalarField& sf) const;
 };
 
 
