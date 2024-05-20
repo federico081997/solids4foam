@@ -92,9 +92,8 @@ namespace vfvm
     // Add coefficients to the matrix for the divergence of stress in the
     // small-strain displacement-pressure formulation. Each coefficient in the
     // matrix is a 4x4 tensor.
-    void divSigma
+    tmp<sparseMatrixExtended> divSigma
     (
-        sparseMatrixExtended& matrix,
         const fvMesh& mesh,
         const fvMesh& dualMesh,
         const labelList& dualFaceToCell,
@@ -108,9 +107,8 @@ namespace vfvm
     // Add coefficients to the matrix for the divergence of stress in the
     // large-strain displacement-pressure formulation. Each coefficient in the
     // matrix is a 4x4 tensor.
-    void divSigma
+    tmp<sparseMatrixExtended> divSigma
     (
-        sparseMatrixExtended& matrix,
         const fvMesh& mesh,
         const fvMesh& dualMesh,
         const labelList& dualFaceToCell,
@@ -141,6 +139,19 @@ namespace vfvm
     //)
 
 
+    // Add coefficients to the matrix for the gradP term in the
+    // small-strain displacement-pressure formulation. Each coefficient in the
+    // matrix is a 4x4 tensor.
+    tmp<sparseMatrixExtended> gradP
+    (
+        const fvMesh& mesh,
+        const fvMesh& dualMesh,
+        const labelList& dualFaceToCell,
+        const labelList& dualCellToPoint,
+        const bool debug
+    );
+
+
     // Add coefficients to the matrix for the Laplacian of a scalar field with
     // a scalar diffusivity field. Each coefficient in the matrix is a scalar.
     void laplacian
@@ -159,9 +170,8 @@ namespace vfvm
     // Add coefficients to the matrix for the Laplacian of a scalar field with
     // a scalar diffusivity in the small-strain pressure-displacement
     // formulation. Each coefficient in the matrix is a 4x4 tensor.
-    void laplacian
+    tmp<sparseMatrixExtended> laplacian
     (
-        sparseMatrixExtended& matrix,
         const Switch compactStencil,
         const fvMesh& mesh,
         const fvMesh& dualMesh,
@@ -175,9 +185,8 @@ namespace vfvm
     // Add coefficients to the matrix for the Laplacian of a scalar field with
     // a scalar diffusivity in the large-strain pressure-displacement
     // formulation. Each coefficient in the matrix is a 4x4 tensor.
-    void laplacian
+    tmp<sparseMatrixExtended> laplacian
     (
-        sparseMatrixExtended& matrix,
         const Switch compactStencil,
         const fvMesh& mesh,
         const fvMesh& dualMesh,
@@ -205,19 +214,18 @@ namespace vfvm
 
     // Add source coefficients to the matrix diagonal of the pressure
     // equation. Each coefficient in the matrix is a 4x4 tensor.
-    void Sp
+    tmp<sparseMatrixExtended> Sp
     (
-        sparseMatrixExtended& matrix,
         const scalarField& pointVolI,
         const int debug
     );
 
 
     // Add the displacement coefficients of the pressure equation to the
-    // matrix. Each coefficients in the matrix is a 4x4 tensor.
-    void addPbar
+    // matrix. Each coefficient in the matrix is a 4x4 tensor.
+    // divU == tr(gradU)
+    tmp<sparseMatrixExtended> divU
     (
-        sparseMatrixExtended& matrix,
         const fvMesh& dualMesh,
         const labelList& dualCellToPoint,
         const scalarField& pointVolI,

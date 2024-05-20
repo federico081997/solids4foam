@@ -320,9 +320,8 @@ void Foam::vfvm::divSigma
 }
 
 
-void Foam::vfvm::divSigma
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::divSigma
 (
-    sparseMatrixExtended& matrix,
     const fvMesh& mesh,
     const fvMesh& dualMesh,
     const labelList& dualFaceToCell,
@@ -334,7 +333,34 @@ void Foam::vfvm::divSigma
 {
     if (debug)
     {
-        Info<< "void Foam::vfvm::divSigma(...): start" << endl;
+        Info<< "tmp<sparseMatrixExtended> Foam::vfvm::divSigma(...): start"
+            << endl;
+    }
+
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(20*mesh.nPoints())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
+
+    // Check the material tangents are the correct shape
+    forAll(materialTangentField, faceI)
+    {
+        if (materialTangentField[faceI].m() != 6)
+        {
+            FatalErrorIn("tmp< > Foam::vfvm::divSigma(...)")
+                << "The materialTangent for face " << faceI << " has "
+                << materialTangentField[faceI].m() << " rows "
+                << "but it should have 6!" << abort(FatalError);
+        }
+        else if (materialTangentField[faceI].n() != 6)
+        {
+            FatalErrorIn("tmp< > Foam::vfvm::divSigma(...)")
+                << "The materialTangent for face " << faceI << " has "
+                << materialTangentField[faceI].m() << " rows "
+                << "but it should have 6!" << abort(FatalError);
+        }
     }
 
     // Take reference for clarity and efficiency
@@ -411,19 +437,6 @@ void Foam::vfvm::divSigma
                 lsVec
             );
 
-            // Insert pressure coefficients of the momentum equation
-            for (int i = 0; i < 3; i++)
-            {
-                // Add the coefficient to the ownPointID equation
-                matrix(ownPointID, pointID)(i,3) +=
-                    -curDualSf.component(i)/curCellPoints.size();
-
-                // Add the coefficient to the neiPointID equation coming from
-                // ownPointID
-                matrix(neiPointID, pointID)(i,3) -=
-                    -curDualSf.component(i)/curCellPoints.size();
-            }
-
             // Insert displacement coefficients of the momentum equation
             label cmptI = 0;
             for (int i = 0; i < 3; i++)
@@ -486,14 +499,16 @@ void Foam::vfvm::divSigma
 
     if (debug)
     {
-        Info<< "void Foam::vfvm::divSigma(...): end" << endl;
+        Info<< "tmp<sparseMatrixExtended> Foam::vfvm::divSigma(...): end"
+            << endl;
     }
+
+    return tmatrix;
 }
 
 
-void Foam::vfvm::divSigma
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::divSigma
 (
-    sparseMatrixExtended& matrix,
     const fvMesh& mesh,
     const fvMesh& dualMesh,
     const labelList& dualFaceToCell,
@@ -508,7 +523,34 @@ void Foam::vfvm::divSigma
 {
     if (debug)
     {
-        Info<< "void Foam::vfvm::divSigma(...): start" << endl;
+        Info<< "tmp<sparseMatrixExtended> Foam::vfvm::divSigma(...): start"
+            << endl;
+    }
+
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(20*mesh.nPoints())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
+
+    // Check the material tangents are the correct shape
+    forAll(materialTangentField, faceI)
+    {
+        if (materialTangentField[faceI].m() != 6)
+        {
+            FatalErrorIn("tmp< > Foam::vfvm::divSigma(...)")
+                << "The materialTangent for face " << faceI << " has "
+                << materialTangentField[faceI].m() << " rows "
+                << "but it should have 6!" << abort(FatalError);
+        }
+        else if (materialTangentField[faceI].n() != 6)
+        {
+            FatalErrorIn("tmp< > Foam::vfvm::divSigma(...)")
+                << "The materialTangent for face " << faceI << " has "
+                << materialTangentField[faceI].m() << " rows "
+                << "but it should have 6!" << abort(FatalError);
+        }
     }
 
     // Take reference for clarity and efficiency
@@ -609,19 +651,6 @@ void Foam::vfvm::divSigma
                 lsVec
             );
 
-            // Insert pressure coefficients of the momentum equation
-            for (int i = 0; i < 3; i++)
-            {
-                // Add the coefficient to the ownPointID equation
-                matrix(ownPointID, pointID)(i,3) +=
-                    -curDualSfDef.component(i)/curCellPoints.size();
-
-                // Add the coefficient to the neiPointID equation coming from
-                // ownPointID
-                matrix(neiPointID, pointID)(i,3) -=
-                    -curDualSfDef.component(i)/curCellPoints.size();
-            }
-
             // Insert displacement coefficients of the momentum equation
             label cmptI = 0;
             for (int i = 0; i < 3; i++)
@@ -687,8 +716,81 @@ void Foam::vfvm::divSigma
 
     if (debug)
     {
-        Info<< "void Foam::vfvm::divSigma(...): end" << endl;
+        Info<< "tmp<sparseMatrixExtended> Foam::vfvm::divSigma(...): end"
+            << endl;
     }
+
+    return tmatrix;
+}
+
+
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::gradP
+(
+    const fvMesh& mesh,
+    const fvMesh& dualMesh,
+    const labelList& dualFaceToCell,
+    const labelList& dualCellToPoint,
+    const bool debug
+)
+{
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(20*mesh.nPoints())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
+
+    // Take reference for clarity and efficiency
+    const labelListList& cellPoints = mesh.cellPoints();
+    const labelList& dualOwn = dualMesh.owner();
+    const labelList& dualNei = dualMesh.neighbour();
+    const vectorField& dualSf = dualMesh.faceAreas();
+
+    // Loop over all internal faces of the dual mesh
+    forAll(dualOwn, dualFaceI)
+    {
+        // Primary mesh cell in which dualFaceI resides
+        const label cellID = dualFaceToCell[dualFaceI];
+
+        // Points in cellID
+        const labelList& curCellPoints = cellPoints[cellID];
+
+        // Dual cell owner of dualFaceI
+        const label dualOwnCellID = dualOwn[dualFaceI];
+
+        // Dual cell neighbour of dualFaceI
+        const label dualNeiCellID = dualNei[dualFaceI];
+
+        // Primary mesh point at the centre of dualOwnCellID
+        const label ownPointID = dualCellToPoint[dualOwnCellID];
+
+        // Primary mesh point at the centre of dualNeiCellID
+        const label neiPointID = dualCellToPoint[dualNeiCellID];
+
+        // dualFaceI area vector
+        const vector& curDualSf = dualSf[dualFaceI];
+
+        forAll(curCellPoints, cpI)
+        {
+            // Primary point index
+            const label pointID = curCellPoints[cpI];
+
+            // Insert pressure coefficients of the momentum equation
+            for (int i = 0; i < 3; i++)
+            {
+                // Add the coefficient to the ownPointID equation
+                matrix(ownPointID, pointID)(i,3) +=
+                    -curDualSf.component(i)/curCellPoints.size();
+
+                // Add the coefficient to the neiPointID equation coming from
+                // ownPointID
+                matrix(neiPointID, pointID)(i,3) -=
+                    -curDualSf.component(i)/curCellPoints.size();
+            }
+        }
+    }
+
+    return tmatrix;
 }
 
 
@@ -1010,9 +1112,8 @@ void Foam::vfvm::laplacian
 }
 
 
-void Foam::vfvm::laplacian
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::laplacian
 (
-    sparseMatrixExtended& matrix,
     const Switch compactStencil,
     const fvMesh& mesh,
     const fvMesh& dualMesh,
@@ -1022,10 +1123,12 @@ void Foam::vfvm::laplacian
     const bool debug
 )
 {
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::laplacian(...): start" << endl;
-    }
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(20*mesh.nPoints())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
 
     // Take references for clarity and efficiency
     const labelListList& cellPoints = mesh.cellPoints();
@@ -1118,16 +1221,12 @@ void Foam::vfvm::laplacian
         }
     }
 
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::laplacian(...): end" << endl;
-    }
+    return tmatrix;
 }
 
 
-void Foam::vfvm::laplacian
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::laplacian
 (
-    sparseMatrixExtended& matrix,
     const Switch compactStencil,
     const fvMesh& mesh,
     const fvMesh& dualMesh,
@@ -1138,10 +1237,12 @@ void Foam::vfvm::laplacian
     const bool debug
 )
 {
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::laplacian(...): start" << endl;
-    }
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(20*mesh.nPoints())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
 
     // Take references for clarity and efficiency
     const labelListList& cellPoints = mesh.cellPoints();
@@ -1249,10 +1350,7 @@ void Foam::vfvm::laplacian
         }
     }
 
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::laplacian(...): end" << endl;
-    }
+    return tmatrix;
 }
 
 
@@ -1316,17 +1414,18 @@ void Foam::vfvm::d2dt2
 }
 
 
-void Foam::vfvm::Sp
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::Sp
 (
-    sparseMatrixExtended& matrix,
     const scalarField& pointVolI,
     const int debug
 )
 {
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::Sp(...): start" << endl;
-    }
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(pointVolI.size())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
 
     // Insert the pressure coefficient of the pressure equation
     forAll(pointVolI, pointI)
@@ -1334,16 +1433,12 @@ void Foam::vfvm::Sp
         matrix(pointI, pointI)(3,3) += pointVolI[pointI];
     }
 
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::Sp(...): end" << endl;
-    }
+    return tmatrix;
 }
 
 
-void Foam::vfvm::addPbar
+Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::divU
 (
-    sparseMatrixExtended& matrix,
     const fvMesh& mesh,
     const labelList& dualCellToPoint,
     const scalarField& pointVolI,
@@ -1351,10 +1446,12 @@ void Foam::vfvm::addPbar
     const int debug
 )
 {
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::addPbar(...): start" << endl;
-    }
+    // Prepare the result field
+    tmp<sparseMatrixExtended> tmatrix
+    (
+        new sparseMatrixExtended(20*mesh.nPoints())
+    );
+    sparseMatrixExtended& matrix = tmatrix.ref();
 
     // Take references for clarity and efficiency
     const labelListList& pointPoints = mesh.pointPoints();
@@ -1396,10 +1493,7 @@ void Foam::vfvm::addPbar
         }
     }
 
-    if (debug)
-    {
-        Info<< "void Foam::vfvm::addPbar(...): end" << endl;
-    }
+    return tmatrix;
 }
 
 

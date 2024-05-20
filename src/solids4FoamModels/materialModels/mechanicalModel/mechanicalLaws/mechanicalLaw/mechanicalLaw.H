@@ -124,11 +124,6 @@ class mechanicalLaw
         //  hydrostatic stress
         const Switch solvePressureEqn_;
 
-        //- Switch to enable solution of pressure Laplacian equation for the
-        //  vertex-centred approach. This can help quell oscillations in the
-        //  hydrostatic stress
-        const Switch solveVertexCentredPressureEqn_;
-
         //- Optional: it is possible to scale the amount of smoothing in the
         //  pressure equation with this coefficient
         const scalar pressureSmoothingScaleFactor_;
@@ -218,10 +213,7 @@ protected:
         }
 
         //- Return const access to solveVertexCentredPressureEqn switch
-        const Switch& solveVertexCentredPressureEqn() const
-        {
-            return solveVertexCentredPressureEqn_;
-        }
+        const Switch solveVertexCentredPressureEqn() const;
 
         //- Return the base mesh region name
         const word& baseMeshRegionName() const
