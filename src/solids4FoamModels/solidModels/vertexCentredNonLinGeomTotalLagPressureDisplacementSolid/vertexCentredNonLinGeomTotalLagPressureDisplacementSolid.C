@@ -1113,6 +1113,20 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::vertexCentredNonLinGeo
         dimensionedTensor("zero", dimless, tensor::zero),
         "calculated"
     ),
+    dualGradPf_
+    (
+        IOobject
+        (
+            "grad(P)f",
+            runTime.timeName(),
+            dualMesh(),
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE
+        ),
+        dualMesh(),
+        dimensionedVector("zero", dimPressure/dimLength, vector::zero),
+        "calculated"
+    ),
     dualSigmaf_
     (
         IOobject

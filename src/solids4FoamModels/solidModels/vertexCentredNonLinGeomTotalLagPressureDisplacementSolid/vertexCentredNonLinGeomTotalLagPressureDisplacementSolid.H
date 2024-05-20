@@ -144,6 +144,9 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
         //- Displacement gradient field at the dual mesh faces
         surfaceTensorField dualGradDf_;
 
+        //- Pressure gradient field at the dual mesh faces
+        surfaceVectorField dualGradPf_;
+
         //- Stress field at the dual mesh faces
         surfaceSymmTensorField dualSigmaf_;
 
