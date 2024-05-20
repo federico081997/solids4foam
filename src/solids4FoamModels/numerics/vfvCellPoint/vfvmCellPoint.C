@@ -780,12 +780,12 @@ Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::gradP
             {
                 // Add the coefficient to the ownPointID equation
                 matrix(ownPointID, pointID)(i,3) +=
-                    -curDualSf.component(i)/curCellPoints.size();
+                    curDualSf.component(i)/curCellPoints.size();
 
                 // Add the coefficient to the neiPointID equation coming from
                 // ownPointID
                 matrix(neiPointID, pointID)(i,3) -=
-                    -curDualSf.component(i)/curCellPoints.size();
+                    curDualSf.component(i)/curCellPoints.size();
             }
         }
     }
@@ -1181,12 +1181,12 @@ Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::laplacian
             const scalar coeff = diffusivity*curDualMagSf*deltaCoeff;
 
             // Insert coefficients for the ownPoint
-            matrix(ownPointID, ownPointID)(3,3) -= coeff;
-            matrix(ownPointID, neiPointID)(3,3) += coeff;
+            matrix(ownPointID, ownPointID)(3,3) += coeff;
+            matrix(ownPointID, neiPointID)(3,3) -= coeff;
 
             // Insert coefficients for the neiPoint
-            matrix(neiPointID, neiPointID)(3,3) -= coeff;
-            matrix(neiPointID, ownPointID)(3,3) += coeff;
+            matrix(neiPointID, neiPointID)(3,3) += coeff;
+            matrix(neiPointID, ownPointID)(3,3) -= coeff;
         }
         else
         {
@@ -1212,11 +1212,11 @@ Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::laplacian
 
                 // Add the coefficient to the ownPointID equation coming from
                 // pointID
-                matrix(ownPointID, pointID)(3,3) -= coeff;
+                matrix(ownPointID, pointID)(3,3) += coeff;
 
                 // Add the coefficient to the neiPointID equation coming from
                 // pointID
-                matrix(neiPointID, pointID)(3,3) += coeff;
+                matrix(neiPointID, pointID)(3,3) -= coeff;
             }
         }
     }
@@ -1310,12 +1310,12 @@ Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::laplacian
             const scalar coeff = diffusivity*curDualMagSf*deltaCoeff;
 
             // Insert coefficients for the ownPoint
-            matrix(ownPointID, ownPointID)(3,3) -= coeff;
-            matrix(ownPointID, neiPointID)(3,3) += coeff;
+            matrix(ownPointID, ownPointID)(3,3) += coeff;
+            matrix(ownPointID, neiPointID)(3,3) -= coeff;
 
             // Insert coefficients for the neiPoint
-            matrix(neiPointID, neiPointID)(3,3) -= coeff;
-            matrix(neiPointID, ownPointID)(3,3) += coeff;
+            matrix(neiPointID, neiPointID)(3,3) += coeff;
+            matrix(neiPointID, ownPointID)(3,3) -= coeff;
         }
         else
         {
@@ -1341,11 +1341,11 @@ Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::laplacian
 
                 // Add the coefficient to the ownPointID equation coming from
                 // pointID
-                matrix(ownPointID, pointID)(3,3) -= coeff;
+                matrix(ownPointID, pointID)(3,3) += coeff;
 
                 // Add the coefficient to the neiPointID equation coming from
                 // pointID
-                matrix(neiPointID, pointID)(3,3) += coeff;
+                matrix(neiPointID, pointID)(3,3) -= coeff;
             }
         }
     }
@@ -1487,8 +1487,8 @@ Foam::tmp<Foam::sparseMatrixExtended> Foam::vfvm::divU
             // Insert the displacement coefficients of pressure equation
             for (int i = 0; i < 3; i++)
             {
-                matrix(pointI, pointPointID)(3,i) -= coeff.component(i);
-                matrix(pointI, pointI)(3,i) += coeff.component(i);
+                matrix(pointI, pointPointID)(3,i) += coeff.component(i);
+                matrix(pointI, pointI)(3,i) -= coeff.component(i);
             }
         }
     }

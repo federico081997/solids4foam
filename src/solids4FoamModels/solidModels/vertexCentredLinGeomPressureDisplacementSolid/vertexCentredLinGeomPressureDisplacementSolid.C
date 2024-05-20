@@ -1080,8 +1080,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         );
 
         // Add div(p*I) pressure coefficients to the momentum equation
-        // PC: shouldn't this be subtracted?!
-        matrix += vfvm::gradP
+        matrix -= vfvm::gradP
         (
             mesh(),
             dualMesh(),
@@ -1090,9 +1089,9 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
             debug
         );
 
-        // Add laplacian coefficients to the pressure equation
-        // PC: shouldn't this be subtracted?!
-        matrix += vfvm::laplacian
+        // Add laplacian coefficients to the pressure coefficient of
+        // pressure equation
+        matrix -= vfvm::laplacian
         (
             compactStencil_,
             mesh(),
@@ -1104,8 +1103,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
         );
 
         // Add displacement coefficients of pressure equation
-        // PC: shouldn't this be subtracted?!
-        matrix += vfvm::divU
+        matrix -= vfvm::divU
         (
             mesh(),
             dualMeshMap().dualCellToPoint(),
@@ -1114,7 +1112,7 @@ bool vertexCentredLinGeomPressureDisplacementSolid::evolve()
             debug
         );
 
-        // Add source terms of pressure equation to the matrix
+        // Add source terms of to the pressure coefficient of pressure equation
         matrix += vfvm::Sp(pointVol_, debug);
 
         // Calculate the matrix using finite difference
