@@ -124,19 +124,18 @@ namespace vfvm
 
     // Add displacement coefficients of pressure equation to the matrix in the
     // large-strain formulation. Each coefficient in the matrix is a 4x4 tensor.
-    //void laplacianCoeff
-    //(
-        //sparseMatrixExtended& matrix,
-        //const fvMesh& mesh,
-        //const fvMesh& dualMesh,
-        //const labelList& dualFaceToCell,
-        //const labelList& dualCellToPoint,
-        //const Field<scalarRectangularMatrix>& geometricStiffnessField,
-        //const tensorField& dualGradDField,
-        //const vectorField& dualGradPField,
-        //const scalar zeta,
-        //const bool debug
-    //)
+    tmp<sparseMatrixExtended> divGradP
+    (
+        const fvMesh& mesh,
+        const fvMesh& dualMesh,
+        const labelList& dualFaceToCell,
+        const labelList& dualCellToPoint,
+        const Field<scalarRectangularMatrix>& geometricStiffnessField,
+        const vectorField& dualGradPField,
+        const scalar& diffusivity,
+        const scalar zeta,
+        const bool debug
+    );
 
 
     // Add coefficients to the matrix for the gradP term in the

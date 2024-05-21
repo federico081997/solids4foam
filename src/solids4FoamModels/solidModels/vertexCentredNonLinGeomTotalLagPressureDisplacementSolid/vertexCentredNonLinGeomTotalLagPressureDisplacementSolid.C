@@ -472,8 +472,8 @@ vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::converged
 Foam::tmp<Foam::Field<Foam::scalarRectangularMatrix>>
 vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::geometricStiffnessField
 (
-        const surfaceVectorField SfUndef,
-        const surfaceTensorField gradDRef
+    const surfaceVectorField SfUndef,
+    const surfaceTensorField gradDRef
 ) const
 {
     // Prepare tmp field
@@ -1332,6 +1332,18 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             debug
         );
 
+        // Update gradP at dual faces
+        dualGradPf_ = vfvc::fGrad
+        (
+            pointP_,
+            mesh(),
+            dualMesh(),
+            dualMeshMap().dualFaceToCell(),
+            dualMeshMap().dualCellToPoint(),
+            zeta_,
+            debug
+        );
+
         // Update F
         dualFf_ = I + dualGradDf_.T();
 
@@ -1419,7 +1431,7 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             )
         );
 
-        // Add div(dev(sigma)) displacement coefficients to the momentum
+        // Add div(div(sigma)) displacement coefficients to the momentum
         // equation
         matrix += vfvm::divSigma
         (
@@ -1442,6 +1454,20 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
             dualMesh(),
             dualMeshMap().dualFaceToCell(),
             dualMeshMap().dualCellToPoint(),
+            debug
+        );
+
+        // Add displacement coefficients to the pressure equation
+        matrix -= vfvm::divGradP
+        (
+            mesh(),
+            dualMesh(),
+            dualMeshMap().dualFaceToCell(),
+            dualMeshMap().dualCellToPoint(),
+            geometricStiffness,
+            dualGradPf_,
+            pressureSmoothingFactor_,
+            zeta_,
             debug
         );
 
@@ -1676,6 +1702,18 @@ bool vertexCentredNonLinGeomTotalLagPressureDisplacementSolid::evolve()
     dualGradDf_ = vfvc::fGrad
     (
         pointD(),
+        mesh(),
+        dualMesh(),
+        dualMeshMap().dualFaceToCell(),
+        dualMeshMap().dualCellToPoint(),
+        zeta_,
+        debug
+    );
+
+    // Update gradP at dual faces
+    dualGradPf_ = vfvc::fGrad
+    (
+        pointP_,
         mesh(),
         dualMesh(),
         dualMeshMap().dualFaceToCell(),

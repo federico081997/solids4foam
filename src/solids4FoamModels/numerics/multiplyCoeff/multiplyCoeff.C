@@ -401,7 +401,7 @@ void Foam::multiplyCoeff
     if (G.m() != 3 || G.n() != 9)
     {
         FatalError
-            << "The material tangent matrix C has the wrong dimensions!" << nl
+            << "The geometric stiffness G has the wrong dimensions!" << nl
             << "It should be 3 x 9 but it is " << G.m() << " x " << G.n()
             << abort(FatalError);
     }
@@ -820,6 +820,123 @@ void Foam::multiplyCoeff
       + G(vector::Z,tensor::YZ)*sigma[symmTensor::ZZ])*g[vector::Y]
       + (Sf[vector::Z]*C(ZZ, ZZ)
       + G(vector::Z,tensor::ZZ)*sigma[symmTensor::ZZ])*g[vector::Z];
+}
+
+
+void Foam::multiplyCoeff
+(
+    vector& coeff,
+    const scalarRectangularMatrix& G,
+    const vector& gradP,
+    const vector& g
+)
+{
+#ifdef FULLDEBUG
+    // Check the dimensions of G are correct
+    if (G.m() != 3 || G.n() != 9)
+    {
+        FatalError
+            << "The geometric stiffness G has the wrong dimensions!" << nl
+            << "It should be 3 x 9 but it is " << G.m() << " x " << G.n()
+            << abort(FatalError);
+    }
+#endif
+
+    // Index notation
+    // coeff_l = gradP_m G_mkl g_k 
+    
+    // coeff_1 = gradP_m G_mk1 g_k
+    //
+    //          = gradP_1 G_1k1 g_k
+    //          + gradP_2 G_2k1 g_k
+    //          + gradP_3 G_3k1 g_k
+    //
+    //          = gradP_1 G_111 g_1
+    //          + gradP_1 G_121 g_2
+    //          + gradP_1 G_131 g_3
+    //            
+    //          + gradP_2 G_211 g_1
+    //          + gradP_2 G_221 g_2
+    //          + gradP_2 G_231 g_3
+    //            
+    //          + gradP_3 G_311 g_1
+    //          + gradP_3 G_321 g_2
+    //          + gradP_3 G_331 g_3
+
+    coeff[vector::X] =
+        gradP[vector::X]*G(vector::X, tensor::XX)*g[vector::X]
+      + gradP[vector::X]*G(vector::X, tensor::YX)*g[vector::Y]
+      + gradP[vector::X]*G(vector::X, tensor::ZX)*g[vector::Z]
+
+      + gradP[vector::Y]*G(vector::Y, tensor::XX)*g[vector::X]
+      + gradP[vector::Y]*G(vector::Y, tensor::YX)*g[vector::Y]
+      + gradP[vector::Y]*G(vector::Y, tensor::ZX)*g[vector::Z]
+
+      + gradP[vector::Z]*G(vector::Z, tensor::XX)*g[vector::X]
+      + gradP[vector::Z]*G(vector::Z, tensor::YX)*g[vector::Y]
+      + gradP[vector::Z]*G(vector::Z, tensor::ZX)*g[vector::Z];
+
+    // coeff_2 = gradP_m G_mk2 g_k
+    //
+    //          = gradP_1 G_1k2 g_k
+    //          + gradP_2 G_2k2 g_k
+    //          + gradP_3 G_3k2 g_k
+    //
+    //          = gradP_1 G_112 g_1
+    //          + gradP_1 G_122 g_2
+    //          + gradP_1 G_132 g_3
+    //            
+    //          + gradP_2 G_212 g_1
+    //          + gradP_2 G_222 g_2
+    //          + gradP_2 G_232 g_3
+    //            
+    //          + gradP_3 G_312 g_1
+    //          + gradP_3 G_322 g_2
+    //          + gradP_3 G_332 g_3
+
+    coeff[vector::Y] =
+        gradP[vector::X]*G(vector::X, tensor::XY)*g[vector::X]
+      + gradP[vector::X]*G(vector::X, tensor::YY)*g[vector::Y]
+      + gradP[vector::X]*G(vector::X, tensor::ZY)*g[vector::Z]
+
+      + gradP[vector::Y]*G(vector::Y, tensor::XY)*g[vector::X]
+      + gradP[vector::Y]*G(vector::Y, tensor::YY)*g[vector::Y]
+      + gradP[vector::Y]*G(vector::Y, tensor::ZY)*g[vector::Z]
+
+      + gradP[vector::Z]*G(vector::Z, tensor::XY)*g[vector::X]
+      + gradP[vector::Z]*G(vector::Z, tensor::YY)*g[vector::Y]
+      + gradP[vector::Z]*G(vector::Z, tensor::ZY)*g[vector::Z];
+
+    // coeff_1 = gradP_m G_mk3 g_k
+    //
+    //          = gradP_1 G_1k3 g_k
+    //          + gradP_2 G_2k3 g_k
+    //          + gradP_3 G_3k3 g_k
+    //
+    //          = gradP_1 G_113 g_1
+    //          + gradP_1 G_123 g_2
+    //          + gradP_1 G_133 g_3
+    //            
+    //          + gradP_2 G_213 g_1
+    //          + gradP_2 G_223 g_2
+    //          + gradP_2 G_233 g_3
+    //            
+    //          + gradP_3 G_313 g_1
+    //          + gradP_3 G_323 g_2
+    //          + gradP_3 G_333 g_3
+
+    coeff[vector::Z] =
+        gradP[vector::X]*G(vector::X, tensor::XZ)*g[vector::X]
+      + gradP[vector::X]*G(vector::X, tensor::YZ)*g[vector::Y]
+      + gradP[vector::X]*G(vector::X, tensor::ZZ)*g[vector::Z]
+
+      + gradP[vector::Y]*G(vector::Y, tensor::XZ)*g[vector::X]
+      + gradP[vector::Y]*G(vector::Y, tensor::YZ)*g[vector::Y]
+      + gradP[vector::Y]*G(vector::Y, tensor::ZZ)*g[vector::Z]
+
+      + gradP[vector::Z]*G(vector::Z, tensor::XZ)*g[vector::X]
+      + gradP[vector::Z]*G(vector::Z, tensor::YZ)*g[vector::Y]
+      + gradP[vector::Z]*G(vector::Z, tensor::ZZ)*g[vector::Z];
 }
 
 
