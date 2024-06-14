@@ -1208,6 +1208,9 @@ bool vertexCentredNonLinGeomTotalLagDisplacementSolid::evolve()
 {
     Info<< "Evolving solid solver" << endl;
 
+    // Update pointD boundary conditions
+    pointD().correctBoundaryConditions();
+
     // Lookup compact edge gradient factor
     const scalar zeta(solidModelDict().lookupOrDefault<scalar>("zeta", 0.2));
     if (debug)
