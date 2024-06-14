@@ -28,14 +28,6 @@ License
     #include "Time.H"
 #endif
 
-//#include "addToRunTimeSelectionTable.H"
-//#include "volFields.H"
-//#include "surfaceFields.H"
-//#include "fvcMeshPhi.H"
-//#include "RodriguesRotation.H"
-//#include "fixedValuePointPatchFields.H"
-//#include "patchCorrectionVectors.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -54,7 +46,6 @@ fixedRotationPointPatchVectorField::fixedRotationPointPatchVectorField
     rotationAngle_(0.0),
     rotationAxis_(vector::zero),
     rotationOrigin_(vector::zero),
-    //origFaceCentres_(0, vector::zero),
     origPatchPoints_(0, vector::zero),
     angleSeries_(),
     dispSeries_(),
@@ -75,7 +66,6 @@ fixedRotationPointPatchVectorField::fixedRotationPointPatchVectorField
     rotationAngle_(pvf.rotationAngle_),
     rotationAxis_(pvf.rotationAxis_),
     rotationOrigin_(pvf.rotationOrigin_),
-    //origFaceCentres_(pvf.origFaceCentres_),
     origPatchPoints_(pvf.origPatchPoints_),
     angleSeries_(pvf.angleSeries_),
     dispSeries_(pvf.dispSeries_),
@@ -98,7 +88,6 @@ fixedRotationPointPatchVectorField::fixedRotationPointPatchVectorField
     rotationAngle_(0.0),
     rotationAxis_(dict.lookup("rotationAxis")),
     rotationOrigin_(vector::zero),
-    //origFaceCentres_(patch().patch().faceCentres()),
     origPatchPoints_(patch().localPoints()),
     angleSeries_(),
     dispSeries_(),
@@ -180,7 +169,6 @@ fixedRotationPointPatchVectorField::fixedRotationPointPatchVectorField
     rotationAngle_(pvf.rotationAngle_),
     rotationAxis_(pvf.rotationAxis_),
     rotationOrigin_(pvf.rotationOrigin_),
-    //origFaceCentres_(pvf.origFaceCentres_),
     origPatchPoints_(pvf.origPatchPoints_),
     angleSeries_(pvf.angleSeries_),
     dispSeries_(pvf.dispSeries_),
@@ -199,7 +187,6 @@ fixedRotationPointPatchVectorField::fixedRotationPointPatchVectorField
     rotationAngle_(pvf.rotationAngle_),
     rotationAxis_(pvf.rotationAxis_),
     rotationOrigin_(pvf.rotationOrigin_),
-    //origFaceCentres_(pvf.origFaceCentres_),
     origPatchPoints_(pvf.origPatchPoints_),
     angleSeries_(pvf.angleSeries_),
     dispSeries_(pvf.dispSeries_),

@@ -96,7 +96,11 @@ void vertexCentredNonLinGeomTotalLagDisplacementSolid::updateSource
     // Enforce extract tractions on traction boundaries
     enforceTractionBoundaries
     (
-        pointD(), dualTraction, mesh(), dualMeshMap().pointToDualFaces()
+        pointD(),
+        dualTraction, 
+        deformedDualN,
+        mesh(), 
+        dualMeshMap().pointToDualFaces()
     );
 
     // Set coupled boundary (e.g. processor) traction fields to zero: this
@@ -310,15 +314,16 @@ void vertexCentredNonLinGeomTotalLagDisplacementSolid::setFixedDofs
 }
 
 
-void vertexCentredNonLinGeomTotalLagDisplacementSolid::enforceTractionBoundaries
+void vertexCentredNonLinGeomTotalLagDisplacementSolid::
+enforceTractionBoundaries
 (
     const pointVectorField& pointD,
     surfaceVectorField& dualTraction,
+    const surfaceVectorField& dualDeformedNormals,
     const fvMesh& mesh,
     const labelListList& pointToDualFaces
 ) const
 {
-    const pointMesh& pMesh = pointD.mesh();
     const fvMesh& dualMesh = dualTraction.mesh();
 
     forAll(pointD.boundaryField(), patchI)
@@ -340,17 +345,9 @@ void vertexCentredNonLinGeomTotalLagDisplacementSolid::enforceTractionBoundaries
             const labelList& meshPoints =
                 mesh.boundaryMesh()[patchI].meshPoints();
 
-            // Primary mesh point normals
-            const vectorField& n =
-                pMesh.boundary()[patchI].pointNormals();
-
-            // Todo: use deformedN
-
             // Primary mesh point tractions
-            const vectorField totalTraction
-            (
-                tracPatch.traction() - n*tracPatch.pressure()
-            );
+            const vectorField& pointTraction = tracPatch.traction();
+            const scalarField& pointPressure = tracPatch.pressure();
 
             // Create dual mesh faces traction field
             vectorField dualFaceTraction
@@ -363,9 +360,9 @@ void vertexCentredNonLinGeomTotalLagDisplacementSolid::enforceTractionBoundaries
             // the average of all the points that map to it
             scalarField nPointsPerDualFace(dualFaceTraction.size(), 0.0);
 
-            // Map from primary mesh point field to second mesh face field 
-            // using the pointToDualFaces map
-            forAll(totalTraction, pI)
+            // Map from primary mesh point field to second mesh face field using
+            // the pointToDualFaces map
+            forAll(pointTraction, pI)
             {
                 const label pointID = meshPoints[pI];
                 const labelList& curDualFaces = pointToDualFaces[pointID];
@@ -387,9 +384,18 @@ void vertexCentredNonLinGeomTotalLagDisplacementSolid::enforceTractionBoundaries
                                 dualFaceID
                               - dualMesh.boundaryMesh()[dualPatchID].start();
 
+                            // Dual face deformed unit normal
+                            const vector& n =
+                                dualDeformedNormals.boundaryField()
+                                [
+                                    patchI
+                                ][localDualFaceID];
+
                             // Set dual face traction
+                            // Use the deformed unit normal for this face for
+                            // the pressure
                             dualFaceTraction[localDualFaceID] +=
-                                totalTraction[pI];
+                                pointTraction[pI] - n*pointPressure[pI];
 
                             // Update the count for this face
                             nPointsPerDualFace[localDualFaceID]++;
@@ -402,7 +408,7 @@ void vertexCentredNonLinGeomTotalLagDisplacementSolid::enforceTractionBoundaries
             {
                 FatalErrorIn
                 (
-                    "void vertexCentredNonLinGeomTotalLagDisplacementSolid::"
+                    "void vertexCentredNonLinGeomTotalLagSolid::"
                     "enforceTractionBoundaries(...)"
                 )   << "Problem setting tractions: gMin(nPointsPerDualFace) < 1"
                     << nl << "nPointsPerDualFace = " << nPointsPerDualFace
@@ -413,11 +419,7 @@ void vertexCentredNonLinGeomTotalLagDisplacementSolid::enforceTractionBoundaries
             dualFaceTraction /= nPointsPerDualFace;
 
             // Overwrite the dual patch face traction
-#ifdef OPENFOAM_NOT_EXTEND
             dualTraction.boundaryFieldRef()[patchI] = dualFaceTraction;
-#else
-            dualTraction.boundaryField()[patchI] = dualFaceTraction;
-#endif
         }
         else if
         (
@@ -429,20 +431,149 @@ void vertexCentredNonLinGeomTotalLagDisplacementSolid::enforceTractionBoundaries
         )
         {
             // Set the dual patch face shear traction to zero
-
-            // Todo: use deformedN
-
+            // It is assumed that the deformedN is the same as the initial
+            // reference normal
             const vectorField n(dualMesh.boundary()[patchI].nf());
-#ifdef OPENFOAM_NOT_EXTEND
             dualTraction.boundaryFieldRef()[patchI] =
                 (sqr(n) & dualTraction.boundaryField()[patchI]);
-#else
-            dualTraction.boundaryField()[patchI] =
-                (sqr(n) & dualTraction.boundaryField()[patchI]);
-#endif
         }
     }
 }
+
+
+//void vertexCentredNonLinGeomTotalLagDisplacementSolid::enforceTractionBoundaries
+//(
+    //const pointVectorField& pointD,
+    //surfaceVectorField& dualTraction,
+    //const fvMesh& mesh,
+    //const labelListList& pointToDualFaces
+//) const
+//{
+    //const pointMesh& pMesh = pointD.mesh();
+    //const fvMesh& dualMesh = dualTraction.mesh();
+
+    //forAll(pointD.boundaryField(), patchI)
+    //{
+        //if
+        //(
+            //isA<solidTractionPointPatchVectorField>
+            //(
+                //pointD.boundaryField()[patchI]
+            //)
+        //)
+        //{
+            //const solidTractionPointPatchVectorField& tracPatch =
+            //refCast<const solidTractionPointPatchVectorField>
+            //(
+                //pointD.boundaryField()[patchI]
+            //);
+
+            //const labelList& meshPoints =
+                //mesh.boundaryMesh()[patchI].meshPoints();
+
+            //// Primary mesh point normals
+            //const vectorField& n =
+                //pMesh.boundary()[patchI].pointNormals();
+
+            //// Todo: use deformedN
+
+            //// Primary mesh point tractions
+            //const vectorField totalTraction
+            //(
+                //tracPatch.traction() - n*tracPatch.pressure()
+            //);
+
+            //// Create dual mesh faces traction field
+            //vectorField dualFaceTraction
+            //(
+                //dualMesh.boundaryMesh()[patchI].size(), vector::zero
+            //);
+
+            //// Multiple points map to each dual face so we will count them
+            //// and then divide the dualFaceTraction by this field so that it is
+            //// the average of all the points that map to it
+            //scalarField nPointsPerDualFace(dualFaceTraction.size(), 0.0);
+
+            //// Map from primary mesh point field to second mesh face field 
+            //// using the pointToDualFaces map
+            //forAll(totalTraction, pI)
+            //{
+                //const label pointID = meshPoints[pI];
+                //const labelList& curDualFaces = pointToDualFaces[pointID];
+
+                //forAll(curDualFaces, dfI)
+                //{
+                    //const label dualFaceID = curDualFaces[dfI];
+
+                    //if (!dualMesh.isInternalFace(dualFaceID))
+                    //{
+                        //// Check which patch this dual face belongs to
+                        //const label dualPatchID =
+                            //dualMesh.boundaryMesh().whichPatch(dualFaceID);
+
+                        //if (dualPatchID == patchI)
+                        //{
+                            //// Find local face index
+                            //const label localDualFaceID =
+                                //dualFaceID
+                              //- dualMesh.boundaryMesh()[dualPatchID].start();
+
+                            //// Set dual face traction
+                            //dualFaceTraction[localDualFaceID] +=
+                                //totalTraction[pI];
+
+                            //// Update the count for this face
+                            //nPointsPerDualFace[localDualFaceID]++;
+                        //}
+                    //}
+                //}
+            //}
+
+            //if (gMin(nPointsPerDualFace) < 1)
+            //{
+                //FatalErrorIn
+                //(
+                    //"void vertexCentredNonLinGeomTotalLagDisplacementSolid::"
+                    //"enforceTractionBoundaries(...)"
+                //)   << "Problem setting tractions: gMin(nPointsPerDualFace) < 1"
+                    //<< nl << "nPointsPerDualFace = " << nPointsPerDualFace
+                    //<< abort(FatalError);
+            //}
+
+            //// Take the average
+            //dualFaceTraction /= nPointsPerDualFace;
+
+            //// Overwrite the dual patch face traction
+//#ifdef OPENFOAM_NOT_EXTEND
+            //dualTraction.boundaryFieldRef()[patchI] = dualFaceTraction;
+//#else
+            //dualTraction.boundaryField()[patchI] = dualFaceTraction;
+//#endif
+        //}
+        //else if
+        //(
+            //isA<symmetryPointPatchVectorField>(pointD.boundaryField()[patchI])
+         //|| isA<fixedDisplacementZeroShearPointPatchVectorField>
+            //(
+                //pointD.boundaryField()[patchI]
+            //)
+        //)
+        //{
+            //// Set the dual patch face shear traction to zero
+
+            //// Todo: use deformedN
+
+            //const vectorField n(dualMesh.boundary()[patchI].nf());
+//#ifdef OPENFOAM_NOT_EXTEND
+            //dualTraction.boundaryFieldRef()[patchI] =
+                //(sqr(n) & dualTraction.boundaryField()[patchI]);
+//#else
+            //dualTraction.boundaryField()[patchI] =
+                //(sqr(n) & dualTraction.boundaryField()[patchI]);
+//#endif
+        //}
+    //}
+//}
 
 bool vertexCentredNonLinGeomTotalLagDisplacementSolid::
 vertexCentredNonLinGeomTotalLagDisplacementSolid::converged

@@ -55,8 +55,18 @@ normalDisplacementPointPatchVectorField
 )
 :
     fixedValuePointPatchVectorField(p, iF),
-    dispSeries_(dict.subDict("displacementSeries"))
-{}
+    dispSeries_()
+{
+    Info<< "Creating " << type() << " boundary condition" << endl;
+
+    // Check if displacement is time-varying
+    if (dict.found("displacementSeries"))
+    {
+        Info<< "    displacement is time-varying" << endl;
+        dispSeries_ =
+            interpolationTable<scalar>(dict.subDict("displacementSeries"));
+    }
+}
 
 
 normalDisplacementPointPatchVectorField::

@@ -159,6 +159,7 @@ class vertexCentredNonLinGeomTotalLagDisplacementSolid
         (
             const pointVectorField& pointD,
             surfaceVectorField& dualTraction,
+            const surfaceVectorField& dualDeformedNormals,
             const fvMesh& mesh, // Corresponding to pointD mesh
             const labelListList& pointToDualFaces
         ) const;

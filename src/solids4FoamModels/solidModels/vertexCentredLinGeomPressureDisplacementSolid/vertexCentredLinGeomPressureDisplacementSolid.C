@@ -19,6 +19,7 @@ License
 
 #include "vertexCentredLinGeomPressureDisplacementSolid.H"
 #include "addToRunTimeSelectionTable.H"
+#include "linearElasticMisesPlastic.H"
 #include "vfvcCellPoint.H"
 #include "vfvmCellPoint.H"
 #include "fvcDiv.H"
@@ -1484,6 +1485,34 @@ void vertexCentredLinGeomPressureDisplacementSolid::writeFields
     pEpsilonEq.write();
 
     Info<< "Max pEpsilonEq = " << gMax(pEpsilonEq) << endl;
+
+    // Access the linearElasticMisesPlastic mechanical law
+    const PtrList<mechanicalLaw>& mechLaws = mechanical();
+    if (isA<linearElasticMisesPlastic>(mechLaws[0]))
+    {
+        // Stress at the points
+        pointSymmTensorField pSigma
+	    (
+            IOobject
+            (
+                "pSigma",
+                runTime.timeName(),
+                runTime,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            pMesh(),
+            dimensionedSymmTensor("zero", dimPressure, symmTensor::zero)
+        );
+
+        const linearElasticMisesPlastic& mech =
+            refCast<const linearElasticMisesPlastic>(mechLaws[0]);
+
+        // Calculate the stress at the points
+        mech.calculatePStress(pSigma, pGradD);
+
+        pSigma.write();
+    }
 
     solidModel::writeFields(runTime);
 }

@@ -186,6 +186,7 @@ class vertexCentredNonLinGeomTotalLagPressureDisplacementSolid
         (
             const pointVectorField& pointD,
             surfaceVectorField& dualTraction,
+            const surfaceVectorField& dualDeformedNormals,
             const fvMesh& mesh, // corresponding to pointD mesh
             const labelListList& pointToDualFaces
         ) const;

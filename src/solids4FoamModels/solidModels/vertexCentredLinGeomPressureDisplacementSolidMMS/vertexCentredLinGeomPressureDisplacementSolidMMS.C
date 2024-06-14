@@ -480,6 +480,9 @@ vertexCentredLinGeomPressureDisplacementSolidMMS::residualD
     // Set the shear modulus
     const scalar mu = E/(2.0*(1.0 + nu));
 
+    // Set bulk modulus 
+    const scalar kappa = E/(3.0*(1.0 - 2*nu));
+
     // Set lambda
     const scalar lambda = (E*nu)/((1.0 + nu)*(1.0 - 2.0*nu));
 
@@ -545,34 +548,43 @@ vertexCentredLinGeomPressureDisplacementSolidMMS::residualD
 
         // Set vector in dualCellI for x-equation
         bodyForcesI[vertexI].x() =
-            lambda*(8*ay*pi*pi*Foam::cos(4*pi*x)*Foam::cos(2*pi*y)*Foam::sin(pi*z)
-            + 4*az*pi*pi*Foam::cos(4*pi*x)*Foam::cos(pi*z)*Foam::sin(2*pi*y)
-            - 16*ax*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z))
-            + mu*(8*ay*pi*pi*Foam::cos(4*pi*x)*Foam::cos(2*pi*y)*Foam::sin(pi*z)
-            + 4*az*pi*pi*Foam::cos(4*pi*x)*Foam::cos(pi*z)*Foam::sin(2*pi*y)
-            - 5*ax*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z))
-            - 32*ax*mu*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z);
+            kappa*(8*ay*pi*pi*Foam::cos(4*pi*x)*Foam::cos(2*pi*y)*Foam::sin(pi*z) 
+            + 4*az*pi*pi*Foam::cos(4*pi*x)*Foam::cos(pi*z)*Foam::sin(2*pi*y) 
+            - 16*ax*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z)) 
+            - 2*mu*((8*ay*pi*pi*Foam::cos(4*pi*x)*Foam::cos(2*pi*y)*Foam::sin(pi*z))/3 
+            + (4*az*pi*pi*Foam::cos(4*pi*x)*Foam::cos(pi*z)*Foam::sin(2*pi*y))/3 
+            + (32*ax*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z))/3) 
+            + mu*(8*ay*pi*pi*Foam::cos(4*pi*x)*Foam::cos(2*pi*y)*Foam::sin(pi*z) 
+            - 4*ax*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z)) 
+            + mu*(4*az*pi*pi*Foam::cos(4*pi*x)*Foam::cos(pi*z)*Foam::sin(2*pi*y) 
+            - ax*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z));
 
         // Set vector in dualCellI for y-equation
         bodyForcesI[vertexI].y() =
-            lambda*(8*ax*pi*pi*Foam::cos(4*pi*x)*Foam::cos(2*pi*y)*Foam::sin(pi*z)
-            + 2*az*pi*pi*Foam::cos(2*pi*y)*Foam::cos(pi*z)*Foam::sin(4*pi*x)
-            - 4*ay*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z))
-            + mu*(8*ax*pi*pi*Foam::cos(4*pi*x)*Foam::cos(2*pi*y)*Foam::sin(pi*z)
-            + 2*az*pi*pi*Foam::cos(2*pi*y)*Foam::cos(pi*z)*Foam::sin(4*pi*x)
-            - 17*ay*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z))
-            - 8*ay*mu*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z);
-
+            kappa*(8*ax*pi*pi*Foam::cos(4*pi*x)*Foam::cos(2*pi*y)*Foam::sin(pi*z) 
+            + 2*az*pi*pi*Foam::cos(2*pi*y)*Foam::cos(pi*z)*Foam::sin(4*pi*x) 
+            - 4*ay*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z)) 
+            - 2*mu*((8*ax*pi*pi*Foam::cos(4*pi*x)*Foam::cos(2*pi*y)*Foam::sin(pi*z))/3 
+            + (2*az*pi*pi*Foam::cos(2*pi*y)*Foam::cos(pi*z)*Foam::sin(4*pi*x))/3 
+            + (8*ay*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z))/3) 
+            + mu*(8*ax*pi*pi*Foam::cos(4*pi*x)*Foam::cos(2*pi*y)*Foam::sin(pi*z) 
+            - 16*ay*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z)) 
+            + mu*(2*az*pi*pi*Foam::cos(2*pi*y)*Foam::cos(pi*z)*Foam::sin(4*pi*x) 
+            - ay*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z));
+        
         // Set vector in dualCellI for -equation
         bodyForcesI[vertexI].z() =
-            lambda*(4*ax*pi*pi*Foam::cos(4*pi*x)*Foam::cos(pi*z)*Foam::sin(2*pi*y)
-            + 2*ay*pi*pi*Foam::cos(2*pi*y)*Foam::cos(pi*z)*Foam::sin(4*pi*x)
-            - az*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z))
-            + mu*(4*ax*pi*pi*Foam::cos(4*pi*x)*Foam::cos(pi*z)*Foam::sin(2*pi*y)
-            + 2*ay*pi*pi*Foam::cos(2*pi*y)*Foam::cos(pi*z)*Foam::sin(4*pi*x)
-            - 20*az*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z))
-            - 2*az*mu*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z);
-    }
+            kappa*(4*ax*pi*pi*Foam::cos(4*pi*x)*Foam::cos(pi*z)*Foam::sin(2*pi*y) 
+            + 2*ay*pi*pi*Foam::cos(2*pi*y)*Foam::cos(pi*z)*Foam::sin(4*pi*x) 
+            - az*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z)) 
+            - 2*mu*((4*ax*pi*pi*Foam::cos(4*pi*x)*Foam::cos(pi*z)*Foam::sin(2*pi*y))/3 
+            + (2*ay*pi*pi*Foam::cos(2*pi*y)*Foam::cos(pi*z)*Foam::sin(4*pi*x))/3 
+            + (2*az*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z))/3) 
+            + mu*(4*ax*pi*pi*Foam::cos(4*pi*x)*Foam::cos(pi*z)*Foam::sin(2*pi*y) 
+            - 16*az*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z)) 
+            + mu*(2*ay*pi*pi*Foam::cos(2*pi*y)*Foam::cos(pi*z)*Foam::sin(4*pi*x) 
+            - 4*az*pi*pi*Foam::sin(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z));
+        }
 
     // Add surface forces
     result += pointDivSigma*pointVolI - bodyForcesI*pointVolI;
@@ -592,6 +604,29 @@ vertexCentredLinGeomPressureDisplacementSolidMMS::residualP
     // Prepare the result
     tmp<scalarField> tresult(new scalarField(pointD.size(), 0));
     scalarField& result = tresult.ref();
+
+    // Coefficients for expression
+    const scalar ax = 2;
+    const scalar ay = 4;
+    const scalar az = 6;
+
+    // pi
+    const scalar pi = constant::mathematical::pi;
+
+    // Young's modulus
+    const scalar E = 200e9;
+
+    // Poisson's ratio
+    const scalar nu = 0.3;
+
+    // Set the shear modulus
+    const scalar mu = E/(2.0*(1.0 + nu));
+
+    // Set bulk modulus 
+    const scalar kappa = E/(3.0*(1.0 - 2*nu));
+
+    // Set lambda
+    const scalar lambda = (E*nu)/((1.0 + nu)*(1.0 - 2.0*nu));
 
     // The residual for the pressure equation is:
     // F = p - gamma*laplacian(p) - pBar(D)
@@ -623,6 +658,24 @@ vertexCentredLinGeomPressureDisplacementSolidMMS::residualP
 
     // Calculate the pBar field
     const scalarField pBar(-pointK_.internalField()*tr(pointGradD));
+
+    //scalarField pBar(mesh().nPoints(), 0);
+
+    //// List of primary points
+    //const pointField& points = mesh().points();
+
+    //// Calculate body force
+    //forAll(pBar, vertexI)
+    //{
+        //const scalar x = points[vertexI].x();
+        //const scalar y = points[vertexI].y();
+        //const scalar z = points[vertexI].z();
+
+        //pBar[vertexI] = 
+            //-kappa*(4*ax*pi*Foam::Foam::cos(4*pi*x)*Foam::sin(2*pi*y)*Foam::sin(pi*z) 
+            //+ 2*ay*pi*Foam::Foam::cos(2*pi*y)*Foam::sin(4*pi*x)*Foam::sin(pi*z) 
+            //+ az*pi*Foam::Foam::cos(pi*z)*Foam::sin(4*pi*x)*Foam::sin(2*pi*y));
+    //}  
 
     // Point volume field
     const scalarField& pointVolI = pointVol_.internalField();

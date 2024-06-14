@@ -197,6 +197,28 @@ Foam::tmp<Foam::volScalarField> Foam::linearElastic::bulkModulus() const
 }
 
 
+Foam::tmp<Foam::pointScalarField> Foam::linearElastic::pBulkModulus() const
+{
+    return tmp<pointScalarField>
+    (
+        new pointScalarField
+        (
+            IOobject
+            (
+                "pBulkModulus",
+                mesh().time().timeName(),
+                mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            pointMesh::New(mesh()),
+            K_,
+            "calculated"
+        )
+    );
+}
+
+
 Foam::tmp<Foam::volScalarField> Foam::linearElastic::impK() const
 {
     if (nu_.value() == 0.5)
@@ -313,6 +335,21 @@ const Foam::dimensionedScalar& Foam::linearElastic::lambda() const
 
 void Foam::linearElastic::correct(volSymmTensorField& sigma)
 {
+    // Prepare the pressure field
+    volScalarField p
+    (
+        IOobject
+        (
+            "p",
+            mesh().time().timeName(),
+            sigma.mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        sigma.mesh(),
+        dimensionedScalar("zero", dimPressure, 0)
+    );
+
     // Update epsilon
     updateEpsilon();
 
@@ -323,6 +360,11 @@ void Foam::linearElastic::correct(volSymmTensorField& sigma)
 
         // Hooke's law: partitioned deviatoric and dilation form
         sigma = 2.0*mu_*dev(epsilon()) + sigmaHyd()*I; // + sigma0();
+    }
+    else if (solveVertexCentredPressureEqn())
+    {
+        p = mesh().lookupObject<volScalarField>("p");
+        sigma = 2.0*mu_*epsilon() - p*I;
     }
     else
     {
@@ -337,6 +379,21 @@ void Foam::linearElastic::correct(volSymmTensorField& sigma)
 
 void Foam::linearElastic::correct(surfaceSymmTensorField& sigma)
 {
+    // Prepare the pressure field
+    surfaceScalarField pf
+    (
+        IOobject
+        (
+            "pf",
+            mesh().time().timeName(),
+            sigma.mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        sigma.mesh(),
+        dimensionedScalar("zero", dimPressure, 0)
+    );
+ 
     // Update epsilon
     updateEpsilonf();
 
@@ -353,7 +410,14 @@ void Foam::linearElastic::correct(surfaceSymmTensorField& sigma)
         // Add deviatoric and initial stresses
         sigma = 2.0*mu_*dev(epsilonf()) + sigmaHydf*I; // + sigma0f();
     }
-    else
+    else if (solveVertexCentredPressureEqn())
+    {
+        // Update the hydrostatic pressure
+        pf = mesh().lookupObject<surfaceScalarField>("pf");
+
+        // Update the stress
+        sigma = 2.0*mu_*epsilonf() - pf*I;
+    }
     {
         // Hooke's law : standard form
         sigma = 2.0*mu_*epsilonf() + lambda_*tr(epsilonf())*I; // + sigma0f();
