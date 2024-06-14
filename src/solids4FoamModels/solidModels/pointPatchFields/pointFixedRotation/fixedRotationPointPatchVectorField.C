@@ -263,7 +263,7 @@ void fixedRotationPointPatchVectorField::updateCoeffs()
     }
 
     // Set the point displacement
-    pointPatchField<vector>::operator==
+    this->operator==
     (
         pointDisp
     );

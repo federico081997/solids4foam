@@ -595,9 +595,9 @@ vertexCentredNonLinGeomTotalLagDisplacementSolid::converged
         initResidual = residualAbs;
 
         // If the initial residual is small then convergence has been achieved
-        if (initResidual < SMALL)
+        if (initResidual < VSMALL)
         {
-            Info<< "    Initial residual is less than 1e-15"
+            Info<< "    Initial residual is less than " << VSMALL
                 << "    Converged" << endl;
             return true;
         }
